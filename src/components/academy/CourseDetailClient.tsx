@@ -18,7 +18,10 @@ const courseBanner: Record<string, string> = {
   "ui-ux-design":            "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1200&q=85",
   "ai-engineering":          "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1200&q=85",
   "graphic-design":          "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=1200&q=85",
+  "digital-marketing":       "https://images.unsplash.com/photo-1533750516457-a7f992034fec?w=1200&q=85",
   "mobile-app-development":  "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1200&q=85",
+  cybersecurity:             "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=85",
+  "video-editing":           "https://images.unsplash.com/photo-1574717024453-354056afd6fc?w=1200&q=85",
   // New 16 courses
   "graphics-designing":      "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=1200&q=85",
   "video-editing":           "https://images.unsplash.com/photo-1574717024453-354056afd6fc?w=1200&q=85",

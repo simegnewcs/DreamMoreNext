@@ -115,7 +115,7 @@ export default function AdminDashboard() {
         }
         if (usersRes.success && usersRes.data) {
           setUsers(usersRes.data.users || []);
-          setStats(prev => ({ ...prev, users: usersRes.data?.total || usersRes.data?.users?.length || 0 }));
+          setStats(prev => ({ ...prev, users: usersRes.data.total || usersRes.data.users?.length || 0 }));
         }
 
         // Fetch payment stats
@@ -499,13 +499,13 @@ export default function AdminDashboard() {
                 {sidebarOpen && (
                   <span className="flex-1 text-left">{item.label}</span>
                 )}
-                {sidebarOpen && (item.badge || (item as any).getBadge) && (
+                {sidebarOpen && (item.badge || item.getBadge) && (
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                     isActive 
                       ? "bg-[#f47822]/20 text-[#f47822]" 
                       : isDark ? "bg-white/10 text-white/60" : "bg-gray-200 text-gray-600"
                   }`}>
-                    {(item as any).getBadge ? (item as any).getBadge(courses) : item.badge}
+                    {item.getBadge ? item.getBadge(courses) : item.badge}
                   </span>
                 )}
               </button>
@@ -580,11 +580,11 @@ export default function AdminDashboard() {
                     >
                       <Icon className="w-5 h-5" />
                       <span className="flex-1 text-left">{item.label}</span>
-                      {(item.badge || (item as any).getBadge) && (
+                      {(item.badge || item.getBadge) && (
                         <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                           isActive ? "bg-[#f47822]/20 text-[#f47822]" : isDark ? "bg-white/10" : "bg-gray-200"
                         }`}>
-                          {(item as any).getBadge ? (item as any).getBadge(courses) : item.badge}
+                          {item.getBadge ? item.getBadge(courses) : item.badge}
                         </span>
                       )}
                     </button>
@@ -1753,7 +1753,7 @@ export default function AdminDashboard() {
                         <input
                           type="number"
                           value={newCourse.price}
-                          onChange={(e) => setNewCourse({...newCourse, price: e.target.value})}
+                          onChange={(e) => setNewCourse({...newCourse, price: Number(e.target.value)})}
                           className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
                             isDark 
                               ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
@@ -2201,7 +2201,7 @@ export default function AdminDashboard() {
 
                       {/* Technologies */}
                       <div className="flex flex-wrap gap-1 mb-4">
-                        {course.technologies.slice(0, 4).map((tech: string) => (
+                        {course.technologies.slice(0, 4).map((tech) => (
                           <span
                             key={tech}
                             className="text-[10px] px-2 py-0.5 rounded bg-[#f47822]/10 text-[#f47822] font-medium"

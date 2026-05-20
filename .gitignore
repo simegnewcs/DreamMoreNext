@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Windows reserved device name (cannot be indexed by Git)
-nul
+# Windows reserved device name (created accidentally)
+/nul

@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { query } from "./db";
 
-const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === "production" ? (() => { throw new Error("JWT_SECRET env var is not set"); })() : "dev-secret-local-only");
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this-in-production";
 
 export interface User {
   id: number;
