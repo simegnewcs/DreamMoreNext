@@ -2202,7 +2202,7 @@ export default function AdminDashboard() {
 
                       {/* Technologies */}
                       <div className="flex flex-wrap gap-1 mb-4">
-                        {course.technologies.slice(0, 4).map((tech) => (
+                        {course.technologies.slice(0, 4).map((tech: string) => (
                           <span
                             key={tech}
                             className="text-[10px] px-2 py-0.5 rounded bg-[#f47822]/10 text-[#f47822] font-medium"
