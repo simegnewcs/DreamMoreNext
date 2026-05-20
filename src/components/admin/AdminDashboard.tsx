@@ -1754,7 +1754,7 @@ export default function AdminDashboard() {
                         <input
                           type="number"
                           value={newCourse.price}
-                          onChange={(e) => setNewCourse({...newCourse, price: Number(e.target.value)})}
+                          onChange={(e) => setNewCourse({...newCourse, price: e.target.value})}
                           className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
                             isDark 
                               ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
