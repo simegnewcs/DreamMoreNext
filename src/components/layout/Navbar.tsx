@@ -1,0 +1,391 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, ChevronDown, Sun, Moon, User, LogOut, LayoutDashboard } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
+
+const navLinks = [
+  { label: "Home", href: "/" },
+  { label: "Agency", href: "/agency" },
+  {
+    label: "Academy",
+    href: "/academy",
+    children: [
+      { label: "All Courses", href: "/academy" },
+      { label: "Full Stack Dev", href: "/academy/course/full-stack-development" },
+      { label: "UI/UX Design", href: "/academy/course/ui-ux-design" },
+      { label: "AI Engineering", href: "/academy/course/ai-engineering" },
+    ],
+  },
+  { label: "About", href: "/about" },
+  { label: "Team", href: "/team" },
+  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
+];
+
+export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdown, setDropdown] = useState<string | null>(null);
+  const [user, setUser] = useState<{name: string; email: string; role: string} | null>(null);
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Check login status
+  useEffect(() => {
+    const checkUser = () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        setUser(JSON.parse(userData));
+      } else {
+        setUser(null);
+      }
+    };
+    
+    checkUser();
+    
+    // Listen for storage changes (login/logout from other tabs)
+    window.addEventListener("storage", checkUser);
+    
+    // Custom event for same-tab updates
+    const handleUserUpdate = () => checkUser();
+    window.addEventListener("userUpdated", handleUserUpdate);
+    
+    return () => {
+      window.removeEventListener("storage", checkUser);
+      window.removeEventListener("userUpdated", handleUserUpdate);
+    };
+  }, []);
+  
+  // Re-check user when pathname changes (after navigation)
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    } else {
+      setUser(null);
+    }
+  }, [pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    window.dispatchEvent(new Event("userUpdated"));
+    router.push("/");
+  };
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  return (
+    <motion.nav
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? isDark 
+            ? "bg-black/80 backdrop-blur-xl border-b border-white/5 py-3" 
+            : "bg-white/90 backdrop-blur-xl border-b border-gray-200 py-3 shadow-lg"
+          : isDark 
+            ? "bg-transparent py-5" 
+            : "bg-white/50 backdrop-blur-md py-5"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <img 
+              src="/dreammorelogo.jpg" 
+              alt="DreamMore" 
+              className="h-14 w-14 object-cover rounded-full"
+            />
+          </Link>
+
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) =>
+              link.children ? (
+                <div
+                  key={link.label}
+                  className="relative"
+                  onMouseEnter={() => setDropdown(link.label)}
+                  onMouseLeave={() => setDropdown(null)}
+                >
+                  <button className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isDark 
+                      ? "text-white/70 hover:text-white hover:bg-white/5" 
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  }`}>
+                    {link.label}
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                  <AnimatePresence>
+                    {dropdown === link.label && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 8 }}
+                        transition={{ duration: 0.15 }}
+                        className={`absolute top-full left-0 mt-1 w-52 rounded-xl overflow-hidden shadow-xl ${
+                          isDark ? "glass-dark" : "bg-white border border-gray-200"
+                        }`}
+                      >
+                        {link.children.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            className={`block px-4 py-3 text-sm transition-all duration-200 ${
+                              isDark 
+                                ? "text-white/70 hover:text-white hover:bg-white/5" 
+                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                            }`}
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    pathname === link.href
+                      ? isDark 
+                        ? "text-cyan-400 bg-cyan-400/10" 
+                        : "text-orange-500 bg-orange-50"
+                      : isDark 
+                        ? "text-white/70 hover:text-white hover:bg-white/5" 
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
+          </div>
+
+          {/* CTA & Theme Toggle */}
+          <div className="hidden lg:flex items-center gap-3">
+            {user ? (
+              <div className="flex items-center gap-3">
+                {/* User Profile */}
+                <div className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#f47822] to-[#15142a] flex items-center justify-center text-white text-xs font-bold">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className={`text-sm font-medium ${isDark ? "text-white" : "text-gray-700"}`}>
+                    {user.name.split(" ")[0]}
+                  </span>
+                </div>
+                {/* Panel Button — admin & instructor only */}
+                {(user.role === "admin" || user.role === "instructor") && (
+                  <Link
+                    href={user.role === "admin" ? "/admin" : "/instructor"}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#f47822] text-white hover:bg-[#e06b18] transition-all"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    Panel
+                  </Link>
+                )}
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    isDark 
+                      ? "text-red-400 hover:bg-red-400/10" 
+                      : "text-red-500 hover:bg-red-50"
+                  }`}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  isDark 
+                    ? "text-white/80 hover:text-white hover:bg-white/5" 
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                <User className="w-4 h-4" />
+                Login
+              </Link>
+            )}
+            <button
+              onClick={toggleTheme}
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105"
+              style={{ 
+                background: isDark ? "rgba(244,120,34,0.15)" : "rgba(244,120,34,0.1)", 
+                border: "1px solid #f47822" 
+              }}
+              aria-label="Toggle theme"
+            >
+              {isDark ? (
+                <Sun className="w-5 h-5" style={{ color: "#f47822" }} />
+              ) : (
+                <Moon className="w-5 h-5" style={{ color: "#f47822" }} />
+              )}
+            </button>
+          </div>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className={`lg:hidden p-2 rounded-lg transition-all ${
+              isDark 
+                ? "text-white/70 hover:text-white hover:bg-white/5" 
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            }`}
+          >
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`lg:hidden backdrop-blur-xl border-t overflow-hidden ${
+              isDark 
+                ? "bg-black/95 border-white/5" 
+                : "bg-white/95 border-gray-200 shadow-lg"
+            }`}
+          >
+            <div className="px-4 py-6 space-y-1">
+              {navLinks.map((link) => (
+                <div key={link.label}>
+                  <Link
+                    href={link.href}
+                    className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                      pathname === link.href
+                        ? isDark 
+                          ? "text-cyan-400 bg-cyan-400/10" 
+                          : "text-orange-500 bg-orange-50"
+                        : isDark 
+                          ? "text-white/70 hover:text-white hover:bg-white/5" 
+                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                  {link.children && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {link.children.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className={`block px-4 py-2 rounded-lg text-xs transition-all ${
+                            isDark 
+                              ? "text-white/50 hover:text-white/80 hover:bg-white/5" 
+                              : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div className="pt-4 flex flex-col gap-2">
+                {user ? (
+                  <>
+                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#f47822] to-[#15142a] flex items-center justify-center text-white font-bold">
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{user.name}</p>
+                        <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{user.email}</p>
+                      </div>
+                      {(user.role === "admin" || user.role === "instructor") && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f47822] text-white font-semibold capitalize">{user.role}</span>
+                      )}
+                    </div>
+                    {/* Panel link for mobile */}
+                    {(user.role === "admin" || user.role === "instructor") && (
+                      <Link
+                        href={user.role === "admin" ? "/admin" : "/instructor"}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold bg-[#f47822] text-white hover:bg-[#e06b18] transition-all"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        Go to Panel
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileOpen(false);
+                      }}
+                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
+                        isDark 
+                          ? "bg-red-500/10 text-red-400 hover:bg-red-500/20" 
+                          : "bg-red-50 text-red-500 hover:bg-red-100"
+                      }`}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border text-sm font-semibold ${
+                      isDark 
+                        ? "border-white/10 text-white/80 hover:bg-white/5" 
+                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <User className="w-4 h-4" />
+                    Login
+                  </Link>
+                )}
+                <button
+                  onClick={toggleTheme}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all"
+                  style={{ 
+                    background: isDark ? "rgba(244,120,34,0.15)" : "rgba(244,120,34,0.1)", 
+                    border: "1px solid #f47822", 
+                    color: "#f47822" 
+                  }}
+                >
+                  {isDark ? (
+                    <><Sun className="w-4 h-4" /> Light Mode</>
+                  ) : (
+                    <><Moon className="w-4 h-4" /> Dark Mode</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
+  );
+}
