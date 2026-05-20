@@ -500,13 +500,13 @@ export default function AdminDashboard() {
                 {sidebarOpen && (
                   <span className="flex-1 text-left">{item.label}</span>
                 )}
-                {sidebarOpen && (item.badge || item.getBadge) && (
+                {sidebarOpen && item.badge && (
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                     isActive 
                       ? "bg-[#f47822]/20 text-[#f47822]" 
                       : isDark ? "bg-white/10 text-white/60" : "bg-gray-200 text-gray-600"
                   }`}>
-                    {item.getBadge ? item.getBadge(courses) : item.badge}
+                    {item.badge}
                   </span>
                 )}
               </button>
