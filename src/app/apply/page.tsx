@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import ApplyClient from "@/components/apply/ApplyClient";
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function ApplyPage() {
-  return <ApplyClient />;
+  return (
+    <Suspense>
+      <ApplyClient />
+    </Suspense>
+  );
 }
