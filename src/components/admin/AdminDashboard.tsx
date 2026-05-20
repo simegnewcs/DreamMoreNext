@@ -114,8 +114,9 @@ export default function AdminDashboard() {
           setApplications(appsRes.data.applications || []);
         }
         if (usersRes.success && usersRes.data) {
-          setUsers(usersRes.data.users || []);
-          setStats(prev => ({ ...prev, users: usersRes.data.total || usersRes.data.users?.length || 0 }));
+          const usersData = usersRes.data;
+          setUsers(usersData.users || []);
+          setStats(prev => ({ ...prev, users: usersData.total || usersData.users?.length || 0 }));
         }
 
         // Fetch payment stats
