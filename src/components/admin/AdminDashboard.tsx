@@ -90,6 +90,8 @@ export default function AdminDashboard() {
     technologies: "",
   });
   const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [courseImgUploading, setCourseImgUploading] = useState(false);
+  const [editImgUploading, setEditImgUploading] = useState(false);
 
   // Users management state
   const [editingUser, setEditingUser] = useState<any>(null);
@@ -1822,39 +1824,60 @@ export default function AdminDashboard() {
                         />
                       </div>
 
-                      {/* Image URL */}
+                      {/* Course Image Upload */}
                       <div className="md:col-span-2">
                         <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
-                          Course Photo URL
+                          Course Image
                         </label>
-                        <input
-                          type="text"
-                          value={newCourse.image}
-                          onChange={(e) => setNewCourse({...newCourse, image: e.target.value})}
-                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
-                            isDark 
-                              ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
-                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-                          }`}
-                          placeholder="/images/courses/course-name.jpg or https://example.com/image.jpg"
-                        />
-                        {/* Image Preview */}
-                        {newCourse.image && (
-                          <div className="mt-3">
-                            <p className={`text-xs mb-2 ${isDark ? "text-white/50" : "text-gray-500"}`}>Preview:</p>
-                            <div className={`relative rounded-xl overflow-hidden w-48 h-32 ${isDark ? "bg-white/5 border border-white/10" : "bg-gray-100 border border-gray-200"}`}>
-                              <img
-                                src={newCourse.image}
-                                alt="Course preview"
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none';
-                                  (e.target as HTMLImageElement).parentElement!.innerHTML = `<div class="flex items-center justify-center h-full text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}">Failed to load image</div>`;
-                                }}
-                              />
+                        <div className="flex items-start gap-4">
+                          {/* Upload button */}
+                          <label className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border cursor-pointer transition-colors text-sm font-medium ${
+                            isDark
+                              ? "bg-white/5 border-white/10 text-white/70 hover:bg-white/10"
+                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }`}>
+                            {courseImgUploading ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Upload className="w-4 h-4" />
+                            )}
+                            {courseImgUploading ? "Uploading…" : "Upload Image"}
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              className="hidden"
+                              disabled={courseImgUploading}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setCourseImgUploading(true);
+                                const fd = new FormData();
+                                fd.append("file", file);
+                                try {
+                                  const res = await fetch("/api/upload/course-image", { method: "POST", body: fd });
+                                  const data = await res.json();
+                                  if (data.success) setNewCourse({ ...newCourse, image: data.url });
+                                  else alert(data.error || "Upload failed");
+                                } catch { alert("Upload failed"); }
+                                finally { setCourseImgUploading(false); e.target.value = ""; }
+                              }}
+                            />
+                          </label>
+                          {/* Preview */}
+                          {newCourse.image && (
+                            <div className={`relative rounded-xl overflow-hidden w-40 h-24 flex-shrink-0 ${
+                              isDark ? "bg-white/5 border border-white/10" : "bg-gray-100 border border-gray-200"
+                            }`}>
+                              <img src={newCourse.image} alt="Preview" className="w-full h-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={() => setNewCourse({ ...newCourse, image: "" })}
+                                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center text-xs hover:bg-red-500 transition-colors"
+                              >✕</button>
                             </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
+                        <p className={`text-xs mt-1.5 ${isDark ? "text-white/30" : "text-gray-400"}`}>JPEG, PNG or WebP · max 5 MB · recommended 1200×675</p>
                       </div>
 
                       {/* Description with Rich Text Editor */}
@@ -2083,23 +2106,53 @@ export default function AdminDashboard() {
                         />
                       </div>
 
-                      {/* Image URL */}
+                      {/* Course Image Upload (Edit) */}
                       <div className="md:col-span-2">
                         <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
-                          Course Image URL *
+                          Course Image
                         </label>
-                        <input
-                          type="url"
-                          value={editingCourse.image}
-                          onChange={(e) => setEditingCourse({...editingCourse, image: e.target.value})}
-                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
-                            isDark 
-                              ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
-                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-                          }`}
-                          placeholder="https://example.com/image.jpg"
-                          required
-                        />
+                        <div className="flex items-start gap-4">
+                          <label className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border cursor-pointer transition-colors text-sm font-medium ${
+                            isDark
+                              ? "bg-white/5 border-white/10 text-white/70 hover:bg-white/10"
+                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }`}>
+                            {editImgUploading ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Upload className="w-4 h-4" />
+                            )}
+                            {editImgUploading ? "Uploading…" : "Change Image"}
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              className="hidden"
+                              disabled={editImgUploading}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setEditImgUploading(true);
+                                const fd = new FormData();
+                                fd.append("file", file);
+                                try {
+                                  const res = await fetch("/api/upload/course-image", { method: "POST", body: fd });
+                                  const data = await res.json();
+                                  if (data.success) setEditingCourse({ ...editingCourse, image: data.url });
+                                  else alert(data.error || "Upload failed");
+                                } catch { alert("Upload failed"); }
+                                finally { setEditImgUploading(false); e.target.value = ""; }
+                              }}
+                            />
+                          </label>
+                          {editingCourse.image && (
+                            <div className={`relative rounded-xl overflow-hidden w-40 h-24 flex-shrink-0 ${
+                              isDark ? "bg-white/5 border border-white/10" : "bg-gray-100 border border-gray-200"
+                            }`}>
+                              <img src={editingCourse.image} alt="Preview" className="w-full h-full object-cover" />
+                            </div>
+                          )}
+                        </div>
+                        <p className={`text-xs mt-1.5 ${isDark ? "text-white/30" : "text-gray-400"}`}>JPEG, PNG or WebP · max 5 MB · recommended 1200×675</p>
                       </div>
 
                       {/* Technologies */}
