@@ -24,15 +24,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               [user.email, user.name || "", user.image || ""]
             );
           } else {
-            // Update avatar if changed
             await query(
               `UPDATE users SET avatar = ? WHERE email = ?`,
               [user.image || "", user.email]
             );
           }
         } catch (err) {
-          console.error("Google sign-in DB error:", err);
-          return false;
+          // Log but never block sign-in due to DB error
+          console.error("Google sign-in DB upsert error:", err);
         }
       }
       return true;
