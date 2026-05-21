@@ -6,11 +6,11 @@ import { Mail, Phone, MapPin, Send, Loader2, CheckCircle, MessageCircle } from "
 import { useTheme } from "@/context/ThemeContext";
 
 const contactInfo = [
-  { icon: Mail, label: "Email", value: "hello@dreammore.et", href: "mailto:hello@dreammore.et", color: "#00d4ff" },
-  { icon: Phone, label: "Phone", value: "+251 911 000 000", href: "tel:+251911000000", color: "#7c3aed" },
-  { icon: MessageCircle, label: "WhatsApp", value: "+251 911 000 000", href: "https://wa.me/251911000000", color: "#10b981" },
-  { icon: Send, label: "Telegram", value: "@dreammore_et", href: "https://t.me/dreammore_et", color: "#00a9ff" },
-  { icon: MapPin, label: "Location", value: "Bole Road, Addis Ababa, Ethiopia", href: "#", color: "#f59e0b" },
+  { icon: Mail, label: "Email", value: "info@dreammoredigitals.com", href: "mailto:info@dreammoredigitals.com", color: "#00d4ff" },
+  { icon: Phone, label: "Phone", value: "+251 993 132 122", href: "tel:+251993132122", color: "#7c3aed" },
+  { icon: MessageCircle, label: "WhatsApp", value: "+251 993 132 122", href: "https://wa.me/251993132122", color: "#10b981" },
+  { icon: Send, label: "Telegram", value: "@dreammoredigitals", href: "https://t.me/dreammoredigitals", color: "#00a9ff" },
+  { icon: MapPin, label: "Location", value: "Bahirdar, Ethiopia", href: "#", color: "#f59e0b" },
 ];
 
 export default function ContactClient() {
