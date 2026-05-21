@@ -9,20 +9,47 @@ import { useTheme } from "@/context/ThemeContext";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Agency", href: "/agency" },
+  {
+    label: "Agency",
+    href: "/agency",
+    children: [
+      { label: "All Services", href: "/agency" },
+      { label: "Software Development", href: "/agency#software-development" },
+      { label: "Mobile App Development", href: "/agency#mobile-app-development" },
+      { label: "Website Development", href: "/agency#website-development" },
+      { label: "AI Solutions", href: "/agency#ai-solutions" },
+      { label: "UI/UX Design", href: "/agency#uiux-design" },
+      { label: "Branding & Identity", href: "/agency#branding-identity" },
+      { label: "Digital Marketing", href: "/agency#digital-marketing" },
+      { label: "CCTV Intelligence Systems", href: "/agency#cctv-intelligence-systems" },
+    ],
+  },
   {
     label: "Academy",
     href: "/academy",
     children: [
       { label: "All Courses", href: "/academy" },
-      { label: "Full Stack Dev", href: "/academy/course/full-stack-development" },
-      { label: "UI/UX Design", href: "/academy/course/ui-ux-design" },
-      { label: "AI Engineering", href: "/academy/course/ai-engineering" },
+      { label: "Graphics Designing", href: "/academy/course/graphics-designing" },
+      { label: "Video Editing", href: "/academy/course/video-editing" },
+      { label: "Digital Marketing", href: "/academy/course/digital-marketing" },
+      { label: "Cinematography", href: "/academy/course/cinematography" },
+      { label: "Web & Mobile Development", href: "/academy/course/web-mobile-development" },
+      { label: "Programming Language C++", href: "/academy/course/cpp-programming" },
+      { label: "Basic Computer Skills", href: "/academy/course/basic-computer" },
+      { label: "Computer Maintenance", href: "/academy/course/computer-maintenance" },
+      { label: "Mobile Maintenance", href: "/academy/course/mobile-maintenance" },
+      { label: "AI for Business", href: "/academy/course/ai-business" },
+      { label: "Cybersecurity & Data Safety", href: "/academy/course/cybersecurity" },
+      { label: "Sales & Career Development", href: "/academy/course/sales-career" },
+      { label: "Robotics & Drone Technology", href: "/academy/course/robotics-drone" },
+      { label: "English Language", href: "/academy/course/english-language" },
+      { label: "AI-Powered Freelancing", href: "/academy/course/ai-freelancing" },
+      { label: "3D Modeling & Prototyping", href: "/academy/course/3d-modeling" },
     ],
   },
   { label: "About", href: "/about" },
   { label: "Team", href: "/team" },
-  { label: "Blog", href: "/blog" },
+  { label: "Testimonials", href: "/#testimonials" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -140,23 +167,25 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 8 }}
                         transition={{ duration: 0.15 }}
-                        className={`absolute top-full left-0 mt-1 w-52 rounded-xl overflow-hidden shadow-xl ${
-                          isDark ? "glass-dark" : "bg-white border border-gray-200"
-                        }`}
+                        className={`absolute top-full left-0 mt-1 rounded-xl overflow-hidden shadow-xl ${
+                          link.children.length > 6 ? "w-[600px]" : "w-52"
+                        } ${isDark ? "glass-dark" : "bg-white border border-gray-200"}`}
                       >
-                        {link.children.map((child) => (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            className={`block px-4 py-3 text-sm transition-all duration-200 ${
-                              isDark 
-                                ? "text-white/70 hover:text-white hover:bg-white/5" 
-                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                            }`}
-                          >
-                            {child.label}
-                          </Link>
-                        ))}
+                        <div className={link.children.length > 6 ? "grid grid-cols-3 p-2 gap-0.5" : ""}>
+                          {link.children.map((child) => (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              className={`block px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                                isDark
+                                  ? "text-white/70 hover:text-white hover:bg-white/5"
+                                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                              }`}
+                            >
+                              {child.label}
+                            </Link>
+                          ))}
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -188,10 +217,10 @@ export default function Navbar() {
                 {/* User Profile */}
                 <div className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#f47822] to-[#15142a] flex items-center justify-center text-white text-xs font-bold">
-                    {user.name.charAt(0).toUpperCase()}
+                    {(user.name || user.email || "?").charAt(0).toUpperCase()}
                   </div>
                   <span className={`text-sm font-medium ${isDark ? "text-white" : "text-gray-700"}`}>
-                    {user.name.split(" ")[0]}
+                    {(user.name || user.email || "").split(" ")[0]}
                   </span>
                 </div>
                 {/* Panel Button — admin & instructor only */}
@@ -316,10 +345,10 @@ export default function Navbar() {
                   <>
                     <div className={`flex items-center gap-3 px-4 py-3 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#f47822] to-[#15142a] flex items-center justify-center text-white font-bold">
-                        {user.name.charAt(0).toUpperCase()}
+                        {(user.name || user.email || "?").charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{user.name}</p>
+                        <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{user.name || user.email}</p>
                         <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{user.email}</p>
                       </div>
                       {(user.role === "admin" || user.role === "instructor") && (
