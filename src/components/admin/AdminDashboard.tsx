@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -165,20 +166,22 @@ export default function AdminDashboard() {
     loadActivities();
   }, []);
 
+  const { user: authUser, loading: authLoading } = useAuth();
+
   // Check auth
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (!userData) {
+    if (authLoading) return;
+    if (!authUser) {
       router.push("/login?redirect=/admin");
       return;
     }
-    const parsed = JSON.parse(userData);
+    const parsed = authUser;
     if (parsed.role !== "admin") {
       router.push("/academy");
       return;
     }
     setUser(parsed);
-  }, [router]);
+  }, [authUser, authLoading, router]);
 
   const [viewingApplication, setViewingApplication] = useState<any>(null);
   const [adminNotes, setAdminNotes] = useState("");

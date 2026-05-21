@@ -9,6 +9,7 @@ import {
   Users, LayoutDashboard, ChevronDown, ChevronRight, Lock, Monitor
 } from "lucide-react";
 import { InstructorProvider, useInstructor } from "@/context/InstructorContext";
+import { useAuth } from "@/hooks/useAuth";
 
 interface User {
   id: number;
@@ -275,15 +276,10 @@ function StudentSidebar({ isCollapsed, user, onLogout }: { isCollapsed: boolean;
 function LMSLayoutInner({ children, course }: LMSLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const { user, loading: authLoading } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isInstructor, canAccessCourse, loading: instructorLoading } = useInstructor();
-
-  useEffect(() => {
-    const raw = localStorage.getItem("user");
-    if (raw) { try { setUser(JSON.parse(raw)); } catch { /* ignore */ } }
-  }, []);
 
   // RBAC: if instructor tries to access an unassigned course, redirect
   useEffect(() => {

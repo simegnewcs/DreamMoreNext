@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
 import { useSearchParams, useRouter } from "next/navigation";
 import { applicationsAPI } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 
 const paymentMethods = [
   {
@@ -53,24 +54,23 @@ function PaymentContent() {
   const [submitted, setSubmitted] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const { user, loading: authLoading } = useAuth();
   const [course, setCourse] = useState<any>(null);
 
   // Get user and course info on mount
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (!userData) {
+    if (authLoading) return;
+    if (!user) {
       router.push(`/login?redirect=/payment${courseSlug ? `?course=${courseSlug}` : ""}`);
       return;
     }
-    setUser(JSON.parse(userData));
 
     // Get course info from localStorage (set by apply page)
     const applyData = localStorage.getItem("applyData");
     if (applyData) {
       setCourse(JSON.parse(applyData));
     }
-  }, [courseSlug, router]);
+  }, [user, authLoading, courseSlug, router]);
 
   const method = paymentMethods.find((m) => m.id === selectedMethod)!;
 

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Clock, Award, ArrowUpRight, User, X, CheckCircle, AlertCircle, LogIn, Loader2, BookOpen } from "lucide-react";
 import { fetchCourses, applicationsAPI } from "@/lib/api";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const categories = ["all", "development", "design", "ai", "marketing", "security", "creative"];
 
@@ -43,7 +44,7 @@ export default function CourseGrid() {
   const isDark = theme === "dark";
   const router = useRouter();
   const [active, setActive] = useState("all");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [courses, setCourses] = useState<any[]>([]);
@@ -68,12 +69,6 @@ export default function CourseGrid() {
     };
 
     loadCourses();
-  }, []);
-
-  // Check login status and application statuses on mount
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    setIsLoggedIn(!!user);
   }, []);
 
   // Check application statuses for all courses when courses load
