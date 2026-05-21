@@ -319,6 +319,12 @@ export const SERVICES = [
     title: "Software Development",
     description: "Custom enterprise-grade software solutions built with cutting-edge technologies tailored to your business needs.",
     color: "#00d4ff",
+    details: [
+      "Full-stack web & desktop application development",
+      "API design, microservices & cloud-native architecture",
+      "Database design, optimization & migration",
+      "Ongoing maintenance, support & performance tuning",
+    ],
   },
   {
     id: 2,
@@ -326,6 +332,12 @@ export const SERVICES = [
     title: "Mobile App Development",
     description: "Cross-platform iOS and Android applications with seamless user experiences and high performance.",
     color: "#7c3aed",
+    details: [
+      "React Native & Flutter cross-platform apps",
+      "Native iOS (Swift) and Android (Kotlin) development",
+      "App Store & Google Play publishing & optimization",
+      "Push notifications, offline support & analytics",
+    ],
   },
   {
     id: 3,
@@ -333,6 +345,12 @@ export const SERVICES = [
     title: "Website Development",
     description: "Modern, fast, and scalable websites from landing pages to complex web platforms.",
     color: "#10b981",
+    details: [
+      "Landing pages, corporate sites & e-commerce stores",
+      "Next.js, React & headless CMS integrations",
+      "SEO-optimized, accessible & mobile-first builds",
+      "Performance audits, hosting setup & deployment",
+    ],
   },
   {
     id: 4,
@@ -340,6 +358,12 @@ export const SERVICES = [
     title: "AI Solutions",
     description: "Intelligent automation, machine learning models, and AI-powered systems to transform your business operations.",
     color: "#f59e0b",
+    details: [
+      "Custom ML model training & deployment",
+      "Chatbots, virtual assistants & NLP pipelines",
+      "Predictive analytics & data intelligence dashboards",
+      "AI integration into existing business workflows",
+    ],
   },
   {
     id: 5,
@@ -347,6 +371,12 @@ export const SERVICES = [
     title: "UI/UX Design",
     description: "User-centered design that converts visitors to customers. Beautiful, intuitive interfaces that delight users.",
     color: "#ec4899",
+    details: [
+      "User research, personas & journey mapping",
+      "Wireframes, prototypes & interactive mockups",
+      "Design systems, component libraries & style guides",
+      "Usability testing & conversion rate optimization",
+    ],
   },
   {
     id: 6,
@@ -354,6 +384,12 @@ export const SERVICES = [
     title: "Branding & Identity",
     description: "Complete brand identity creation — logos, style guides, brand strategy, and visual communication systems.",
     color: "#06b6d4",
+    details: [
+      "Logo design & full visual identity package",
+      "Brand strategy, tone of voice & positioning",
+      "Marketing collateral — print, digital & social",
+      "Brand guidelines & asset management",
+    ],
   },
   {
     id: 7,
@@ -361,6 +397,12 @@ export const SERVICES = [
     title: "Digital Marketing",
     description: "Data-driven marketing strategies, SEO, paid ads, and social media management to grow your online presence.",
     color: "#84cc16",
+    details: [
+      "SEO audits, keyword strategy & on-page optimization",
+      "Google Ads, Meta Ads & paid social campaigns",
+      "Social media content creation & community management",
+      "Monthly analytics reports & performance reviews",
+    ],
   },
   {
     id: 8,
@@ -368,6 +410,12 @@ export const SERVICES = [
     title: "CCTV Intelligence Systems",
     description: "AI-powered surveillance solutions with facial recognition, anomaly detection, and real-time monitoring.",
     color: "#f97316",
+    details: [
+      "AI-powered facial recognition & access control",
+      "Real-time anomaly & intrusion detection alerts",
+      "Remote monitoring dashboards & mobile apps",
+      "Hardware procurement, installation & ongoing support",
+    ],
   },
 ];
 
