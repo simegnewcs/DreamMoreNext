@@ -20,7 +20,7 @@ export default function Testimonials() {
   }, []);
 
   return (
-    <section className="relative py-24 lg:py-32 overflow-hidden" style={{ background: isDark ? "#0c0b1e" : "#f8f9fa" }}>
+    <section id="testimonials" className="relative py-24 lg:py-32 overflow-hidden" style={{ background: isDark ? "#0c0b1e" : "#f8f9fa" }}>
       {/* ── Orange top accent bar ── */}
       <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent, #f47822, transparent)" }} />
 

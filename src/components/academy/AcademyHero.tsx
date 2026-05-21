@@ -6,7 +6,7 @@ import { useTheme } from "@/context/ThemeContext";
 
 const stats = [
   { icon: BookOpen,     value: "16+",    label: "Courses" },
-  { icon: Users,        value: "2,000+", label: "Students" },
+  { icon: Users,        value: "150+",   label: "Students" },
   { icon: Award,        value: "98%",    label: "Job Placement" },
   { icon: GraduationCap, value: "100%", label: "Certified" },
 ];

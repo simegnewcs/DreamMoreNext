@@ -3,8 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
-import { COURSES } from "@/lib/data";
 import { useTheme } from "@/context/ThemeContext";
+import { useEffect, useState } from "react";
 
 /* Per-course accent color + app-icon background + photo */
 const courseCard: Record<string, { accent: string; iconBg: string; iconText: string; photo: string; difficulty: string }> = {
@@ -71,7 +71,18 @@ const fallbackCard = { accent: "#f47822", iconBg: "#431407", iconText: "D", phot
 export default function AcademyPillar() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const featured = COURSES.slice(0, 4);
+  const [featured, setFeatured] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/courses?limit=4")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.courses?.length) setFeatured(data.courses);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <section className="relative overflow-hidden">
@@ -128,9 +139,17 @@ export default function AcademyPillar() {
         <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
 
+            {/* Skeleton while loading */}
+            {loading && Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex-shrink-0 w-[220px] sm:w-[240px] h-[260px] rounded-2xl animate-pulse"
+                style={{ background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)" }} />
+            ))}
+
             {/* Course cards */}
-            {featured.map((course, i) => {
+            {!loading && featured.map((course: any, i: number) => {
               const card = courseCard[course.slug] ?? fallbackCard;
+              const photo = course.image || card.photo;
+              const difficulty = course.level || card.difficulty;
               return (
                 <motion.div
                   key={course.id}
@@ -163,7 +182,7 @@ export default function AcademyPillar() {
                         </div>
                         <div>
                           <p className={`text-[11px] font-black leading-tight line-clamp-1 ${isDark ? "text-white" : "text-gray-900"}`}>{course.title}</p>
-                          <p className={`text-[9px] line-clamp-1 ${isDark ? "text-white/40" : "text-gray-500"}`}>{course.description.split(".")[0]}</p>
+                          <p className={`text-[9px] line-clamp-1 ${isDark ? "text-white/40" : "text-gray-500"}`}>{(course.short_description || course.description || "").split(".")[0]}</p>
                         </div>
                       </div>
 
@@ -171,7 +190,7 @@ export default function AcademyPillar() {
                       <div className="relative mx-3 rounded-xl overflow-hidden h-28 flex-shrink-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={card.photo}
+                          src={photo}
                           alt={course.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
@@ -181,13 +200,19 @@ export default function AcademyPillar() {
                       {/* Info */}
                       <div className="px-3 pt-2.5 pb-3 flex flex-col gap-1 flex-1">
                         <div className="flex items-center justify-between text-[10px]">
-                          <span className="text-white/45">Difficulty:</span>
-                          <span className="font-semibold text-white/70">{card.difficulty}</span>
+                          <span className={isDark ? "text-white/45" : "text-gray-500"}>Level:</span>
+                          <span className={`font-semibold ${isDark ? "text-white/70" : "text-gray-700"}`}>{difficulty}</span>
                         </div>
                         <div className="flex items-center justify-between text-[10px]">
-                          <span className="text-white/45">Duration:</span>
-                          <span className="font-semibold text-white/70">{course.duration}</span>
+                          <span className={isDark ? "text-white/45" : "text-gray-500"}>Duration:</span>
+                          <span className={`font-semibold ${isDark ? "text-white/70" : "text-gray-700"}`}>{course.duration}</span>
                         </div>
+                        {course.price != null && (
+                          <div className="flex items-center justify-between text-[10px]">
+                            <span className={isDark ? "text-white/45" : "text-gray-500"}>Price:</span>
+                            <span className="font-bold" style={{ color: card.accent }}>{course.currency || "ETB"} {Number(course.price).toLocaleString()}</span>
+                          </div>
+                        )}
 
                         {/* CTA arrow */}
                         <div
@@ -221,7 +246,7 @@ export default function AcademyPillar() {
               >
                 <p className={`text-xs font-bold uppercase tracking-wider mb-3 ${isDark ? "text-white/60" : "text-gray-500"}`}>Student Success</p>
                 <div className="text-5xl font-black mb-1" style={{ color: "#f47822" }}>
-                  200+
+                  150+
                 </div>
                 <p className={`text-xs font-black uppercase tracking-widest leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
                   Professionals<br />Trained

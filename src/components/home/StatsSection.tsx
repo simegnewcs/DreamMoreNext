@@ -5,8 +5,8 @@ import { useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 
 const stats = [
-  { value: 2000, suffix: "+", label: "Students Trained", color: "#00d4ff" },
-  { value: 50, suffix: "+", label: "Projects Delivered", color: "#7c3aed" },
+  { value: 150, suffix: "+", label: "Students Trained", color: "#00d4ff" },
+  { value: 30, suffix: "+", label: "Projects Delivered", color: "#7c3aed" },
   { value: 16, suffix: "", label: "Active Courses", color: "#ec4899" },
   { value: 98, suffix: "%", label: "Student Satisfaction", color: "#10b981" },
   { value: 5, suffix: "+", label: "Years of Excellence", color: "#f59e0b" },

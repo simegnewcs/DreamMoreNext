@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import ThemeProviderWrapper from "@/components/providers/ThemeProviderWrapper";
+import NextAuthProvider from "@/components/providers/NextAuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,11 +51,13 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-[#0a0a0f] text-white" suppressHydrationWarning>
-        <ThemeProviderWrapper>
-          <ConditionalLayout>
-            {children}
-          </ConditionalLayout>
-        </ThemeProviderWrapper>
+        <NextAuthProvider>
+          <ThemeProviderWrapper>
+            <ConditionalLayout>
+              {children}
+            </ConditionalLayout>
+          </ThemeProviderWrapper>
+        </NextAuthProvider>
       </body>
     </html>
   );

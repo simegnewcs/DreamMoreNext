@@ -29,30 +29,41 @@ export async function GET(request: NextRequest) {
     sql += ` GROUP BY c.id ORDER BY c.created_at DESC`;
 
     if (limit) {
-      sql += ` LIMIT ?`;
-      params.push(limit);
+      sql += ` LIMIT ${limit}`;
     }
 
     const courses = await query(sql, params);
 
-    // Parse technologies string to array
-    const formattedCourses = (courses as any[]).map(course => ({
-      ...course,
-      technologies: course.technologies ? course.technologies.split(',') : [],
-      certificate: course.certificate === 1,
-      price: parseFloat(course.price),
-      rating: parseFloat(course.rating)
-    }));
+    // Parse technologies string to array, filtering out blank/single-char entries
+    const formattedCourses = (courses as any[]).map(course => {
+      let techs: string[] = [];
+      if (course.technologies) {
+        const parts = course.technologies.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 1);
+        // If all parts are single chars (data stored char-by-char), join them back into one word
+        if (parts.length === 0 && course.technologies.replace(/,/g, '').trim().length > 0) {
+          techs = [course.technologies.replace(/,/g, '').trim()];
+        } else {
+          techs = parts;
+        }
+      }
+      return {
+        ...course,
+        technologies: techs,
+        certificate: course.certificate === 1,
+        price: parseFloat(course.price),
+        rating: parseFloat(course.rating)
+      };
+    });
 
     return NextResponse.json({ 
       success: true, 
       courses: formattedCourses 
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching courses:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch courses" },
+      { success: false, error: "Failed to fetch courses", detail: error?.message || String(error) },
       { status: 500 }
     );
   }

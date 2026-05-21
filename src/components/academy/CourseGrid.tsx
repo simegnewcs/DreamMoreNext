@@ -271,7 +271,12 @@ export default function CourseGrid() {
                       Software & Tools
                     </p>
                     <div className="flex flex-wrap gap-1.5">
-                      {course.technologies.map((tech: string) => (
+                      {(Array.isArray(course.technologies)
+                        ? course.technologies
+                        : typeof course.technologies === "string" && course.technologies.length > 0
+                          ? course.technologies.split(",").map((t: string) => t.trim()).filter(Boolean)
+                          : []
+                      ).map((tech: string) => (
                         <span
                           key={tech}
                           className="text-[9px] px-2 py-0.5 rounded font-medium"

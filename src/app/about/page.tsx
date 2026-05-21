@@ -41,11 +41,14 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className={`text-3xl sm:text-4xl font-black mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>Our Story</h2>
+              <h2 className={`text-3xl sm:text-4xl font-black mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>About Dreammore</h2>
               <div className={`space-y-4 leading-relaxed ${isDark ? "text-white/60" : "text-gray-600"}`}>
-                <p>DreamMore started as a small web development studio in Addis Ababa, Ethiopia. Our founders saw a clear gap: African businesses needed world-class digital solutions, and African youth needed real skills to build them.</p>
-                <p>We built both. The Agency arm creates enterprise-grade digital products for businesses across Africa. The Academy arm trains the next generation of African developers, designers, and digital marketers.</p>
-                <p>Today, DreamMore has delivered 50+ projects, trained 2,000+ students, and is on track to become Africa&apos;s most impactful digital ecosystem.</p>
+                <p>Dreammore Dream More is a collaborative group of dynamic youth and active team members dedicated to education purpose, digital marketing, and a wide range of tech-related services. We prioritize a client-centred approach, supported by our versatile service offerings and an unwavering commitment to quality. With a focus on reliability, trust, and continuous innovation, our dedicated team adapts to meet the evolving demands of every client, ensuring that we consistently exceed expectations.</p>
+                <p className={`text-sm italic border-l-2 pl-4 ${isDark ? "border-orange-500/50 text-white/45" : "border-orange-400 text-gray-500"}`}>
+                  ድሪም-ሞር የወጣትና የታታሪዎች ስብስብ ሲሆን በሀገራችን ላይ በትምህርቱ ዘርፍ፤ በድጂታል ማርኬቲንግ እና በሌሎች ቴክኖሎጂ ዘርፎች ስራዎች እና ሁለገብ ድጂታል ሃሳቦች ላይ በአንክሮ የሚሰራ ሩቅ አላሚ፤ ቀልጣፋ እና ዘመኑን የዋጁ ስራዎች ላይ የሚያተኩር ለሁሉም ደንበኞቻችን ፍላጎት ዋልታ እና የጋራ መድረክ የሆነ ሃገር በቀል ድርጅት ነው፡፡
+                </p>
+                <p>Our mission is to deliver outstanding services tailored to the unique needs of each client, ensuring quality, efficiency, and innovation in every aspect of our work. Dream More is an indigenous company committed to empowering our community with the tools and resources necessary for success in any sectors.</p>
+                <p>At Dreammore, we are committed to excellence, innovation, and social impact. Our team of skilled professionals works tirelessly to deliver high-quality services that meet the unique needs of our clients.</p>
               </div>
               <Link href="/team" className="btn-primary inline-flex mt-8">
                 Meet Our Team
@@ -55,8 +58,8 @@ export default function AboutPage() {
             <div className="grid grid-cols-2 gap-4">
               {[
                 { num: "5+", label: "Years of Excellence" },
-                { num: "50+", label: "Projects Delivered" },
-                { num: "2,000+", label: "Students Trained" },
+                { num: "30+", label: "Projects Delivered" },
+                { num: "150+", label: "Students Trained" },
                 { num: "16+", label: "Active Courses" },
               ].map((s) => (
                 <div key={s.label} className={`rounded-2xl p-6 text-center ${isDark ? "glass" : "bg-gray-50 border border-gray-200 shadow-sm"}`}>

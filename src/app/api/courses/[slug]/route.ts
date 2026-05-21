@@ -127,9 +127,14 @@ export async function PUT(
     }
 
     // Update related data if provided
-    if (body.technologies) {
+    if (body.technologies !== undefined) {
+      const techArray: string[] = Array.isArray(body.technologies)
+        ? body.technologies
+        : typeof body.technologies === 'string' && body.technologies.trim()
+          ? body.technologies.split(',').map((t: string) => t.trim()).filter(Boolean)
+          : [];
       await query(`DELETE FROM technologies WHERE course_id = ?`, [courseId]);
-      for (const tech of body.technologies) {
+      for (const tech of techArray) {
         await query(`INSERT INTO technologies (course_id, name) VALUES (?, ?)`, [courseId, tech]);
       }
     }

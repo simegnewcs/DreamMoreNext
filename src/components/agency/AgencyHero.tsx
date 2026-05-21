@@ -67,7 +67,10 @@ export default function AgencyHero() {
             Start a Project
             <ArrowRight className="w-5 h-5" />
           </Link>
-          <button className="btn-secondary text-base py-4 px-8 gap-3">
+          <button
+            className="btn-secondary text-base py-4 px-8 gap-3"
+            onClick={() => document.getElementById("portfolio")?.scrollIntoView({ behavior: "smooth" })}
+          >
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-white/10" : "bg-gray-200"}`}>
               <Play className={`w-3.5 h-3.5 fill-current ${isDark ? "text-white" : "text-gray-700"}`} />
             </div>

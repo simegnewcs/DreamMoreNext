@@ -338,7 +338,7 @@ export default function HeroSection() {
           >
             {[
               { icon: Award, label: "Award Winning", value: "Agency", color: isDark ? "#ffffff" : "#15142a" },
-              { icon: Users, label: "2,000+", value: "Students Trained", color: "#f47822" },
+              { icon: Users, label: "150+", value: "Students Trained", color: "#f47822" },
               { icon: TrendingUp, label: "98%", value: "Success Rate", color: isDark ? "#ffffff" : "#15142a" },
             ].map(({ icon: Icon, label, value, color }) => (
               <div key={label} className="flex items-center gap-3">

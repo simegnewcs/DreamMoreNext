@@ -13,12 +13,12 @@ const services = [
 ];
 
 const stats = [
-  { value: "50+",  label: "Projects Delivered" },
+  { value: "30+",  label: "Projects Delivered" },
   { value: "4.9★", label: "Client Rating" },
   { value: "3x",   label: "Avg. ROI Uplift" },
 ];
 
-const clients = ["Hella Coffee", "EthioHealth", "AgroConnect", "SafeCity AI", "BankDash", "Addis Brand Co.", "Urban Bites", "StrLink"];
+const clients = ["Hella Coffee", "EthioHealth", "AgroConnect", "BankDash", "Addis Brand Co.", "Urban Bites", "StrLink"];
 
 export default function AgencyPillar() {
   const { theme } = useTheme();

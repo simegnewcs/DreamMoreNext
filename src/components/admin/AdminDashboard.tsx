@@ -387,7 +387,9 @@ export default function AdminDashboard() {
       duration: editingCourse.duration,
       level: editingCourse.level,
       instructor: editingCourse.instructor,
-      technologies: editingCourse.technologies,
+      technologies: Array.isArray(editingCourse.technologies)
+        ? editingCourse.technologies
+        : String(editingCourse.technologies || "").split(",").map((t: string) => t.trim()).filter(Boolean),
     });
     
     if (result.success) {
