@@ -57,6 +57,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdown, setDropdown] = useState<string | null>(null);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [user, setUser] = useState<{name: string; email: string; role: string} | null>(null);
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
@@ -114,6 +115,7 @@ export default function Navbar() {
 
   useEffect(() => {
     setMobileOpen(false);
+    setMobileExpanded(null);
   }, [pathname]);
 
   return (
@@ -307,29 +309,48 @@ export default function Navbar() {
             <div className="px-4 py-6 space-y-1">
               {navLinks.map((link) => (
                 <div key={link.label}>
-                  <Link
-                    href={link.href}
-                    className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                      pathname === link.href
-                        ? isDark 
-                          ? "text-cyan-400 bg-cyan-400/10" 
-                          : "text-orange-500 bg-orange-50"
-                        : isDark 
-                          ? "text-white/70 hover:text-white hover:bg-white/5" 
+                  {link.children ? (
+                    <button
+                      onClick={() => setMobileExpanded(mobileExpanded === link.label ? null : link.label)}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                        isDark
+                          ? "text-white/70 hover:text-white hover:bg-white/5"
                           : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                  {link.children && (
+                      }`}
+                    >
+                      {link.label}
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform duration-200 ${
+                          mobileExpanded === link.label ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                        pathname === link.href
+                          ? isDark
+                            ? "text-cyan-400 bg-cyan-400/10"
+                            : "text-orange-500 bg-orange-50"
+                          : isDark
+                            ? "text-white/70 hover:text-white hover:bg-white/5"
+                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                  {link.children && mobileExpanded === link.label && (
                     <div className="ml-4 mt-1 space-y-1">
                       {link.children.map((child) => (
                         <Link
                           key={child.href}
                           href={child.href}
+                          onClick={() => setMobileOpen(false)}
                           className={`block px-4 py-2 rounded-lg text-xs transition-all ${
-                            isDark 
-                              ? "text-white/50 hover:text-white/80 hover:bg-white/5" 
+                            isDark
+                              ? "text-white/50 hover:text-white/80 hover:bg-white/5"
                               : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                           }`}
                         >

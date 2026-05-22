@@ -42,8 +42,8 @@ export default function AgencyPillar() {
       </div>
 
       {/* ════════ MAIN TWO-COL BLOCK ════════ */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24 items-center">
 
           {/* ── LEFT — Copy & services ── */}
           <motion.div
@@ -117,7 +117,7 @@ export default function AgencyPillar() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.65, delay: 0.15 }}
-            className="relative flex items-center justify-center"
+            className="relative flex items-center justify-center mt-4 lg:mt-0"
           >
             {/* glow behind */}
             <div
@@ -125,7 +125,7 @@ export default function AgencyPillar() {
               style={{ background: "rgba(244,120,34,0.08)" }}
             />
 
-            <div className="relative w-full max-w-sm">
+            <div className="relative w-full max-w-sm mx-auto">
 
               {/* ── Background card (dashboard) ── */}
               <div
@@ -215,7 +215,7 @@ export default function AgencyPillar() {
 
               {/* ── Floating phone (right side) ── */}
               <div
-                className="absolute -right-8 top-8 z-20 w-[80px] rounded-[18px] overflow-hidden shadow-2xl"
+                className="absolute -right-4 sm:-right-8 top-8 z-20 w-[60px] sm:w-[80px] rounded-[18px] overflow-hidden shadow-2xl"
                 style={{ border: "1px solid rgba(244,120,34,0.25)", background: "#13122a" }}
               >
                 <div className="h-5 flex items-center justify-center" style={{ background: "#1e1c38" }}>
@@ -237,7 +237,7 @@ export default function AgencyPillar() {
 
               {/* ── Floating stat pill ── */}
               <div
-                className="absolute -left-6 bottom-12 z-20 rounded-xl px-3 py-2 shadow-lg"
+                className="absolute -left-3 sm:-left-6 bottom-12 z-20 rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 shadow-lg"
                 style={{ background: "#1e1c38", border: "1px solid rgba(244,120,34,0.2)" }}
               >
                 <div className="flex items-center gap-2">
@@ -257,7 +257,7 @@ export default function AgencyPillar() {
         style={{ borderColor: "rgba(244,120,34,0.1)", background: isDark ? "rgba(244,120,34,0.03)" : "rgba(244,120,34,0.05)" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="grid grid-cols-3 gap-8 text-center">
+          <div className="grid grid-cols-3 gap-4 sm:gap-8 text-center">
             {stats.map((s, i) => (
               <motion.div
                 key={s.label}
@@ -287,7 +287,7 @@ export default function AgencyPillar() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.07 }}
-                className="group flex flex-col items-start gap-3 p-8 transition-all duration-300"
+                className="group flex flex-col items-start gap-3 p-5 sm:p-8 transition-all duration-300"
                 style={{ background: isDark ? "#0b0a1a" : "#ffffff" }}
               >
                 <div

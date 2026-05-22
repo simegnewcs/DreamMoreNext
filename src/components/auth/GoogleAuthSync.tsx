@@ -9,7 +9,8 @@ export default function GoogleAuthSync() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user) {
+    if (status !== "authenticated" || !session?.user) return;
+    try {
       const existing = localStorage.getItem("user");
       const existingParsed = existing ? JSON.parse(existing) : null;
 
@@ -29,7 +30,7 @@ export default function GoogleAuthSync() {
         }
         window.dispatchEvent(new Event("userUpdated"));
       }
-    }
+    } catch {}
   }, [status, session, router]);
 
   return null;

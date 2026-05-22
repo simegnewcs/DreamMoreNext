@@ -113,7 +113,7 @@ export default function AcademyPillar() {
       {/* ══════════════════════════════════════
           CONTENT
       ══════════════════════════════════════ */}
-      <div className="relative z-10 py-20 lg:py-28">
+      <div className="relative z-10 py-14 lg:py-28">
 
         {/* ── Headline block ── */}
         <motion.div
@@ -137,11 +137,11 @@ export default function AcademyPillar() {
 
         {/* ── Horizontal card row ── */}
         <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+          <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 snap-x snap-mandatory" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
 
             {/* Skeleton while loading */}
             {loading && Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex-shrink-0 w-[220px] sm:w-[240px] h-[260px] rounded-2xl animate-pulse"
+              <div key={i} className="flex-shrink-0 w-[200px] sm:w-[240px] h-[260px] rounded-2xl animate-pulse snap-start"
                 style={{ background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)" }} />
             ))}
 
@@ -157,7 +157,7 @@ export default function AcademyPillar() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.45, delay: i * 0.08 }}
-                  className="flex-shrink-0 w-[220px] sm:w-[240px]"
+                  className="flex-shrink-0 w-[200px] sm:w-[240px] snap-start"
                 >
                   <Link href={`/academy/course/${course.slug}`} className="group block h-full">
                     <div
@@ -234,7 +234,7 @@ export default function AcademyPillar() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: 0.36 }}
-              className="flex-shrink-0 w-[180px] sm:w-[200px]"
+              className="flex-shrink-0 w-[160px] sm:w-[200px] snap-start"
             >
               <div
                 className="h-full rounded-2xl flex flex-col items-center justify-center text-center p-6"

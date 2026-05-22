@@ -142,7 +142,7 @@ export default function Footer() {
           </div>
 
           {/* Links columns */}
-          <div>
+          <div className="hidden md:block">
             <h4 className={`text-sm font-semibold mb-4 uppercase tracking-wider ${isDark ? "text-white" : "text-gray-900"}`}>Company</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
@@ -155,7 +155,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="hidden md:block">
             <h4 className={`text-sm font-semibold mb-4 uppercase tracking-wider ${isDark ? "text-white" : "text-gray-900"}`}>Agency</h4>
             <ul className="space-y-3">
               {footerLinks.agency.map((link) => (
@@ -168,7 +168,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="hidden md:block">
             <h4 className={`text-sm font-semibold mb-4 uppercase tracking-wider ${isDark ? "text-white" : "text-gray-900"}`}>Academy</h4>
             <ul className="space-y-3">
               {footerLinks.academy.map((link) => (

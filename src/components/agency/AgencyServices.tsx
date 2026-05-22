@@ -68,7 +68,7 @@ export default function AgencyServices() {
                     <h3 className={`font-bold text-base ${isDark ? "text-white" : "text-gray-900"}`}>
                       {service.title}
                     </h3>
-                    <p className={`text-sm mt-0.5 leading-relaxed ${isDark ? "text-white/45" : "text-gray-500"}`}>
+                    <p className={`hidden sm:block text-sm mt-0.5 leading-relaxed ${isDark ? "text-white/45" : "text-gray-500"}`}>
                       {service.description}
                     </p>
                   </div>
@@ -103,6 +103,9 @@ export default function AgencyServices() {
                       className="overflow-hidden"
                     >
                       <div className="pb-6 px-2 pl-16">
+                        <p className={`sm:hidden text-sm mb-4 leading-relaxed ${isDark ? "text-white/55" : "text-gray-500"}`}>
+                          {service.description}
+                        </p>
                         <ul className="space-y-2.5">
                           {service.details.map((point, j) => (
                             <motion.li

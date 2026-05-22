@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { ExternalLink, BookOpen, Loader2, FolderOpen } from "lucide-react";
+import { ExternalLink, BookOpen, Loader2, FolderOpen, ChevronDown } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
 export default function AgencyPortfolio() {
@@ -11,6 +11,10 @@ export default function AgencyPortfolio() {
   const [active, setActive] = useState("all");
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedDesc, setExpandedDesc] = useState<Record<number, boolean>>({});
+
+  const toggleDesc = (id: number) =>
+    setExpandedDesc(prev => ({ ...prev, [id]: !prev[id] }));
 
   useEffect(() => {
     fetch("/api/portfolio")
@@ -142,7 +146,21 @@ export default function AgencyPortfolio() {
 
                 <div className="p-5">
                   <h3 className={`font-bold text-base mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>{project.title}</h3>
-                  <p className={`text-sm leading-relaxed mb-4 line-clamp-2 ${isDark ? "text-white/50" : "text-gray-600"}`}>{project.description}</p>
+                  <p className={`text-sm leading-relaxed ${expandedDesc[project.id] ? "" : "line-clamp-2"} ${isDark ? "text-white/50" : "text-gray-600"}`}>
+                    {project.description}
+                  </p>
+                  {project.description?.length > 120 && (
+                    <button
+                      onClick={() => toggleDesc(project.id)}
+                      className={`flex items-center gap-1 mt-1 mb-3 text-xs font-semibold transition-colors ${
+                        isDark ? "text-orange-400 hover:text-orange-300" : "text-orange-500 hover:text-orange-600"
+                      }`}
+                    >
+                      {expandedDesc[project.id] ? "Less" : "More"}
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${expandedDesc[project.id] ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
+                  {!project.description?.length || project.description.length <= 120 ? <div className="mb-4" /> : null}
                   {project.technologies?.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {project.technologies.map((tech: string) => (

@@ -5,7 +5,7 @@ import GoogleAuthSync from "@/components/auth/GoogleAuthSync";
 
 export default function NextAuthProvider({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={0} refetchOnWindowFocus={false}>
       <GoogleAuthSync />
       {children}
     </SessionProvider>

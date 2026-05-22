@@ -92,7 +92,7 @@ export default function HeroSection() {
               <div className="absolute inset-0 pointer-events-none"
                 style={{ background: "radial-gradient(ellipse at 30% 20%, rgba(244,120,34,0.12) 0%, transparent 50%)" }} />
 
-              <div className="relative p-8 lg:p-10 flex flex-col h-full min-h-[600px]">
+              <div className="relative p-5 sm:p-8 lg:p-10 flex flex-col h-full min-h-[480px] sm:min-h-[600px]">
 
                 {/* Header */}
                 <div className="mb-6">
@@ -151,7 +151,7 @@ export default function HeroSection() {
                     </div>
 
                     {/* Floating phone */}
-                    <div className="absolute -right-4 bottom-0 w-[22%] aspect-[9/18] rounded-2xl overflow-hidden shadow-xl border-2 border-white/10">
+                    <div className="hidden sm:block absolute -right-4 bottom-0 w-[22%] aspect-[9/18] rounded-2xl overflow-hidden shadow-xl border-2 border-white/10">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&q=80"
@@ -165,7 +165,7 @@ export default function HeroSection() {
                     <motion.div
                       animate={{ y: [0, -8, 0] }}
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute -right-2 top-8 px-3 py-2 rounded-xl shadow-lg border-2"
+                      className="hidden sm:block absolute -right-2 top-8 px-3 py-2 rounded-xl shadow-lg border-2"
                       style={{ background: "#ffffff", borderColor: "#f47822" }}
                     >
                       <p className="text-[9px] font-black leading-tight text-center" style={{ color: "#15142a" }}>
@@ -214,7 +214,7 @@ export default function HeroSection() {
               <div className="absolute inset-0 pointer-events-none"
                 style={{ background: "radial-gradient(ellipse at 70% 30%, rgba(244,120,34,0.12) 0%, transparent 60%)" }} />
 
-              <div className="relative p-8 lg:p-10 flex flex-col h-full min-h-[600px]">
+              <div className="relative p-5 sm:p-8 lg:p-10 flex flex-col h-full min-h-[480px] sm:min-h-[600px]">
 
                 {/* Header */}
                 <div className="mb-6 text-right">
@@ -273,7 +273,7 @@ export default function HeroSection() {
                     </div>
 
                     {/* Floating student avatars */}
-                    <div className="absolute -left-3 top-8 flex -space-x-2">
+                    <div className="hidden sm:flex absolute -left-3 top-8 -space-x-2">
                       {["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100","https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100","https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100"].map((src, i) => (
                         <div key={i} className="w-10 h-10 rounded-full border-2 border-[#2d1810] overflow-hidden">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -290,7 +290,7 @@ export default function HeroSection() {
                     <motion.div
                       animate={{ y: [0, -6, 0] }}
                       transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                      className="absolute -right-2 bottom-16 px-4 py-3 rounded-xl border-2"
+                      className="hidden sm:block absolute -right-2 bottom-16 px-4 py-3 rounded-xl border-2"
                       style={{ background: "#ffffff", borderColor: "#f47822" }}
                     >
                       <div className="flex items-center gap-2">
@@ -330,7 +330,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="mt-12 flex flex-wrap justify-center items-center gap-8 lg:gap-12 px-6 py-4 rounded-2xl"
+            className="mt-8 flex flex-wrap justify-center items-center gap-5 sm:gap-8 lg:gap-12 px-4 sm:px-6 py-4 rounded-2xl"
             style={{ 
               background: isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.7)", 
               border: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(244,120,34,0.2)" 

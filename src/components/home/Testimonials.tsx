@@ -135,7 +135,7 @@ export default function Testimonials() {
           className="mt-16 text-center"
         >
           <div
-            className="inline-flex items-center gap-6 px-8 py-4 rounded-2xl"
+            className="inline-flex flex-wrap justify-center items-center gap-4 sm:gap-6 px-5 sm:px-8 py-4 rounded-2xl"
             style={{ 
               background: isDark ? "rgba(244,120,34,0.05)" : "rgba(244,120,34,0.08)", 
               border: isDark ? "1px solid rgba(244,120,34,0.15)" : "1px solid rgba(244,120,34,0.2)" 
