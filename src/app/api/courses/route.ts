@@ -13,7 +13,8 @@ export async function GET(request: NextRequest) {
       SELECT 
         c.*,
         GROUP_CONCAT(DISTINCT t.name) as technologies,
-        (SELECT COUNT(*) FROM applications WHERE course_id = c.id AND status = 'pending') as pending_applications
+        (SELECT COUNT(*) FROM applications WHERE course_id = c.id AND status = 'pending') as pending_applications,
+        (SELECT COALESCE(SUM(duration_weeks), 0) FROM course_phases WHERE course_id = c.id) as total_duration_weeks
       FROM courses c
       LEFT JOIN technologies t ON c.id = t.course_id
       WHERE c.status = 'active'
@@ -35,6 +36,7 @@ export async function GET(request: NextRequest) {
     const courses = await query(sql, params);
 
     // Parse technologies string to array, filtering out blank/single-char entries
+    // Calculate dynamic duration from phases (total_duration_weeks) or fallback to static duration
     const formattedCourses = (courses as any[]).map(course => {
       let techs: string[] = [];
       if (course.technologies) {
@@ -46,12 +48,30 @@ export async function GET(request: NextRequest) {
           techs = parts;
         }
       }
+
+      // Calculate dynamic duration from phases
+      const totalWeeks = course.total_duration_weeks || 0;
+      let dynamicDuration: string;
+      if (totalWeeks > 0) {
+        if (totalWeeks >= 4) {
+          const months = Math.round(totalWeeks / 4 * 10) / 10; // Round to 1 decimal
+          dynamicDuration = months === 1 ? "1 Month" : `${months} Months`;
+        } else {
+          dynamicDuration = totalWeeks === 1 ? "1 Week" : `${totalWeeks} Weeks`;
+        }
+      } else {
+        // Fallback to static duration from courses table
+        dynamicDuration = course.duration || "—";
+      }
+
       return {
         ...course,
         technologies: techs,
         certificate: course.certificate === 1,
         price: parseFloat(course.price),
-        rating: parseFloat(course.rating)
+        rating: parseFloat(course.rating),
+        duration: dynamicDuration, // Override with calculated duration
+        _rawWeeks: totalWeeks // Keep raw weeks for reference
       };
     });
 

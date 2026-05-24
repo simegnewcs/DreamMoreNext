@@ -24,6 +24,26 @@ export async function GET(
 
     const course = (courses as any[])[0];
 
+    // Get dynamic duration from phases
+    const phaseDurations = await query(
+      `SELECT COALESCE(SUM(duration_weeks), 0) as total_weeks FROM course_phases WHERE course_id = ?`,
+      [course.id]
+    );
+    const totalWeeks = (phaseDurations as any[])[0]?.total_weeks || 0;
+
+    // Calculate dynamic duration
+    let dynamicDuration: string;
+    if (totalWeeks > 0) {
+      if (totalWeeks >= 4) {
+        const months = Math.round(totalWeeks / 4 * 10) / 10;
+        dynamicDuration = months === 1 ? "1 Month" : `${months} Months`;
+      } else {
+        dynamicDuration = totalWeeks === 1 ? "1 Week" : `${totalWeeks} Weeks`;
+      }
+    } else {
+      dynamicDuration = course.duration || "—";
+    }
+
     // Get technologies
     const techs = await query(
       `SELECT name FROM technologies WHERE course_id = ?`,
@@ -65,7 +85,9 @@ export async function GET(
       certificate: course.certificate === 1,
       price: parseFloat(course.price),
       rating: parseFloat(course.rating),
-      students: course.students_count
+      students: course.students_count,
+      duration: dynamicDuration, // Override with calculated duration
+      _rawWeeks: totalWeeks
     };
 
     return NextResponse.json({ 
