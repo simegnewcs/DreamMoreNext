@@ -3,10 +3,11 @@
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
 
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  
+
   const isLMSPage = pathname?.startsWith("/lms");
   const isAdminPage = pathname?.startsWith("/admin");
   const isInstructorPage = pathname?.startsWith("/instructor");
@@ -17,6 +18,7 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
       {!hideLayout && <Navbar />}
       <main className="flex-1">{children}</main>
       {!hideLayout && <Footer />}
+      <ChatbotWidget />
     </div>
   );
 }
