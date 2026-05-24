@@ -24,24 +24,28 @@ export async function GET(
 
     const course = (courses as any[])[0];
 
-    // Get dynamic duration from phases
+    // Get dynamic duration from phases (as fallback only)
     const phaseDurations = await query(
       `SELECT COALESCE(SUM(duration_weeks), 0) as total_weeks FROM course_phases WHERE course_id = ?`,
       [course.id]
     );
     const totalWeeks = (phaseDurations as any[])[0]?.total_weeks || 0;
 
-    // Calculate dynamic duration
-    let dynamicDuration: string;
-    if (totalWeeks > 0) {
+    // Use static duration from database, fallback to dynamic calculation
+    let finalDuration: string;
+    if (course.duration && course.duration !== "—" && course.duration.trim() !== "") {
+      // Use the admin-set duration from database
+      finalDuration = course.duration;
+    } else if (totalWeeks > 0) {
+      // Calculate from phases
       if (totalWeeks >= 4) {
         const months = Math.round(totalWeeks / 4 * 10) / 10;
-        dynamicDuration = months === 1 ? "1 Month" : `${months} Months`;
+        finalDuration = months === 1 ? "1 Month" : `${months} Months`;
       } else {
-        dynamicDuration = totalWeeks === 1 ? "1 Week" : `${totalWeeks} Weeks`;
+        finalDuration = totalWeeks === 1 ? "1 Week" : `${totalWeeks} Weeks`;
       }
     } else {
-      dynamicDuration = course.duration || "—";
+      finalDuration = "—";
     }
 
     // Get technologies
@@ -86,8 +90,7 @@ export async function GET(
       price: parseFloat(course.price),
       rating: parseFloat(course.rating),
       students: course.students_count,
-      duration: dynamicDuration, // Override with calculated duration
-      _rawWeeks: totalWeeks
+      duration: finalDuration // Use admin-set duration from database
     };
 
     return NextResponse.json({ 

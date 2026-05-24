@@ -49,19 +49,24 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Calculate dynamic duration from phases
-      const totalWeeks = course.total_duration_weeks || 0;
-      let dynamicDuration: string;
-      if (totalWeeks > 0) {
-        if (totalWeeks >= 4) {
-          const months = Math.round(totalWeeks / 4 * 10) / 10; // Round to 1 decimal
-          dynamicDuration = months === 1 ? "1 Month" : `${months} Months`;
-        } else {
-          dynamicDuration = totalWeeks === 1 ? "1 Week" : `${totalWeeks} Weeks`;
-        }
+      // Use static duration from database, only calculate dynamically if not set
+      let finalDuration: string;
+      if (course.duration && course.duration !== "—" && course.duration.trim() !== "") {
+        // Use the static duration from database (admin-set value)
+        finalDuration = course.duration;
       } else {
-        // Fallback to static duration from courses table
-        dynamicDuration = course.duration || "—";
+        // Calculate dynamic duration from phases as fallback
+        const totalWeeks = course.total_duration_weeks || 0;
+        if (totalWeeks > 0) {
+          if (totalWeeks >= 4) {
+            const months = Math.round(totalWeeks / 4 * 10) / 10;
+            finalDuration = months === 1 ? "1 Month" : `${months} Months`;
+          } else {
+            finalDuration = totalWeeks === 1 ? "1 Week" : `${totalWeeks} Weeks`;
+          }
+        } else {
+          finalDuration = "—";
+        }
       }
 
       return {
@@ -70,8 +75,7 @@ export async function GET(request: NextRequest) {
         certificate: course.certificate === 1,
         price: parseFloat(course.price),
         rating: parseFloat(course.rating),
-        duration: dynamicDuration, // Override with calculated duration
-        _rawWeeks: totalWeeks // Keep raw weeks for reference
+        duration: finalDuration // Use admin-set duration
       };
     });
 
