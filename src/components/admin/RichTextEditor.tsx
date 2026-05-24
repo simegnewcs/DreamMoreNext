@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import {
   Bold, Italic, Underline, Strikethrough,
@@ -57,8 +57,8 @@ export default function RichTextEditor({
     "#ffffff", "#f4f4f4", "#ea4335", "#fbbc05", "#34a853", "#4285f4"
   ];
 
-  const execCommand = (command: string, value: string = "") => {
-    document.execCommand(command, false, value);
+  const execCommand = (command: string, val: string = "") => {
+    document.execCommand(command, false, val);
     updateActiveFormats();
     if (editorRef.current) {
       onChange(editorRef.current.innerHTML);
@@ -114,22 +114,47 @@ export default function RichTextEditor({
     execCommand("removeFormat");
   };
 
-  const handleKeyUp = () => {
-    updateActiveFormats();
+  // Save and restore cursor position
+  const saveSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editorRef.current) {
+      return sel.getRangeAt(0);
+    }
+    return null;
+  };
+
+  const restoreSelection = (range: Range | null) => {
+    if (range && editorRef.current) {
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    }
+  };
+
+  const handleInput = () => {
     if (editorRef.current) {
       onChange(editorRef.current.innerHTML);
     }
   };
 
-  const handleBlur = () => {
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
-  };
-
+  // Initialize editor content only once, then let contentEditable handle updates
+  const isInitialized = useRef(false);
   useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== value) {
+    if (editorRef.current && !isInitialized.current) {
       editorRef.current.innerHTML = value || "";
+      isInitialized.current = true;
+    }
+  }, []);
+
+  // Only update from external value if it differs significantly (not from typing)
+  useEffect(() => {
+    if (editorRef.current && isInitialized.current) {
+      const current = editorRef.current.innerHTML;
+      const external = value || "";
+      // Only update if external value is significantly different (cleared or new content)
+      if (external === "" && current !== "") {
+        editorRef.current.innerHTML = "";
+      }
     }
   }, [value]);
 
@@ -370,17 +395,17 @@ export default function RichTextEditor({
       <div
         ref={editorRef}
         contentEditable
-        onKeyUp={handleKeyUp}
+        dir="ltr"
+        lang="en"
+        onInput={handleInput}
+        onKeyUp={updateActiveFormats}
         onMouseUp={updateActiveFormats}
-        onBlur={handleBlur}
-        onInput={handleKeyUp}
-        className={`p-4 outline-none min-h-[300px] ${
+        className={`p-4 outline-none min-h-[300px] text-left ${
           isDark 
             ? "bg-white/5 text-white prose-invert" 
             : "bg-white text-gray-900 prose"
         }`}
-        style={{ minHeight }}
-        dangerouslySetInnerHTML={{ __html: value || "" }}
+        style={{ minHeight, direction: "ltr", unicodeBidi: "normal", textAlign: "left" }}
       />
 
       {/* Placeholder */}

@@ -1805,9 +1805,11 @@ export default function AdminDashboard() {
                               : "bg-white border-gray-300 text-gray-900"
                           }`}
                         >
+                          <option value="">Select level</option>
                           <option value="Beginner">Beginner</option>
                           <option value="Intermediate">Intermediate</option>
                           <option value="Advanced">Advanced</option>
+                          <option value="All Levels">All Levels</option>
                         </select>
                       </div>
 
@@ -1901,7 +1903,7 @@ export default function AdminDashboard() {
                       {/* Technologies/Features */}
                       <div className="md:col-span-2">
                         <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
-                          Technologies / Tools (comma separated) *
+                          Technologies / Tools <span className={isDark ? "text-white/40" : "text-gray-400"}>(optional)</span>
                         </label>
                         <input
                           type="text"
@@ -1913,7 +1915,6 @@ export default function AdminDashboard() {
                               : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
                           }`}
                           placeholder="React, Node.js, MySQL, AWS"
-                          required
                         />
                       </div>
 
@@ -2053,17 +2054,16 @@ export default function AdminDashboard() {
                       {/* Level */}
                       <div>
                         <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
-                          Level *
+                          Level <span className={isDark ? "text-white/40" : "text-gray-400"}>(optional)</span>
                         </label>
                         <select
-                          value={editingCourse.level}
+                          value={editingCourse.level || ""}
                           onChange={(e) => setEditingCourse({...editingCourse, level: e.target.value})}
                           className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
                             isDark 
                               ? "bg-white/5 border-white/10 text-white" 
                               : "bg-white border-gray-300 text-gray-900"
                           }`}
-                          required
                         >
                           <option value="">Select level</option>
                           <option value="Beginner">Beginner</option>
@@ -2076,11 +2076,11 @@ export default function AdminDashboard() {
                       {/* Instructor */}
                       <div className="md:col-span-2">
                         <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
-                          Instructor *
+                          Instructor <span className={isDark ? "text-white/40" : "text-gray-400"}>(optional)</span>
                         </label>
                         <input
                           type="text"
-                          value={editingCourse.instructor}
+                          value={editingCourse.instructor || ""}
                           onChange={(e) => setEditingCourse({...editingCourse, instructor: e.target.value})}
                           className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
                             isDark 
@@ -2088,7 +2088,6 @@ export default function AdminDashboard() {
                               : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
                           }`}
                           placeholder="e.g., John Doe"
-                          required
                         />
                       </div>
 
@@ -2163,11 +2162,11 @@ export default function AdminDashboard() {
                       {/* Technologies */}
                       <div className="md:col-span-2">
                         <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
-                          Technologies / Tools (comma separated) *
+                          Technologies / Tools <span className={isDark ? "text-white/40" : "text-gray-400"}>(optional)</span>
                         </label>
                         <input
                           type="text"
-                          value={Array.isArray(editingCourse.technologies) ? editingCourse.technologies.join(', ') : editingCourse.technologies}
+                          value={Array.isArray(editingCourse.technologies) ? editingCourse.technologies.join(', ') : (editingCourse.technologies || "")}
                           onChange={(e) => setEditingCourse({...editingCourse, technologies: e.target.value})}
                           className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
                             isDark 
@@ -2175,7 +2174,6 @@ export default function AdminDashboard() {
                               : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
                           }`}
                           placeholder="React, Node.js, MySQL, AWS"
-                          required
                         />
                       </div>
 
