@@ -1,19 +1,43 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
   Clock, BarChart2, Globe, Award, CheckCircle, ChevronDown, ChevronUp,
   Users, BookOpen, ArrowRight, PlayCircle, Target, Lightbulb, FileCheck,
-  Info, Calendar, MapPin, Wallet, Loader2
+  Info, Calendar, MapPin, Wallet, Loader2, Star, TrendingUp, Zap, Video, 
+  FileText, HelpCircle, ChevronRight, Sparkles, GraduationCap, MonitorPlay
 } from "lucide-react";
-import { COURSES } from "@/lib/data";
 import { useTheme } from "@/context/ThemeContext";
 import { applicationsAPI } from "@/lib/api";
 
+interface Course {
+  id: string | number;
+  slug: string;
+  title: string;
+  description?: string;
+  short_description?: string;
+  image?: string;
+  duration?: string;
+  level?: string;
+  language?: string;
+  students?: number;
+  price?: number;
+  rating?: number;
+  category?: string;
+  certificate?: boolean;
+  instructor?: string;
+  instructorBio?: string;
+  instructorImage?: string;
+  technologies?: string[];
+  outcomes?: string[];
+  requirements?: string[];
+  modules?: { title: string; lessons: number }[];
+  faqs?: { q: string; a: string }[];
+}
+
 const courseBanner: Record<string, string> = {
-  // Legacy mappings
   "full-stack-development":  "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&q=85",
   "ui-ux-design":            "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1200&q=85",
   "ai-engineering":          "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1200&q=85",
@@ -22,7 +46,6 @@ const courseBanner: Record<string, string> = {
   "mobile-app-development":  "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1200&q=85",
   "cybersecurity":           "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=85",
   "video-editing":           "https://images.unsplash.com/photo-1574717024453-354056afd6fc?w=1200&q=85",
-  // New 16 courses
   "graphics-designing":      "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=1200&q=85",
   "cinematography":          "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1200&q=85",
   "web-mobile-development":  "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&q=85",
@@ -39,8 +62,6 @@ const courseBanner: Record<string, string> = {
 };
 
 const fallbackBanner = "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&q=85";
-
-type Course = (typeof COURSES)[0];
 
 export default function CourseDetailClient({ course }: { course: Course }) {
   const { theme } = useTheme();

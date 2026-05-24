@@ -253,9 +253,12 @@ export default function CourseGrid() {
                 {/* Body */}
                 <div className="p-4 flex flex-col flex-1">
                   {/* Description */}
-                  <h3 className={`text-sm font-black leading-snug mb-2 hover:text-[#f47822] transition-colors duration-200 line-clamp-2 ${isDark ? "text-white" : "text-gray-900"}`}>
+                  <h3 className={`text-sm font-black leading-snug mb-1 hover:text-[#f47822] transition-colors duration-200 line-clamp-2 ${isDark ? "text-white" : "text-gray-900"}`}>
                     {course.title}
                   </h3>
+                  <p className={`text-xs font-bold mb-3 ${isDark ? "text-[#f47822]" : "text-[#f47822]"}`}>
+                    ETB {course.price?.toLocaleString() || course.price}
+                  </p>
                   <p className={`text-xs leading-relaxed line-clamp-2 mb-4 flex-1 ${isDark ? "text-white/50" : "text-gray-600"}`}>
                     {course.description}
                   </p>
