@@ -15,7 +15,7 @@ const paymentMethods = [
     name: "CBE Bank",
     icon: Building2,
     color: "#00d4ff",
-    account: "1000123456789",
+    account: "1000765205852",
     holder: "DreamMore Academy PLC",
     instructions: "Transfer to CBE account and take a screenshot of the confirmation.",
   },
@@ -24,18 +24,9 @@ const paymentMethods = [
     name: "Telebirr",
     icon: Smartphone,
     color: "#7c3aed",
-    account: "+251 911 000 000",
+    account: "0993132122",
     holder: "DreamMore",
     instructions: "Send payment via Telebirr and screenshot the transaction confirmation.",
-  },
-  {
-    id: "chapa",
-    name: "Chapa",
-    icon: CreditCard,
-    color: "#10b981",
-    account: "Pay via Chapa checkout",
-    holder: "DreamMore Academy",
-    instructions: "Use Chapa online payment gateway. Screenshot payment receipt.",
   },
 ];
 

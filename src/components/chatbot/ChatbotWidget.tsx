@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Message {
   id: string;
@@ -17,22 +18,27 @@ const quickQuestions = [
   "How do I apply?",
   "What are the prices?",
   "Do you offer certificates?",
+  "Payment options?",
+  "Contact info?",
 ];
 
 export default function ChatbotWidget() {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const isDark = theme === "dark";
   const [isOpen, setIsOpen] = useState(false);
+  const [sessionId, setSessionId] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "👋 Hi! I'm DreamMore Bot. How can I help you today?",
+      text: "👋 Hi! I'm DreamMore Bot. How can I help you today?\n\nAsk me about courses, pricing, or how to apply!",
       isUser: false,
       timestamp: new Date(),
     },
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -43,8 +49,20 @@ export default function ChatbotWidget() {
     scrollToBottom();
   }, [messages, isOpen]);
 
+  // Initialize session ID on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('chatbot_session_id');
+    if (stored) {
+      setSessionId(stored);
+    } else {
+      const newSession = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('chatbot_session_id', newSession);
+      setSessionId(newSession);
+    }
+  }, []);
+
   const handleSend = async (text: string = inputValue) => {
-    if (!text.trim()) return;
+    if (!text.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -56,49 +74,55 @@ export default function ChatbotWidget() {
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsTyping(true);
+    setIsLoading(true);
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse = generateResponse(text.trim());
+    try {
+      const response = await fetch('/api/chatbot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text.trim(),
+          sessionId,
+          userId: user?.id || null
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update session ID if new one returned
+        if (data.data.sessionId && data.data.sessionId !== sessionId) {
+          setSessionId(data.data.sessionId);
+          localStorage.setItem('chatbot_session_id', data.data.sessionId);
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            text: data.data.response,
+            isUser: false,
+            timestamp: new Date(),
+          },
+        ]);
+      } else {
+        throw new Error(data.error || 'Failed to get response');
+      }
+    } catch (error) {
+      console.error('Chatbot error:', error);
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          text: botResponse,
+          text: "Sorry, I'm having trouble connecting right now. Please try again or contact us at support@dreammoredigitals.com",
           isUser: false,
           timestamp: new Date(),
         },
       ]);
+    } finally {
       setIsTyping(false);
-    }, 1000);
-  };
-
-  const generateResponse = (userText: string): string => {
-    const lowerText = userText.toLowerCase();
-
-    if (lowerText.includes("course") || lowerText.includes("offer")) {
-      return "We offer courses in Web Development, UI/UX Design, Graphic Design, Digital Marketing, and more. Visit https://www.dreammoredigitals.com/academy to see all courses!";
+      setIsLoading(false);
     }
-    if (lowerText.includes("price") || lowerText.includes("cost") || lowerText.includes("fee")) {
-      return "Our courses are priced at ETB 6,000 for most programs. Web Development courses are ETB 8,000. Payment plans available!";
-    }
-    if (lowerText.includes("apply") || lowerText.includes("enroll") || lowerText.includes("register")) {
-      return "You can apply by visiting the course page and clicking 'Apply Now'. Fill out the application form and submit your payment.";
-    }
-    if (lowerText.includes("certificate") || lowerText.includes("certified")) {
-      return "Yes! All our courses come with industry-recognized certificates upon completion.";
-    }
-    if (lowerText.includes("contact") || lowerText.includes("email") || lowerText.includes("phone")) {
-      return "You can reach us at support@dreammore.com or call +251 911 234 567. We're available Mon-Fri, 9AM-6PM.";
-    }
-    if (lowerText.includes("duration") || lowerText.includes("long")) {
-      return "Most courses are 3 months long. Web Development is 4 months. All include hands-on projects!";
-    }
-    if (lowerText.includes("hello") || lowerText.includes("hi") || lowerText.includes("hey")) {
-      return "Hello! 👋 How can I help you today? Feel free to ask about our courses, pricing, or application process.";
-    }
-
-    return "I'm here to help with questions about our courses, pricing, application process, and more. What would you like to know?";
   };
 
   const handleQuickQuestion = (question: string) => {
@@ -202,19 +226,22 @@ export default function ChatbotWidget() {
                         ? "bg-white/10 text-white rounded-bl-md"
                         : "bg-white text-gray-800 rounded-bl-md shadow-sm"
                     }`}
-                  >
-                    {msg.text}
-                  </div>
+                    dangerouslySetInnerHTML={{ __html: msg.text }}
+                  />
                 </div>
               ))}
-              {isTyping && (
+              {(isTyping || isLoading) && (
                 <div className="flex gap-2">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${
                       isDark ? "bg-white/10" : "bg-gray-200"
                     }`}
                   >
-                    <Bot className={`w-4 h-4 ${isDark ? "text-white" : "text-gray-600"}`} />
+                    {isLoading ? (
+                      <Loader2 className={`w-4 h-4 animate-spin ${isDark ? "text-white" : "text-gray-600"}`} />
+                    ) : (
+                      <Bot className={`w-4 h-4 ${isDark ? "text-white" : "text-gray-600"}`} />
+                    )}
                   </div>
                   <div
                     className={`px-3 py-2 rounded-2xl rounded-bl-md ${

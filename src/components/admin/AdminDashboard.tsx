@@ -12,7 +12,7 @@ import {
   Sun, Moon, Bell, Search, Filter, MoreVertical, ChevronDown,
   ArrowUpRight, DollarSign, GraduationCap, BarChart3, Plus, Save, Trash2, Pencil,
   Loader2, Video, BookMarked, Users2, ChevronRight, Play, FileArchive, ClipboardList, Layers, Upload,
-  BadgeCheck, ShieldOff, Hash, CalendarDays, UserCheck, Send,
+  BadgeCheck, ShieldOff, Shield, Hash, CalendarDays, UserCheck, Send,
   ExternalLink, Globe, ImageIcon, Tag, ToggleLeft, ToggleRight, FolderOpen,
   Star, Quote, MessageSquare, UserCheck2, Share2, ClipboardCheck
 } from "lucide-react";
@@ -21,7 +21,7 @@ import { useTheme } from "@/context/ThemeContext";
 import RichTextEditor from "./RichTextEditor";
 
 // Sidebar items with dynamic badge functions
-const getSidebarItems = (stats: { users: number; applications: number; courses: number }) => [
+const getSidebarItems = (stats: { users: number; applications: number; courses: number; settingsAlert?: number }) => [
   { icon: LayoutDashboard, label: "Dashboard", id: "dashboard", badge: null },
   { icon: Users, label: "Users", id: "users", badge: stats.users > 0 ? `${stats.users}` : null },
   { icon: FileText, label: "Applications", id: "applications", badge: stats.applications > 0 ? `${stats.applications}` : null },
@@ -34,7 +34,7 @@ const getSidebarItems = (stats: { users: number; applications: number; courses: 
   { icon: BarChart3, label: "Testimonials", id: "testimonials", badge: null },
   { icon: UserCheck2, label: "Team", id: "team", badge: null },
   { icon: ClipboardCheck, label: "Course Assignment", id: "course-assignment", badge: null },
-  { icon: Settings, label: "Settings", id: "settings", badge: null },
+  { icon: Settings, label: "Settings", id: "settings", badge: stats.settingsAlert && stats.settingsAlert > 0 ? `${stats.settingsAlert}` : null },
 ];
 
 function timeAgo(dateStr: string): string {
@@ -57,7 +57,9 @@ export default function AdminDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [notifications, setNotifications] = useState(3);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [user, setUser] = useState<{name: string; email: string; role: string} | null>(null);
   
   // Courses, applications, users and stats state
@@ -72,7 +74,8 @@ export default function AdminDashboard() {
     revenue: 0,
     students: 0,
     totalPaidStudents: 0,
-    totalRevenue: 0
+    totalRevenue: 0,
+    settingsAlert: 0
   });
   const [paidStudents, setPaidStudents] = useState<any[]>([]);
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
@@ -133,7 +136,17 @@ export default function AdminDashboard() {
           }));
           setPaidStudents(paymentData.paidStudents || []);
         }
-        
+
+        // Fetch settings status
+        const settingsRes = await fetch('/api/admin/settings');
+        const settingsData = await settingsRes.json();
+        if (settingsData.success) {
+          setStats(prev => ({
+            ...prev,
+            settingsAlert: settingsData.data?.alertCount || 0,
+          }));
+        }
+
         // Calculate other stats
         setStats(prev => ({
           ...prev,
@@ -162,8 +175,22 @@ export default function AdminDashboard() {
       }
     };
 
+    const loadNotifications = async () => {
+      try {
+        const res = await fetch("/api/admin/notifications");
+        const data = await res.json();
+        if (data.success) {
+          setNotifications(data.data.notifications || []);
+          setNotificationCount(data.data.totalCount || 0);
+        }
+      } catch (e) {
+        console.error("Error loading notifications:", e);
+      }
+    };
+
     loadData();
     loadActivities();
+    loadNotifications();
   }, []);
 
   const { user: authUser, loading: authLoading } = useAuth();
@@ -182,6 +209,20 @@ export default function AdminDashboard() {
     }
     setUser(parsed);
   }, [authUser, authLoading, router]);
+
+  // Close notifications dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-notifications]')) {
+        setShowNotifications(false);
+      }
+    };
+    if (showNotifications) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showNotifications]);
 
   const [viewingApplication, setViewingApplication] = useState<any>(null);
   const [adminNotes, setAdminNotes] = useState("");
@@ -659,16 +700,112 @@ export default function AdminDashboard() {
             </button>
 
             {/* Notifications */}
-            <button className={`relative p-2 rounded-xl transition-colors ${
-              isDark ? "hover:bg-white/5 text-white/60" : "hover:bg-gray-100 text-gray-600"
-            }`}>
-              <Bell className="w-5 h-5" />
-              {notifications > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-[#f47822] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {notifications}
-                </span>
+            <div className="relative" data-notifications>
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className={`relative p-2 rounded-xl transition-colors ${
+                  isDark ? "hover:bg-white/5 text-white/60" : "hover:bg-gray-100 text-gray-600"
+                } ${showNotifications ? (isDark ? "bg-white/10" : "bg-gray-100") : ""}`}
+              >
+                <Bell className="w-5 h-5" />
+                {notificationCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-[#f47822] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {notificationCount > 9 ? '9+' : notificationCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notifications Dropdown */}
+              {showNotifications && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className={`absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-xl z-50 overflow-hidden ${
+                    isDark ? "bg-[#15142a] border-white/10" : "bg-white border-gray-200"
+                  }`}
+                >
+                  <div className={`flex items-center justify-between px-4 py-3 border-b ${
+                    isDark ? "border-white/10" : "border-gray-100"
+                  }`}>
+                    <h3 className={`font-semibold text-sm ${isDark ? "text-white" : "text-gray-900"}`}>
+                      Notifications
+                    </h3>
+                    {notificationCount > 0 && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        isDark ? "bg-[#f47822]/20 text-[#f47822]" : "bg-orange-100 text-orange-600"
+                      }`}>
+                        {notificationCount} new
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className={`px-4 py-8 text-center ${isDark ? "text-white/50" : "text-gray-500"}`}>
+                        <Bell className={`w-8 h-8 mx-auto mb-2 ${isDark ? "text-white/20" : "text-gray-300"}`} />
+                        <p className="text-sm">No notifications</p>
+                      </div>
+                    ) : (
+                      notifications.map((notification) => {
+                        const iconMap: Record<string, any> = {
+                          FileText, CreditCard, DollarSign, Users, Bell
+                        };
+                        const Icon = iconMap[notification.icon] || Bell;
+                        const priorityColors = notification.priority === 'high'
+                          ? (isDark ? "bg-red-500/10 border-l-2 border-red-500" : "bg-red-50 border-l-2 border-red-500")
+                          : (isDark ? "bg-white/5 border-l-2 border-[#f47822]" : "bg-orange-50/50 border-l-2 border-[#f47822]");
+
+                        return (
+                          <button
+                            key={notification.id}
+                            onClick={() => {
+                              if (notification.link) {
+                                const section = new URL(notification.link, window.location.origin).searchParams.get('section');
+                                if (section) setActiveSection(section);
+                              }
+                              setShowNotifications(false);
+                            }}
+                            className={`w-full px-4 py-3 flex items-start gap-3 hover:bg-opacity-80 transition-colors text-left ${priorityColors}`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                              isDark ? "bg-white/10" : "bg-white"
+                            }`}>
+                              <Icon className={`w-4 h-4 ${notification.priority === 'high' ? 'text-red-500' : 'text-[#f47822]'}`} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}>
+                                {notification.title}
+                              </p>
+                              <p className={`text-xs mt-0.5 ${isDark ? "text-white/60" : "text-gray-500"}`}>
+                                {notification.message}
+                              </p>
+                              <p className={`text-[10px] mt-1 ${isDark ? "text-white/40" : "text-gray-400"}`}>
+                                {new Date(notification.timestamp).toLocaleTimeString()}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <div className={`px-4 py-2 border-t ${isDark ? "border-white/10" : "border-gray-100"}`}>
+                    <button
+                      onClick={() => {
+                        setActiveSection("applications");
+                        setShowNotifications(false);
+                      }}
+                      className={`w-full text-center text-xs font-medium py-1.5 rounded-lg transition-colors ${
+                        isDark ? "text-white/60 hover:bg-white/5" : "text-gray-500 hover:bg-gray-50"
+                      }`}
+                    >
+                      View All Activity
+                    </button>
+                  </div>
+                </motion.div>
               )}
-            </button>
+            </div>
 
             {/* User Profile */}
             <div className={`flex items-center gap-2 pl-3 border-l ${isDark ? "border-white/10" : "border-gray-200"}`}>
@@ -3057,9 +3194,14 @@ export default function AdminDashboard() {
             <CertificatesSection isDark={isDark} />
           )}
 
+          {/* ── SETTINGS ─────────────────────────────────────────── */}
+          {activeSection === "settings" && (
+            <SettingsSection isDark={isDark} />
+          )}
+
           {/* Other sections placeholder */}
-         {!["dashboard", "applications", "courses", "portfolio", "testimonials", "payments", "lms", "certificates", "team", "course-assignment"].includes(activeSection) && (
-            <motion.div 
+         {!["dashboard", "applications", "courses", "portfolio", "testimonials", "payments", "lms", "certificates", "team", "course-assignment", "settings"].includes(activeSection) && (
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className={`flex flex-col items-center justify-center py-24 text-center rounded-2xl ${
@@ -4657,6 +4799,249 @@ function CourseAssignmentSection({ isDark }: { isDark: boolean }) {
         </div>
       )}
 
+    </motion.div>
+  );
+}
+
+// ── SETTINGS SECTION ────────────────────────────────────────────────────
+
+function SettingsSection({ isDark }: { isDark: boolean }) {
+  const [settings, setSettings] = useState({
+    siteName: "DreamMore",
+    contactEmail: "support@dreammore.com",
+    contactPhone: "+251 911 234 567",
+    cbeAccount: "1000765205852",
+    telebirrAccount: "0993132122",
+    maintenanceMode: false,
+    allowRegistration: true,
+  });
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{type: 'success'|'error', text: string} | null>(null);
+
+  // Fetch settings on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/admin/settings');
+        const data = await res.json();
+        if (data.success && data.data) {
+          // Merge fetched settings with defaults
+          setSettings(prev => ({
+            ...prev,
+            ...data.data
+          }));
+        }
+      } catch (e) {
+        console.error('Error loading settings:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleSave = async (key: string, value: any) => {
+    setSaving(true);
+    setMessage(null);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value: String(value) })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Setting saved successfully!' });
+        setSettings(prev => ({ ...prev, [key]: value }));
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to save setting' });
+      }
+    } catch (e) {
+      setMessage({ type: 'error', text: 'Error saving setting' });
+    } finally {
+      setSaving(false);
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  const inputClass = `w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-colors ${
+    isDark
+      ? "bg-white/5 text-white placeholder:text-white/30 border border-white/10 focus:border-[#f47822]/50"
+      : "bg-gray-50 text-gray-900 placeholder:text-gray-400 border border-gray-200 focus:border-[#f47822]"
+  }`;
+
+  const labelClass = `block text-xs font-semibold uppercase tracking-wider mb-2 ${
+    isDark ? "text-white/60" : "text-gray-500"
+  }`;
+
+  const cardClass = `rounded-2xl border overflow-hidden ${
+    isDark ? "bg-[#0f0f15] border-white/10" : "bg-white border-gray-200"
+  }`;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className={`w-8 h-8 animate-spin ${isDark ? "text-white/30" : "text-gray-400"}`} />
+      </div>
+    );
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Site Settings</h2>
+          <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-500"}`}>Manage your platform configuration</p>
+        </div>
+        {message && (
+          <div className={`px-4 py-2 rounded-xl text-sm font-medium ${
+            message.type === 'success'
+              ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+              : "bg-red-500/10 text-red-600 border border-red-500/20"
+          }`}>
+            {message.text}
+          </div>
+        )}
+      </div>
+
+      {/* General Settings */}
+      <div className={cardClass}>
+        <div className={`px-5 py-4 border-b ${isDark ? "border-white/10" : "border-gray-100"}`}>
+          <h3 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>General</h3>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Site Name</label>
+              <input
+                type="text"
+                value={settings.siteName}
+                onChange={(e) => setSettings(prev => ({ ...prev, siteName: e.target.value }))}
+                onBlur={() => handleSave('siteName', settings.siteName)}
+                className={inputClass}
+                disabled={saving}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Contact Email</label>
+              <input
+                type="email"
+                value={settings.contactEmail}
+                onChange={(e) => setSettings(prev => ({ ...prev, contactEmail: e.target.value }))}
+                onBlur={() => handleSave('contactEmail', settings.contactEmail)}
+                className={inputClass}
+                disabled={saving}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Contact Phone</label>
+              <input
+                type="text"
+                value={settings.contactPhone}
+                onChange={(e) => setSettings(prev => ({ ...prev, contactPhone: e.target.value }))}
+                onBlur={() => handleSave('contactPhone', settings.contactPhone)}
+                className={inputClass}
+                disabled={saving}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Settings */}
+      <div className={cardClass}>
+        <div className={`px-5 py-4 border-b ${isDark ? "border-white/10" : "border-gray-100"}`}>
+          <h3 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>Payment Accounts</h3>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>CBE Bank Account</label>
+              <input
+                type="text"
+                value={settings.cbeAccount}
+                onChange={(e) => setSettings(prev => ({ ...prev, cbeAccount: e.target.value }))}
+                onBlur={() => handleSave('cbeAccount', settings.cbeAccount)}
+                className={inputClass}
+                disabled={saving}
+              />
+              <p className={`text-xs mt-1 ${isDark ? "text-white/40" : "text-gray-400"}`}>Commercial Bank of Ethiopia</p>
+            </div>
+            <div>
+              <label className={labelClass}>Telebirr Account</label>
+              <input
+                type="text"
+                value={settings.telebirrAccount}
+                onChange={(e) => setSettings(prev => ({ ...prev, telebirrAccount: e.target.value }))}
+                onBlur={() => handleSave('telebirrAccount', settings.telebirrAccount)}
+                className={inputClass}
+                disabled={saving}
+              />
+              <p className={`text-xs mt-1 ${isDark ? "text-white/40" : "text-gray-400"}`}>Ethio Telecom Telebirr</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* System Settings */}
+      <div className={cardClass}>
+        <div className={`px-5 py-4 border-b ${isDark ? "border-white/10" : "border-gray-100"}`}>
+          <h3 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>System</h3>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>Maintenance Mode</p>
+              <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>Disable public access to the site</p>
+            </div>
+            <button
+              onClick={() => handleSave('maintenanceMode', !settings.maintenanceMode)}
+              disabled={saving}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                settings.maintenanceMode ? "bg-[#f47822]" : isDark ? "bg-white/20" : "bg-gray-300"
+              }`}
+            >
+              <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                settings.maintenanceMode ? "translate-x-6" : ""
+              }`} />
+            </button>
+          </div>
+          <div className={`border-t ${isDark ? "border-white/10" : "border-gray-100"}`} />
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>Allow Registration</p>
+              <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>Enable new user signups</p>
+            </div>
+            <button
+              onClick={() => handleSave('allowRegistration', !settings.allowRegistration)}
+              disabled={saving}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                settings.allowRegistration ? "bg-[#f47822]" : isDark ? "bg-white/20" : "bg-gray-300"
+              }`}
+            >
+              <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                settings.allowRegistration ? "translate-x-6" : ""
+              }`} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Card */}
+      <div className={`rounded-2xl border p-4 ${isDark ? "bg-[#f47822]/5 border-[#f47822]/20" : "bg-orange-50 border-orange-200"}`}>
+        <div className="flex items-start gap-3">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isDark ? "bg-[#f47822]/20" : "bg-orange-100"}`}>
+            <Shield className={`w-4 h-4 ${isDark ? "text-[#f47822]" : "text-orange-600"}`} />
+          </div>
+          <div>
+            <p className={`font-medium text-sm ${isDark ? "text-white" : "text-gray-900"}`}>Settings are saved automatically</p>
+            <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-600"}`}>Changes take effect immediately across the platform.</p>
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 }

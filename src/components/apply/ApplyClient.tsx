@@ -190,7 +190,7 @@ function ApplyContent() {
           {/* Steps */}
           <div className="space-y-4">
             {[
-              { step: 1, text: "Pay the course fee using CBE Bank, Telebirr, or Chapa" },
+              { step: 1, text: "Pay the course fee using CBE Bank or Telebirr" },
               { step: 2, text: "Take a screenshot of the payment confirmation" },
               { step: 3, text: "Upload the screenshot on the payment verification page" },
               { step: 4, text: "Wait for admin approval (within 24 hours)" },
@@ -209,7 +209,7 @@ function ApplyContent() {
           <div className={`mt-5 pt-4 border-t ${isDark ? "border-white/10" : "border-gray-100"}`}>
             <p className={`text-xs mb-3 ${isDark ? "text-white/50" : "text-gray-500"}`}>Accepted Payment Methods</p>
             <div className="flex flex-wrap gap-2">
-              {["CBE Bank", "Telebirr", "Chapa"].map((method) => (
+              {["CBE Bank", "Telebirr"].map((method) => (
                 <span 
                   key={method}
                   className="px-3 py-1 rounded-lg text-xs font-medium bg-[#f47822]/10 text-[#f47822] border border-[#f47822]/20"
