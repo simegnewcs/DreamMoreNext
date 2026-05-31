@@ -236,15 +236,20 @@ export default function AgencyPillar() {
               </div>
 
               {/* ── Floating stat pill ── */}
-              <div
-                className="absolute -left-3 sm:-left-6 bottom-12 z-20 rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 shadow-lg"
+              <button
+                onClick={() => {
+                  const element = document.getElementById('trusted-brands');
+                  element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className="absolute -left-3 sm:-left-6 bottom-12 z-20 rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 shadow-lg transition-all duration-300 hover:scale-105 hover:brightness-110 cursor-pointer"
                 style={{ background: "#1e1c38", border: "1px solid rgba(244,120,34,0.2)" }}
+                title="View trusted brands"
               >
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                   <span className="text-xs font-semibold text-white/80">50+ Projects Live</span>
                 </div>
-              </div>
+              </button>
 
             </div>
           </motion.div>
@@ -308,6 +313,7 @@ export default function AgencyPillar() {
 
       {/* ════════ TRUSTED BY MARQUEE ════════ */}
       <div
+        id="trusted-brands"
         className="relative border-t py-8 overflow-hidden"
         style={{ borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(244,120,34,0.15)" }}
       >

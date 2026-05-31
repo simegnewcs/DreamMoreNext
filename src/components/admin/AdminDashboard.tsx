@@ -14,7 +14,8 @@ import {
   Loader2, Video, BookMarked, Users2, ChevronRight, Play, FileArchive, ClipboardList, Layers, Upload,
   BadgeCheck, ShieldOff, Shield, Hash, CalendarDays, UserCheck, Send,
   ExternalLink, Globe, ImageIcon, Tag, ToggleLeft, ToggleRight, FolderOpen,
-  Star, Quote, MessageSquare, UserCheck2, Share2, ClipboardCheck
+  Star, Quote, MessageSquare, UserCheck2, Share2, ClipboardCheck, Sparkles,
+  Building2, Smartphone
 } from "lucide-react";
 import { coursesAPI, applicationsAPI, usersAPI } from "@/lib/api";
 import { useTheme } from "@/context/ThemeContext";
@@ -97,6 +98,54 @@ export default function AdminDashboard() {
   const [courseImgUploading, setCourseImgUploading] = useState(false);
   const [editImgUploading, setEditImgUploading] = useState(false);
 
+  // Blog management state
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [showAddBlog, setShowAddBlog] = useState(false);
+  const [newBlog, setNewBlog] = useState({
+    title: "",
+    excerpt: "",
+    description: "",
+    category: "",
+    author: "",
+    date: "",
+    readTime: "",
+    image: "",
+    video: "",
+    featured: false,
+    promotion: false,
+  });
+  const [editingBlog, setEditingBlog] = useState<any>(null);
+  const [blogImgUploading, setBlogImgUploading] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [blogToDelete, setBlogToDelete] = useState<any>(null);
+  const [deletingBlog, setDeletingBlog] = useState(false);
+
+  // Custom categories state
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+
+  // Course delete confirmation state
+  const [courseDeleteModal, setCourseDeleteModal] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState<any>(null);
+  const [deletingCourse, setDeletingCourse] = useState(false);
+
+  // Payment accounts management state
+  const [paymentAccounts, setPaymentAccounts] = useState<any[]>([]);
+  const [showPaymentAccountForm, setShowPaymentAccountForm] = useState(false);
+  const [editingPaymentAccount, setEditingPaymentAccount] = useState<any>(null);
+  const [newPaymentAccount, setNewPaymentAccount] = useState({
+    method: "cbe",
+    accountNumber: "",
+    accountHolder: "",
+    bankName: "",
+    instructions: "",
+    isActive: true,
+    displayOrder: 0,
+  });
+  const [paymentAccountDeleteModal, setPaymentAccountDeleteModal] = useState(false);
+  const [paymentAccountToDelete, setPaymentAccountToDelete] = useState<any>(null);
+
   // Users management state
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userRoleFilter, setUserRoleFilter] = useState("all");
@@ -155,6 +204,38 @@ export default function AdminDashboard() {
           courses: coursesRes.data?.courses?.length || 0,
           revenue: 0,
         }));
+
+        // Load blog posts from API (database)
+        try {
+          const blogsRes = await fetch("/api/admin/blog");
+          const blogsData = await blogsRes.json();
+          if (blogsData.success) {
+            setBlogs(blogsData.blogs || []);
+          }
+        } catch (blogError) {
+          console.error("Error loading blogs:", blogError);
+        }
+
+        // Load payment accounts from API (database)
+        try {
+          const accountsRes = await fetch("/api/admin/payment-accounts");
+          const accountsData = await accountsRes.json();
+          if (accountsData.success) {
+            setPaymentAccounts(accountsData.accounts || []);
+          }
+        } catch (accountsError) {
+          console.error("Error loading payment accounts:", accountsError);
+        }
+
+        // Load custom categories from localStorage
+        try {
+          const savedCategories = localStorage.getItem("customCourseCategories");
+          if (savedCategories) {
+            setCustomCategories(JSON.parse(savedCategories));
+          }
+        } catch (e) {
+          console.error("Error loading custom categories:", e);
+        }
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
@@ -398,10 +479,17 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  const handleDeleteCourse = async (slug: string) => {
-    if (confirm("Are you sure you want to delete this course?")) {
-      setLoading(true);
-      const result = await coursesAPI.delete(slug);
+  const handleDeleteCourse = (course: any) => {
+    setCourseToDelete(course);
+    setCourseDeleteModal(true);
+  };
+
+  const confirmDeleteCourse = async () => {
+    if (!courseToDelete) return;
+    
+    setDeletingCourse(true);
+    try {
+      const result = await coursesAPI.delete(courseToDelete.slug);
       
       if (result.success) {
         // Refresh courses list
@@ -409,10 +497,16 @@ export default function AdminDashboard() {
         if (coursesRes.success && coursesRes.data) {
           setCourses(coursesRes.data.courses || []);
         }
+        setCourseDeleteModal(false);
+        setCourseToDelete(null);
       } else {
         alert("Failed to delete course: " + result.error);
       }
-      setLoading(false);
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      alert("Error deleting course");
+    } finally {
+      setDeletingCourse(false);
     }
   };
 
@@ -1862,31 +1956,41 @@ export default function AdminDashboard() {
                         </label>
                         <select
                           value={newCourse.category}
-                          onChange={(e) => setNewCourse({...newCourse, category: e.target.value})}
+                          onChange={(e) => {
+                            if (e.target.value === "__add_new__") {
+                              setShowAddCategoryModal(true);
+                            } else {
+                              setNewCourse({...newCourse, category: e.target.value});
+                            }
+                          }}
                           className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
-                            isDark 
-                              ? "bg-white/5 border-white/10 text-white" 
+                            isDark
+                              ? "bg-white/5 border-white/10 text-white"
                               : "bg-white border-gray-300 text-gray-900"
                           }`}
                           required
                         >
-                          <option value="">Select category</option>
-                          <option value="graphics-designing">Graphics Designing</option>
-                          <option value="video-editing">Video Editing</option>
-                          <option value="digital-marketing">Digital Marketing</option>
-                          <option value="cinematography">Cinematography</option>
-                          <option value="web-mobile-development">Web and Mobile App Development</option>
-                          <option value="cpp-programming">Programming Language C++</option>
-                          <option value="basic-computer">Basic Computer Skills</option>
-                          <option value="computer-maintenance">Computer Maintenance</option>
-                          <option value="mobile-maintenance">Mobile Maintenance</option>
-                          <option value="ai-business">AI for Business</option>
-                          <option value="cybersecurity">Cybersecurity & Data Safety</option>
-                          <option value="sales-career">Sales & Career Development</option>
-                          <option value="robotics-drone">Robotics & Drone Technology</option>
-                          <option value="english-language">English Language</option>
-                          <option value="ai-freelancing">AI-Powered Freelancing</option>
-                          <option value="3d-modeling">3D Modeling & Product Prototyping</option>
+                          <option value="" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Select category</option>
+                          <option value="graphics-designing" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Graphics Designing</option>
+                          <option value="video-editing" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Video Editing</option>
+                          <option value="digital-marketing" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Digital Marketing</option>
+                          <option value="cinematography" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Cinematography</option>
+                          <option value="web-mobile-development" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Web and Mobile App Development</option>
+                          <option value="cpp-programming" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Programming Language C++</option>
+                          <option value="basic-computer" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Basic Computer Skills</option>
+                          <option value="computer-maintenance" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Computer Maintenance</option>
+                          <option value="mobile-maintenance" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Mobile Maintenance</option>
+                          <option value="ai-business" className={isDark ? "bg-[#1a1a24] text-white" : ""}>AI for Business</option>
+                          <option value="cybersecurity" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Cybersecurity & Data Safety</option>
+                          <option value="sales-career" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Sales & Career Development</option>
+                          <option value="robotics-drone" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Robotics & Drone Technology</option>
+                          <option value="english-language" className={isDark ? "bg-[#1a1a24] text-white" : ""}>English Language</option>
+                          <option value="ai-freelancing" className={isDark ? "bg-[#1a1a24] text-white" : ""}>AI-Powered Freelancing</option>
+                          <option value="3d-modeling" className={isDark ? "bg-[#1a1a24] text-white" : ""}>3D Modeling & Product Prototyping</option>
+                          {customCategories.map((cat) => (
+                            <option key={cat} value={cat} className={isDark ? "bg-[#1a1a24] text-white" : ""}>{cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>
+                          ))}
+                          <option value="__add_new__" className={`${isDark ? "bg-[#1a1a24] text-[#f47822]" : "text-[#f47822]"} font-medium`}>+ Add New Category</option>
                         </select>
                       </div>
 
@@ -2122,31 +2226,41 @@ export default function AdminDashboard() {
                         </label>
                         <select
                           value={editingCourse.category}
-                          onChange={(e) => setEditingCourse({...editingCourse, category: e.target.value})}
+                          onChange={(e) => {
+                            if (e.target.value === "__add_new__") {
+                              setShowAddCategoryModal(true);
+                            } else {
+                              setEditingCourse({...editingCourse, category: e.target.value});
+                            }
+                          }}
                           className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
-                            isDark 
-                              ? "bg-white/5 border-white/10 text-white" 
+                            isDark
+                              ? "bg-white/5 border-white/10 text-white"
                               : "bg-white border-gray-300 text-gray-900"
                           }`}
                           required
                         >
-                          <option value="">Select category</option>
-                          <option value="graphics-designing">Graphics Designing</option>
-                          <option value="video-editing">Video Editing</option>
-                          <option value="digital-marketing">Digital Marketing</option>
-                          <option value="cinematography">Cinematography</option>
-                          <option value="web-mobile-development">Web and Mobile App Development</option>
-                          <option value="cpp-programming">Programming Language C++</option>
-                          <option value="basic-computer">Basic Computer Skills</option>
-                          <option value="computer-maintenance">Computer Maintenance</option>
-                          <option value="mobile-maintenance">Mobile Maintenance</option>
-                          <option value="ai-business">AI for Business</option>
-                          <option value="cybersecurity">Cybersecurity & Data Safety</option>
-                          <option value="sales-career">Sales & Career Development</option>
-                          <option value="robotics-drone">Robotics & Drone Technology</option>
-                          <option value="english-language">English Language</option>
-                          <option value="ai-freelancing">AI-Powered Freelancing</option>
-                          <option value="3d-modeling">3D Modeling & Product Prototyping</option>
+                          <option value="" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Select category</option>
+                          <option value="graphics-designing" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Graphics Designing</option>
+                          <option value="video-editing" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Video Editing</option>
+                          <option value="digital-marketing" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Digital Marketing</option>
+                          <option value="cinematography" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Cinematography</option>
+                          <option value="web-mobile-development" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Web and Mobile App Development</option>
+                          <option value="cpp-programming" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Programming Language C++</option>
+                          <option value="basic-computer" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Basic Computer Skills</option>
+                          <option value="computer-maintenance" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Computer Maintenance</option>
+                          <option value="mobile-maintenance" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Mobile Maintenance</option>
+                          <option value="ai-business" className={isDark ? "bg-[#1a1a24] text-white" : ""}>AI for Business</option>
+                          <option value="cybersecurity" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Cybersecurity & Data Safety</option>
+                          <option value="sales-career" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Sales & Career Development</option>
+                          <option value="robotics-drone" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Robotics & Drone Technology</option>
+                          <option value="english-language" className={isDark ? "bg-[#1a1a24] text-white" : ""}>English Language</option>
+                          <option value="ai-freelancing" className={isDark ? "bg-[#1a1a24] text-white" : ""}>AI-Powered Freelancing</option>
+                          <option value="3d-modeling" className={isDark ? "bg-[#1a1a24] text-white" : ""}>3D Modeling & Product Prototyping</option>
+                          {customCategories.map((cat) => (
+                            <option key={cat} value={cat} className={isDark ? "bg-[#1a1a24] text-white" : ""}>{cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>
+                          ))}
+                          <option value="__add_new__" className={`${isDark ? "bg-[#1a1a24] text-[#f47822]" : "text-[#f47822]"} font-medium`}>+ Add New Category</option>
                         </select>
                       </div>
 
@@ -2417,7 +2531,7 @@ export default function AdminDashboard() {
                         </span>
                         <div className="flex gap-2">
                           <button
-                            onClick={() => handleDeleteCourse(course.slug)}
+                            onClick={() => handleDeleteCourse(course)}
                             className={`p-1.5 rounded-lg transition-colors ${
                               isDark 
                                 ? "text-red-400 hover:bg-red-400/10" 
@@ -2613,6 +2727,344 @@ export default function AdminDashboard() {
                     </table>
                   </div>
                 )}
+              </div>
+
+              {/* Payment Accounts Management */}
+              <div className={`rounded-2xl overflow-hidden ${isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-lg"}`}>
+                <div className={`p-4 border-b ${isDark ? "border-white/10" : "border-gray-200"} flex items-center justify-between`}>
+                  <div>
+                    <h3 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      Payment Accounts
+                    </h3>
+                    <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>
+                      Manage CBE, TeleBirr and other payment methods
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setEditingPaymentAccount(null);
+                      setNewPaymentAccount({
+                        method: "cbe",
+                        accountNumber: "",
+                        accountHolder: "",
+                        bankName: "",
+                        instructions: "",
+                        isActive: true,
+                        displayOrder: 0,
+                      });
+                      setShowPaymentAccountForm(!showPaymentAccountForm);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#f47822] text-white text-sm font-semibold hover:bg-[#e06b18] transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {showPaymentAccountForm ? "Cancel" : "Add Account"}
+                  </button>
+                </div>
+
+                {/* Add/Edit Payment Account Form */}
+                {showPaymentAccountForm && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className={`p-6 border-b ${isDark ? "border-white/10" : "border-gray-200"}`}
+                  >
+                    <h4 className={`text-sm font-bold mb-4 ${isDark ? "text-white" : "text-gray-900"}`}>
+                      {editingPaymentAccount ? "Edit Payment Account" : "Add New Payment Account"}
+                    </h4>
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        try {
+                          const isEditing = editingPaymentAccount && editingPaymentAccount.id;
+                          const url = isEditing
+                            ? `/api/admin/payment-accounts/${editingPaymentAccount.id}`
+                            : "/api/admin/payment-accounts";
+                          const method = isEditing ? "PUT" : "POST";
+
+                          const res = await fetch(url, {
+                            method,
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(newPaymentAccount),
+                          });
+                          const data = await res.json();
+                          if (data.success) {
+                            if (isEditing) {
+                              setPaymentAccounts(
+                                paymentAccounts.map((a) =>
+                                  a.id === editingPaymentAccount.id ? data.account : a
+                                )
+                              );
+                              setEditingPaymentAccount(null);
+                            } else {
+                              setPaymentAccounts([...paymentAccounts, data.account]);
+                            }
+                            setShowPaymentAccountForm(false);
+                            setNewPaymentAccount({
+                              method: "cbe",
+                              accountNumber: "",
+                              accountHolder: "",
+                              bankName: "",
+                              instructions: "",
+                              isActive: true,
+                              displayOrder: 0,
+                            });
+                          } else {
+                            alert(data.message || "Error saving payment account");
+                          }
+                        } catch (error) {
+                          console.error("Error saving payment account:", error);
+                          alert("Error saving payment account");
+                        }
+                      }}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                    >
+                      {/* Method */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Payment Method *
+                        </label>
+                        <select
+                          value={newPaymentAccount.method}
+                          onChange={(e) =>
+                            setNewPaymentAccount({ ...newPaymentAccount, method: e.target.value })
+                          }
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark
+                              ? "bg-white/5 border-white/10 text-white"
+                              : "bg-white border-gray-300 text-gray-900"
+                          }`}
+                          required
+                        >
+                          <option value="cbe">CBE Bank</option>
+                          <option value="telebirr">TeleBirr</option>
+                          <option value="dashen">Dashen Bank</option>
+                          <option value="abyssinia">Bank of Abyssinia</option>
+                          <option value="awash">Awash Bank</option>
+                          <option value="chapa">Chapa</option>
+                        </select>
+                      </div>
+
+                      {/* Account Number */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Account Number / Phone *
+                        </label>
+                        <input
+                          type="text"
+                          value={newPaymentAccount.accountNumber}
+                          onChange={(e) =>
+                            setNewPaymentAccount({ ...newPaymentAccount, accountNumber: e.target.value })
+                          }
+                          placeholder="e.g., 1000765205852"
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30"
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                          required
+                        />
+                      </div>
+
+                      {/* Account Holder */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Account Holder Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={newPaymentAccount.accountHolder}
+                          onChange={(e) =>
+                            setNewPaymentAccount({ ...newPaymentAccount, accountHolder: e.target.value })
+                          }
+                          placeholder="e.g., DreamMore Academy PLC"
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30"
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                          required
+                        />
+                      </div>
+
+                      {/* Bank Name (optional) */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Bank Name (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={newPaymentAccount.bankName}
+                          onChange={(e) =>
+                            setNewPaymentAccount({ ...newPaymentAccount, bankName: e.target.value })
+                          }
+                          placeholder="e.g., Commercial Bank of Ethiopia"
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30"
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                        />
+                      </div>
+
+                      {/* Instructions */}
+                      <div className="md:col-span-2">
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Payment Instructions
+                        </label>
+                        <textarea
+                          value={newPaymentAccount.instructions}
+                          onChange={(e) =>
+                            setNewPaymentAccount({ ...newPaymentAccount, instructions: e.target.value })
+                          }
+                          placeholder="e.g., Transfer to CBE account and take a screenshot of the confirmation."
+                          rows={2}
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30"
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                        />
+                      </div>
+
+                      {/* Active Status */}
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          id="isActive"
+                          checked={newPaymentAccount.isActive}
+                          onChange={(e) =>
+                            setNewPaymentAccount({ ...newPaymentAccount, isActive: e.target.checked })
+                          }
+                          className="w-4 h-4 rounded border-gray-300 text-[#f47822] focus:ring-[#f47822]"
+                        />
+                        <label htmlFor="isActive" className={`text-sm ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Active (visible to customers)
+                        </label>
+                      </div>
+
+                      {/* Submit Buttons */}
+                      <div className="md:col-span-2 flex gap-3 pt-2">
+                        <button
+                          type="submit"
+                          className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#f47822] text-white text-sm font-semibold hover:bg-[#e06b18] transition-all"
+                        >
+                          <Save className="w-4 h-4" />
+                          {editingPaymentAccount ? "Update Account" : "Save Account"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowPaymentAccountForm(false);
+                            setEditingPaymentAccount(null);
+                            setNewPaymentAccount({
+                              method: "cbe",
+                              accountNumber: "",
+                              accountHolder: "",
+                              bankName: "",
+                              instructions: "",
+                              isActive: true,
+                              displayOrder: 0,
+                            });
+                          }}
+                          className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                            isDark
+                              ? "bg-white/10 text-white hover:bg-white/15"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </motion.div>
+                )}
+
+                {/* Payment Accounts List */}
+                <div className="divide-y divide-gray-200 dark:divide-white/10">
+                  {paymentAccounts.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <CreditCard className={`w-12 h-12 mx-auto mb-3 ${isDark ? "text-white/20" : "text-gray-300"}`} />
+                      <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-500"}`}>
+                        No payment accounts configured yet
+                      </p>
+                    </div>
+                  ) : (
+                    paymentAccounts.map((account) => (
+                      <div
+                        key={account.id}
+                        className={`p-4 flex items-center justify-between ${isDark ? "hover:bg-white/5" : "hover:bg-gray-50"} transition-colors`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                            account.method === 'cbe' ? 'bg-blue-500/10' :
+                            account.method === 'telebirr' ? 'bg-purple-500/10' :
+                            'bg-gray-500/10'
+                          }`}>
+                            {account.method === 'cbe' ? (
+                              <Building2 className="w-5 h-5 text-blue-500" />
+                            ) : account.method === 'telebirr' ? (
+                              <Smartphone className="w-5 h-5 text-purple-500" />
+                            ) : (
+                              <CreditCard className="w-5 h-5 text-gray-500" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>
+                                {account.method === 'cbe' ? 'CBE Bank' :
+                                 account.method === 'telebirr' ? 'TeleBirr' :
+                                 account.method === 'dashen' ? 'Dashen Bank' :
+                                 account.method === 'abyssinia' ? 'Bank of Abyssinia' :
+                                 account.method === 'awash' ? 'Awash Bank' :
+                                 account.method === 'chapa' ? 'Chapa' : account.method}
+                              </p>
+                              {!account.isActive && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${isDark ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-600"}`}>
+                                  Inactive
+                                </span>
+                              )}
+                            </div>
+                            <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-500"}`}>
+                              {account.accountNumber} • {account.accountHolder}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingPaymentAccount(account);
+                              setNewPaymentAccount({
+                                method: account.method,
+                                accountNumber: account.accountNumber,
+                                accountHolder: account.accountHolder,
+                                bankName: account.bankName || "",
+                                instructions: account.instructions || "",
+                                isActive: account.isActive,
+                                displayOrder: account.displayOrder || 0,
+                              });
+                              setShowPaymentAccountForm(true);
+                            }}
+                            className={`p-2 rounded-lg transition-colors ${isDark ? "hover:bg-white/10 text-blue-400" : "hover:bg-gray-100 text-blue-600"}`}
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setPaymentAccountToDelete(account);
+                              setPaymentAccountDeleteModal(true);
+                            }}
+                            className={`p-2 rounded-lg transition-colors ${isDark ? "hover:bg-white/10 text-red-400" : "hover:bg-gray-100 text-red-600"}`}
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -3194,13 +3646,763 @@ export default function AdminDashboard() {
             <CertificatesSection isDark={isDark} />
           )}
 
+          {/* ── BLOG MANAGEMENT ─────────────────────────────────────────── */}
+          {activeSection === "blog" && (
+            <div className="space-y-6">
+              {/* Header */}
+              <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl ${
+                isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-sm"
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#f47822]/10 flex items-center justify-center">
+                    <Newspaper className="w-5 h-5 text-[#f47822]" />
+                  </div>
+                  <div>
+                    <h2 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Blog Management</h2>
+                    <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{blogs.length} blog posts</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    if (showAddBlog) {
+                      // Closing form - clear everything
+                      setShowAddBlog(false);
+                      setEditingBlog(null);
+                      setNewBlog({
+                        title: "",
+                        excerpt: "",
+                        description: "",
+                        category: "",
+                        author: "",
+                        date: "",
+                        readTime: "",
+                        image: "",
+                        video: "",
+                        featured: false,
+                        promotion: false,
+                      });
+                    } else {
+                      // Opening form for new blog - ensure clean state
+                      setEditingBlog(null);
+                      setNewBlog({
+                        title: "",
+                        excerpt: "",
+                        description: "",
+                        category: "",
+                        author: "",
+                        date: "",
+                        readTime: "",
+                        image: "",
+                        video: "",
+                        featured: false,
+                        promotion: false,
+                      });
+                      setShowAddBlog(true);
+                    }
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#f47822] text-white text-sm font-semibold hover:bg-[#e06b18] transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  {showAddBlog ? "Cancel" : "Add Blog Post"}
+                </button>
+              </div>
+
+              {/* Add Blog Form */}
+              <AnimatePresence>
+                {showAddBlog && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className={`rounded-2xl p-6 ${isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-lg"}`}
+                  >
+                    <h3 className={`text-lg font-bold mb-5 flex items-center gap-2 ${isDark ? "text-white" : "text-gray-900"}`}>
+                      <Plus className="w-5 h-5 text-[#f47822]" />
+                      {editingBlog ? "Edit Blog Post" : "Add New Blog Post"}
+                    </h3>
+                    
+                    <form onSubmit={async (e) => {
+                      e.preventDefault();
+                      try {
+                        const isEditing = editingBlog && editingBlog.id;
+                        const url = isEditing 
+                          ? `/api/admin/blog/${editingBlog.id}` 
+                          : '/api/admin/blog';
+                        const method = isEditing ? 'PUT' : 'POST';
+                        
+                        const res = await fetch(url, {
+                          method,
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(newBlog),
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          if (isEditing) {
+                            // Update existing blog in the list
+                            setBlogs(blogs.map(b => b.id === editingBlog.id ? data.blog : b));
+                            setEditingBlog(null);
+                          } else {
+                            // Add new blog to the list
+                            setBlogs([data.blog, ...blogs]);
+                          }
+                          setShowAddBlog(false);
+                          setNewBlog({
+                            title: "",
+                            excerpt: "",
+                            description: "",
+                            category: "",
+                            author: "",
+                            date: "",
+                            readTime: "",
+                            image: "",
+                            video: "",
+                            featured: false,
+                            promotion: false,
+                          });
+                        } else {
+                          alert(data.message || 'Error saving blog post');
+                        }
+                      } catch (error) {
+                        console.error('Error saving blog:', error);
+                        alert('Error saving blog post');
+                      }
+                    }} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Title */}
+                      <div className="md:col-span-2">
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Blog Title *
+                        </label>
+                        <input
+                          type="text"
+                          value={newBlog.title}
+                          onChange={(e) => setNewBlog({...newBlog, title: e.target.value})}
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark 
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                          placeholder="e.g., The Future of AI in Africa"
+                          required
+                        />
+                      </div>
+
+                      {/* Excerpt */}
+                      <div className="md:col-span-2">
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Excerpt (Short Summary) *
+                        </label>
+                        <textarea
+                          value={newBlog.excerpt}
+                          onChange={(e) => setNewBlog({...newBlog, excerpt: e.target.value})}
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm h-20 resize-none ${
+                            isDark 
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                          placeholder="Brief summary of the blog post..."
+                          required
+                        />
+                      </div>
+
+                      {/* Description */}
+                      <div className="md:col-span-2">
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Full Description / Content *
+                        </label>
+                        <textarea
+                          value={newBlog.description}
+                          onChange={(e) => setNewBlog({...newBlog, description: e.target.value})}
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm h-40 resize-none ${
+                            isDark 
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                          placeholder="Full blog content with paragraphs separated by line breaks..."
+                          required
+                        />
+                        <p className={`text-xs mt-1 ${isDark ? "text-white/40" : "text-gray-400"}`}>Separate paragraphs with double line breaks</p>
+                      </div>
+
+                      {/* Category */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Category *
+                        </label>
+                        <select
+                          value={newBlog.category}
+                          onChange={(e) => setNewBlog({...newBlog, category: e.target.value})}
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark 
+                              ? "bg-white/5 border-white/10 text-white" 
+                              : "bg-white border-gray-300 text-gray-900"
+                          }`}
+                          required
+                        >
+                          <option value="">Select category</option>
+                          <option value="AI">AI</option>
+                          <option value="Technology">Technology</option>
+                          <option value="Startups">Startups</option>
+                          <option value="Cybersecurity">Cybersecurity</option>
+                          <option value="Education">Education</option>
+                          <option value="Innovation">Innovation</option>
+                        </select>
+                      </div>
+
+                      {/* Author */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Author Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={newBlog.author}
+                          onChange={(e) => setNewBlog({...newBlog, author: e.target.value})}
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark 
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                          placeholder="e.g., Samuel Tesfaye"
+                          required
+                        />
+                      </div>
+
+                      {/* Date */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Publication Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={newBlog.date}
+                          onChange={(e) => setNewBlog({...newBlog, date: e.target.value})}
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark 
+                              ? "bg-white/5 border-white/10 text-white" 
+                              : "bg-white border-gray-300 text-gray-900"
+                          }`}
+                          required
+                        />
+                      </div>
+
+                      {/* Read Time */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Read Time *
+                        </label>
+                        <input
+                          type="text"
+                          value={newBlog.readTime}
+                          onChange={(e) => setNewBlog({...newBlog, readTime: e.target.value})}
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark 
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                          placeholder="e.g., 5 min read"
+                          required
+                        />
+                      </div>
+
+                      {/* Image URL */}
+                      <div className="md:col-span-2">
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Featured Image URL
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={newBlog.image}
+                            onChange={(e) => setNewBlog({...newBlog, image: e.target.value})}
+                            className={`flex-1 px-4 py-2.5 rounded-xl border text-sm ${
+                              isDark 
+                                ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
+                                : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                            }`}
+                            placeholder="/images/blog/your-image.jpg"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Video URL */}
+                      <div className="md:col-span-2">
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Video Embed URL (YouTube)
+                        </label>
+                        <input
+                          type="text"
+                          value={newBlog.video}
+                          onChange={(e) => setNewBlog({...newBlog, video: e.target.value})}
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark 
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                          placeholder="https://www.youtube.com/embed/..."
+                        />
+                        <p className={`text-xs mt-1 ${isDark ? "text-white/40" : "text-gray-400"}`}>Leave empty for text-only posts</p>
+                      </div>
+
+                      {/* Featured Toggle */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Featured Post
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({...newBlog, featured: !newBlog.featured})}
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all ${
+                            newBlog.featured
+                              ? "bg-[#f47822]/10 border-[#f47822] text-[#f47822]"
+                              : isDark
+                                ? "bg-white/5 border-white/10 text-white/60"
+                                : "bg-white border-gray-300 text-gray-600"
+                          }`}
+                        >
+                          <Star className={`w-4 h-4 ${newBlog.featured ? "fill-current" : ""}`} />
+                          {newBlog.featured ? "Featured" : "Not Featured"}
+                        </button>
+                      </div>
+
+                      {/* Promotion Toggle */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Promotion Badge
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({...newBlog, promotion: !newBlog.promotion})}
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all ${
+                            newBlog.promotion
+                              ? "bg-orange-500/10 border-orange-500 text-orange-500"
+                              : isDark
+                                ? "bg-white/5 border-white/10 text-white/60"
+                                : "bg-white border-gray-300 text-gray-600"
+                          }`}
+                        >
+                          <Sparkles className={`w-4 h-4 ${newBlog.promotion ? "fill-current" : ""}`} />
+                          {newBlog.promotion ? "Promotional" : "Regular Post"}
+                        </button>
+                      </div>
+
+                      {/* Submit Button */}
+                      <div className="md:col-span-2 flex gap-3 pt-4">
+                        <button
+                          type="submit"
+                          className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#f47822] text-white text-sm font-semibold hover:bg-[#e06b18] transition-all"
+                        >
+                          <Save className="w-4 h-4" />
+                          Save Blog Post
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAddBlog(false);
+                            setEditingBlog(null);
+                            setNewBlog({
+                              title: "",
+                              excerpt: "",
+                              description: "",
+                              category: "",
+                              author: "",
+                              date: "",
+                              readTime: "",
+                              image: "",
+                              video: "",
+                              featured: false,
+                              promotion: false,
+                            });
+                          }}
+                          className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                            isDark
+                              ? "bg-white/5 text-white/60 hover:bg-white/10"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Blog Posts List */}
+              <div className={`rounded-2xl overflow-hidden ${isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-sm"}`}>
+                <div className={`px-4 py-3 border-b ${isDark ? "border-white/10" : "border-gray-200"}`}>
+                  <h3 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>All Blog Posts</h3>
+                </div>
+                <div className="divide-y divide-gray-200 dark:divide-white/10">
+                  {blogs.length === 0 ? (
+                    <div className={`p-8 text-center ${isDark ? "text-white/50" : "text-gray-500"}`}>
+                      <Newspaper className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                      <p>No blog posts yet. Click "Add Blog Post" to create your first post.</p>
+                    </div>
+                  ) : (
+                    blogs.map((blog: any) => (
+                      <div key={blog.id} className={`p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors`}>
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg ${
+                            blog.video ? "bg-red-500/10 text-red-500" : "bg-[#f47822]/10 text-[#f47822]"
+                          }`}>
+                            {blog.video ? <Play className="w-5 h-5" /> : <Newspaper className="w-5 h-5" />}
+                          </div>
+                          <div>
+                            <h4 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{blog.title}</h4>
+                            <div className="flex items-center gap-2 text-xs mt-1">
+                              <span className="section-badge text-[10px] px-2 py-0.5">{blog.category}</span>
+                              <span className={isDark ? "text-white/50" : "text-gray-500"}>{blog.author}</span>
+                              <span className={isDark ? "text-white/30" : "text-gray-400"}>•</span>
+                              <span className={isDark ? "text-white/50" : "text-gray-500"}>{blog.date}</span>
+                              {blog.featured && (
+                                <span className="flex items-center gap-1 text-[#f47822]">
+                                  <Star className="w-3 h-3 fill-current" />
+                                  Featured
+                                </span>
+                              )}
+                              {blog.promotion && (
+                                <span className="flex items-center gap-1 text-orange-500">
+                                  <Sparkles className="w-3 h-3 fill-current" />
+                                  Promo
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/blog/${blog.slug}`}
+                            target="_blank"
+                            className={`p-2 rounded-lg transition-colors ${isDark ? "hover:bg-white/10 text-white/60" : "hover:bg-gray-100 text-gray-500"}`}
+                            title="View on site"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </Link>
+                          <button
+                            onClick={() => { setEditingBlog(blog); setNewBlog(blog); setShowAddBlog(true); }}
+                            className={`p-2 rounded-lg transition-colors ${isDark ? "hover:bg-white/10 text-blue-400" : "hover:bg-gray-100 text-blue-600"}`}
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setBlogToDelete(blog);
+                              setDeleteModalOpen(true);
+                            }}
+                            className={`p-2 rounded-lg transition-colors ${isDark ? "hover:bg-white/10 text-red-400" : "hover:bg-gray-100 text-red-600"}`}
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── DELETE CONFIRMATION MODAL ─────────────────────────── */}
+          {deleteModalOpen && blogToDelete && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`w-full max-w-md rounded-2xl p-6 ${isDark ? "bg-[#1a1a24] border border-white/10" : "bg-white border border-gray-200 shadow-xl"}`}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
+                    <Trash2 className="w-6 h-6 text-red-500" />
+                  </div>
+                  <div>
+                    <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      Delete Blog Post?
+                    </h3>
+                  </div>
+                </div>
+                
+                <p className={`text-sm mb-6 ${isDark ? "text-white/70" : "text-gray-600"}`}>
+                  Are you sure you want to delete <strong className={isDark ? "text-white" : "text-gray-900"}>"{blogToDelete.title}"</strong>? This action cannot be undone.
+                </p>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setDeleteModalOpen(false);
+                      setBlogToDelete(null);
+                    }}
+                    className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      isDark 
+                        ? "bg-white/10 text-white hover:bg-white/15" 
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                    disabled={deletingBlog}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setDeletingBlog(true);
+                      try {
+                        const res = await fetch(`/api/admin/blog/${blogToDelete.id}`, { method: 'DELETE' });
+                        if (res.ok) {
+                          setBlogs(blogs.filter((b) => b.id !== blogToDelete.id));
+                          setDeleteModalOpen(false);
+                          setBlogToDelete(null);
+                        } else {
+                          const data = await res.json();
+                          alert(data.message || 'Failed to delete blog post');
+                        }
+                      } catch (error) {
+                        console.error('Error deleting blog:', error);
+                        alert('Error deleting blog post');
+                      } finally {
+                        setDeletingBlog(false);
+                      }
+                    }}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                    disabled={deletingBlog}
+                  >
+                    {deletingBlog ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+
+          {/* ── PAYMENT ACCOUNT DELETE CONFIRMATION MODAL ─────────────────────────── */}
+          {paymentAccountDeleteModal && paymentAccountToDelete && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`w-full max-w-md rounded-2xl p-6 ${isDark ? "bg-[#1a1a24] border border-white/10" : "bg-white border border-gray-200 shadow-xl"}`}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
+                    <Trash2 className="w-6 h-6 text-red-500" />
+                  </div>
+                  <div>
+                    <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      Delete Payment Account?
+                    </h3>
+                  </div>
+                </div>
+                
+                <p className={`text-sm mb-6 ${isDark ? "text-white/70" : "text-gray-600"}`}>
+                  Are you sure you want to delete the <strong className={isDark ? "text-white" : "text-gray-900"}>{paymentAccountToDelete.method === 'cbe' ? 'CBE Bank' : paymentAccountToDelete.method === 'telebirr' ? 'TeleBirr' : paymentAccountToDelete.method}</strong> account <strong className={isDark ? "text-white" : "text-gray-900"}>({paymentAccountToDelete.accountNumber})</strong>? This action cannot be undone.
+                </p>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setPaymentAccountDeleteModal(false);
+                      setPaymentAccountToDelete(null);
+                    }}
+                    className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      isDark 
+                        ? "bg-white/10 text-white hover:bg-white/15" 
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/admin/payment-accounts/${paymentAccountToDelete.id}`, { method: 'DELETE' });
+                        if (res.ok) {
+                          setPaymentAccounts(paymentAccounts.filter((a) => a.id !== paymentAccountToDelete.id));
+                          setPaymentAccountDeleteModal(false);
+                          setPaymentAccountToDelete(null);
+                        } else {
+                          const data = await res.json();
+                          alert(data.message || 'Failed to delete payment account');
+                        }
+                      } catch (error) {
+                        console.error('Error deleting payment account:', error);
+                        alert('Error deleting payment account');
+                      }
+                    }}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+
+          {/* ── ADD NEW CATEGORY MODAL ─────────────────────────── */}
+          {showAddCategoryModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`w-full max-w-md rounded-2xl p-6 ${isDark ? "bg-[#1a1a24] border border-white/10" : "bg-white border border-gray-200 shadow-xl"}`}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-[#f47822]/10 flex items-center justify-center">
+                    <Plus className="w-6 h-6 text-[#f47822]" />
+                  </div>
+                  <div>
+                    <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      Add New Category
+                    </h3>
+                  </div>
+                </div>
+                
+                <p className={`text-sm mb-4 ${isDark ? "text-white/70" : "text-gray-600"}`}>
+                  Enter a name for the new course category.
+                </p>
+                
+                <div className="mb-6">
+                  <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                    Category Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="e.g., Data Science"
+                    className={`w-full px-4 py-3 rounded-xl border text-sm ${
+                      isDark
+                        ? "bg-white/5 border-white/10 text-white placeholder-white/30"
+                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                    }`}
+                    autoFocus
+                  />
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowAddCategoryModal(false);
+                      setNewCategoryName("");
+                    }}
+                    className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      isDark 
+                        ? "bg-white/10 text-white hover:bg-white/15" 
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (newCategoryName.trim()) {
+                        // Convert to slug format (lowercase, hyphenated)
+                        const slug = newCategoryName.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                        if (slug && !customCategories.includes(slug)) {
+                          const updated = [...customCategories, slug];
+                          setCustomCategories(updated);
+                          localStorage.setItem("customCourseCategories", JSON.stringify(updated));
+                          // Auto-select the new category in the current form
+                          if (showAddCourse) {
+                            setNewCourse({...newCourse, category: slug});
+                          } else if (editingCourse) {
+                            setEditingCourse({...editingCourse, category: slug});
+                          }
+                        }
+                        setShowAddCategoryModal(false);
+                        setNewCategoryName("");
+                      }
+                    }}
+                    disabled={!newCategoryName.trim()}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-[#f47822] text-white text-sm font-medium hover:bg-[#e06b18] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Category
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+
+          {/* ── COURSE DELETE CONFIRMATION MODAL ─────────────────────────── */}
+          {courseDeleteModal && courseToDelete && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`w-full max-w-md rounded-2xl p-6 ${isDark ? "bg-[#1a1a24] border border-white/10" : "bg-white border border-gray-200 shadow-xl"}`}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
+                    <Trash2 className="w-6 h-6 text-red-500" />
+                  </div>
+                  <div>
+                    <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      Delete Course?
+                    </h3>
+                  </div>
+                </div>
+                
+                <p className={`text-sm mb-6 ${isDark ? "text-white/70" : "text-gray-600"}`}>
+                  Are you sure you want to delete <strong className={isDark ? "text-white" : "text-gray-900"}>"{courseToDelete.title}"</strong>? This action cannot be undone.
+                </p>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setCourseDeleteModal(false);
+                      setCourseToDelete(null);
+                    }}
+                    className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      isDark 
+                        ? "bg-white/10 text-white hover:bg-white/15" 
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                    disabled={deletingCourse}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDeleteCourse}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                    disabled={deletingCourse}
+                  >
+                    {deletingCourse ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+
           {/* ── SETTINGS ─────────────────────────────────────────── */}
           {activeSection === "settings" && (
             <SettingsSection isDark={isDark} />
           )}
 
           {/* Other sections placeholder */}
-         {!["dashboard", "applications", "courses", "portfolio", "testimonials", "payments", "lms", "certificates", "team", "course-assignment", "settings"].includes(activeSection) && (
+         {!["dashboard", "applications", "courses", "portfolio", "testimonials", "payments", "lms", "certificates", "team", "course-assignment", "blog", "settings"].includes(activeSection) && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}

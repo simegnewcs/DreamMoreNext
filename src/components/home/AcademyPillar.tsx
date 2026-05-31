@@ -85,7 +85,7 @@ export default function AcademyPillar() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden">
+    <section id="academy-skills" className="relative overflow-hidden">
 
       {/* ══════════════════════════════════════
           FULL-BLEED BACKGROUND — classroom photo

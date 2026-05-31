@@ -9,26 +9,15 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { applicationsAPI } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 
-const paymentMethods = [
-  {
-    id: "cbe",
-    name: "CBE Bank",
-    icon: Building2,
-    color: "#00d4ff",
-    account: "1000765205852",
-    holder: "DreamMore Academy PLC",
-    instructions: "Transfer to CBE account and take a screenshot of the confirmation.",
-  },
-  {
-    id: "telebirr",
-    name: "Telebirr",
-    icon: Smartphone,
-    color: "#7c3aed",
-    account: "0993132122",
-    holder: "DreamMore",
-    instructions: "Send payment via Telebirr and screenshot the transaction confirmation.",
-  },
-];
+interface PaymentAccount {
+  id: number;
+  method: string;
+  accountNumber: string;
+  accountHolder: string;
+  bankName?: string;
+  instructions?: string;
+  isActive: boolean;
+}
 
 function PaymentContent() {
   const { theme } = useTheme();
@@ -37,7 +26,7 @@ function PaymentContent() {
   const searchParams = useSearchParams();
   const courseSlug = searchParams.get("course");
   
-  const [selectedMethod, setSelectedMethod] = useState("cbe");
+  const [selectedMethod, setSelectedMethod] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
   const [transactionId, setTransactionId] = useState("");
   const [note, setNote] = useState("");
@@ -47,8 +36,12 @@ function PaymentContent() {
   const [error, setError] = useState<string | null>(null);
   const { user, loading: authLoading } = useAuth();
   const [course, setCourse] = useState<any>(null);
+  
+  // Payment accounts from API
+  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([]);
+  const [accountsLoading, setAccountsLoading] = useState(true);
 
-  // Get user and course info on mount
+  // Get user, course info, and payment accounts on mount
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
@@ -61,9 +54,60 @@ function PaymentContent() {
     if (applyData) {
       setCourse(JSON.parse(applyData));
     }
+    
+    // Fetch payment accounts from API
+    const fetchAccounts = async () => {
+      try {
+        setAccountsLoading(true);
+        const res = await fetch('/api/payment-accounts');
+        const data = await res.json();
+        if (data.success && data.accounts) {
+          setPaymentAccounts(data.accounts);
+          // Set first active account as default
+          if (data.accounts.length > 0) {
+            setSelectedMethod(data.accounts[0].method);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching payment accounts:', error);
+      } finally {
+        setAccountsLoading(false);
+      }
+    };
+    
+    fetchAccounts();
   }, [user, authLoading, courseSlug, router]);
+  
+  // Get icon and color based on method
+  const getMethodIcon = (method: string) => {
+    switch (method) {
+      case 'cbe': return Building2;
+      case 'telebirr': return Smartphone;
+      default: return CreditCard;
+    }
+  };
+  
+  const getMethodColor = (method: string) => {
+    switch (method) {
+      case 'cbe': return '#00d4ff';
+      case 'telebirr': return '#7c3aed';
+      default: return '#f47822';
+    }
+  };
+  
+  const getMethodName = (method: string) => {
+    switch (method) {
+      case 'cbe': return 'CBE Bank';
+      case 'telebirr': return 'TeleBirr';
+      case 'dashen': return 'Dashen Bank';
+      case 'abyssinia': return 'Bank of Abyssinia';
+      case 'awash': return 'Awash Bank';
+      case 'chapa': return 'Chapa';
+      default: return method;
+    }
+  };
 
-  const method = paymentMethods.find((m) => m.id === selectedMethod)!;
+  const selectedAccount = paymentAccounts.find((a) => a.method === selectedMethod);
 
   const handleFile = (f: File) => {
     if (f.type.startsWith("image/")) setFile(f);
@@ -194,46 +238,93 @@ function PaymentContent() {
           {/* Payment method selector */}
           <div className="lg:col-span-2 space-y-3">
             <h3 className={`text-sm font-semibold uppercase tracking-wider mb-4 ${isDark ? "text-white/70" : "text-gray-600"}`}>Select Payment Method</h3>
-            {paymentMethods.map((pm) => {
-              const Icon = pm.icon;
-              const isSelected = selectedMethod === pm.id;
-              return (
-                <button
-                  key={pm.id}
-                  onClick={() => setSelectedMethod(pm.id)}
-                  className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left ${
-                    isSelected
-                      ? isDark 
-                        ? "bg-[#f47822]/5 border-[#f47822]/40" 
-                        : "bg-orange-50 border-[#f47822]/30"
-                      : isDark
-                        ? "bg-white/5 border-transparent hover:border-white/20"
-                        : "bg-white border-transparent hover:border-gray-300 shadow-sm"
-                  }`}
-                >
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: pm.color + "15", border: `1px solid ${pm.color}30` }}
+            {accountsLoading ? (
+              <div className={`p-8 rounded-xl text-center ${isDark ? "bg-white/5" : "bg-white"}`}>
+                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-[#f47822]" />
+                <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-500"}`}>Loading payment methods...</p>
+              </div>
+            ) : paymentAccounts.length === 0 ? (
+              <div className={`p-8 rounded-xl text-center ${isDark ? "bg-white/5" : "bg-white"}`}>
+                <AlertCircle className="w-8 h-8 mx-auto mb-2 text-red-500" />
+                <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-500"}`}>No payment methods available</p>
+              </div>
+            ) : (
+              paymentAccounts.map((account) => {
+                const Icon = getMethodIcon(account.method);
+                const color = getMethodColor(account.method);
+                const isSelected = selectedMethod === account.method;
+                return (
+                  <button
+                    key={account.id}
+                    onClick={() => setSelectedMethod(account.method)}
+                    className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                      isSelected
+                        ? isDark 
+                          ? "bg-[#f47822]/5 border-[#f47822]/40" 
+                          : "bg-orange-50 border-[#f47822]/30"
+                        : isDark
+                          ? "bg-white/5 border-transparent hover:border-white/20"
+                          : "bg-white border-transparent hover:border-gray-300 shadow-sm"
+                    }`}
                   >
-                    <Icon className="w-5 h-5" style={{ color: pm.color }} />
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: color + "15", border: `1px solid ${color}30` }}
+                    >
+                      <Icon className="w-5 h-5" style={{ color: color }} />
+                    </div>
+                    <div>
+                      <div className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {getMethodName(account.method)}
+                      </div>
+                      <div className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{account.accountNumber}</div>
+                    </div>
+                    {isSelected && (
+                      <CheckCircle className="w-5 h-5 ml-auto flex-shrink-0 text-[#f47822]" />
+                    )}
+                  </button>
+                );
+              })
+            )}
+
+            {/* Selected Account Details */}
+            {selectedAccount && (
+              <div className={`rounded-xl p-4 mt-4 ${isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-sm"}`}>
+                <h4 className={`text-xs font-semibold uppercase tracking-wider mb-3 ${isDark ? "text-white/60" : "text-gray-500"}`}>
+                  Payment Details
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className={`flex justify-between ${isDark ? "text-white/80" : "text-gray-700"}`}>
+                    <span>Account Holder:</span>
+                    <span className="font-medium">{selectedAccount.accountHolder}</span>
                   </div>
-                  <div>
-                    <div className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{pm.name}</div>
-                    <div className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{pm.account}</div>
+                  <div className={`flex justify-between ${isDark ? "text-white/80" : "text-gray-700"}`}>
+                    <span>Account Number:</span>
+                    <span className="font-medium">{selectedAccount.accountNumber}</span>
                   </div>
-                  {isSelected && (
-                    <CheckCircle className="w-5 h-5 ml-auto flex-shrink-0 text-[#f47822]" />
+                  {selectedAccount.bankName && (
+                    <div className={`flex justify-between ${isDark ? "text-white/80" : "text-gray-700"}`}>
+                      <span>Bank:</span>
+                      <span className="font-medium">{selectedAccount.bankName}</span>
+                    </div>
                   )}
-                </button>
-              );
-            })}
+                </div>
+                {selectedAccount.instructions && (
+                  <div className={`mt-3 pt-3 border-t ${isDark ? "border-white/10" : "border-gray-100"}`}>
+                    <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>
+                      <span className="font-medium">Instructions:</span> {selectedAccount.instructions}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Instructions */}
             <div className={`rounded-xl p-4 mt-4 ${isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-sm"}`}>
-              <h4 className={`text-xs font-semibold uppercase tracking-wider mb-3 ${isDark ? "text-white/60" : "text-gray-500"}`}>Instructions</h4>
+              <h4 className={`text-xs font-semibold uppercase tracking-wider mb-3 ${isDark ? "text-white/60" : "text-gray-500"}`}>How to Pay</h4>
               <ol className="space-y-2 text-xs">
                 {[
-                  "Pay to the account above",
+                  "Pay to the account shown above",
                   "Take a screenshot of confirmation",
                   "Note your transaction ID",
                   "Upload screenshot below",

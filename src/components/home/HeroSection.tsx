@@ -163,13 +163,17 @@ export default function HeroSection() {
 
                     {/* Floating client badge */}
                     <motion.div
-                      animate={{ y: [0, -8, 0] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      className="hidden sm:block absolute -right-2 top-8 px-3 py-2 rounded-xl shadow-lg border-2"
+                      whileHover={{ scale: 1.05, backgroundColor: "#f47822" }}
+                      transition={{ duration: 0.3 }}
+                      className="hidden sm:block absolute -right-2 top-8 px-3 py-2 rounded-xl shadow-lg border-2 cursor-pointer"
                       style={{ background: "#ffffff", borderColor: "#f47822" }}
+                      onClick={() => {
+                        document.getElementById('trusted-brands')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }}
+                      title="View trusted brands"
                     >
-                      <p className="text-[9px] font-black leading-tight text-center" style={{ color: "#15142a" }}>
-                        TRUSTED<br/><span style={{ color: "#f47822" }}>BY 50+</span>
+                      <p className="text-[9px] font-black leading-tight text-center text-[#15142a] hover:text-white transition-colors duration-300">
+                        TRUSTED<br/><span className="text-[#f47822] hover:text-white transition-colors duration-300">BY 50+</span>
                       </p>
                     </motion.div>
                   </div>
@@ -288,16 +292,20 @@ export default function HeroSection() {
 
                     {/* Stats badge */}
                     <motion.div
-                      animate={{ y: [0, -6, 0] }}
-                      transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                      className="hidden sm:block absolute -right-2 bottom-16 px-4 py-3 rounded-xl border-2"
+                      whileHover={{ scale: 1.05, backgroundColor: "#f47822" }}
+                      transition={{ duration: 0.3 }}
+                      className="hidden sm:block absolute -right-2 bottom-16 px-4 py-3 rounded-xl border-2 cursor-pointer"
                       style={{ background: "#ffffff", borderColor: "#f47822" }}
+                      onClick={() => {
+                        document.getElementById('academy-skills')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }}
+                      title="Browse all courses"
                     >
                       <div className="flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4" style={{ color: "#f47822" }} />
-                        <span className="text-sm font-black" style={{ color: "#15142a" }}>16+</span>
+                        <TrendingUp className="w-4 h-4 text-[#f47822] hover:text-white transition-colors duration-300" />
+                        <span className="text-sm font-black text-[#15142a] hover:text-white transition-colors duration-300">16+</span>
                       </div>
-                      <p className="text-[9px] uppercase tracking-wider" style={{ color: "#f47822" }}>Courses</p>
+                      <p className="text-[9px] uppercase tracking-wider text-[#f47822] hover:text-white/90 transition-colors duration-300">Courses</p>
                     </motion.div>
                   </div>
                 </div>

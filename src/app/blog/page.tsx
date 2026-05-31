@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getAllBlogs } from "@/lib/db/blogs";
 import BlogClient from "@/components/blog/BlogClient";
 
 export const metadata: Metadata = {
@@ -6,6 +7,18 @@ export const metadata: Metadata = {
   description: "Insights on technology, AI, startups, and digital innovation from DreamMore.",
 };
 
-export default function BlogPage() {
-  return <BlogClient />;
+async function fetchAllBlogs() {
+  try {
+    // Fetch directly from database
+    const blogs = await getAllBlogs();
+    return blogs;
+  } catch (error) {
+    console.error('Error fetching blogs from database:', error);
+    return [];
+  }
+}
+
+export default async function BlogPage() {
+  const blogs = await fetchAllBlogs();
+  return <BlogClient initialBlogs={blogs} />;
 }
