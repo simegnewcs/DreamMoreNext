@@ -296,11 +296,11 @@ export default function CourseDetailClient({ course }: { course: Course }) {
             {/* Instructor Info */}
             <div className={`flex items-center justify-center gap-3 p-4 rounded-lg mb-6 ${isDark ? "bg-white/5" : "bg-gray-50"}`}>
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#f47822] to-[#15142a] flex items-center justify-center text-white font-bold text-lg">
-                {course.instructor.charAt(0)}
+                {course.instructor?.charAt(0) ?? '?'}
               </div>
               <div className="text-center">
-                <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{course.instructor}</p>
-                <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{course.instructorBio}</p>
+                <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{course.instructor ?? 'Unknown'}</p>
+                <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{course.instructorBio ?? 'No bio available'}</p>
               </div>
             </div>
 
@@ -366,10 +366,10 @@ export default function CourseDetailClient({ course }: { course: Course }) {
               Course Curriculum
             </h3>
             <p className={`text-sm mb-4 ${isDark ? "text-white/70" : "text-gray-600"}`}>
-              {course.modules.length} modules • {course.modules.reduce((a, m) => a + m.lessons, 0)} lessons
+              {course.modules?.length ?? 0} modules • {(course.modules ?? []).reduce((a, m) => a + (m.lessons ?? 0), 0)} lessons
             </p>
             <div className="space-y-2">
-              {course.modules.slice(0, 3).map((mod, i) => (
+              {(course.modules?.slice(0, 3) ?? []).map((mod, i) => (
                 <div key={i} className={`flex items-center gap-2 p-2 rounded ${isDark ? "bg-white/5" : "bg-gray-50"}`}>
                   <span className="w-6 h-6 rounded bg-[#f47822]/20 text-[#f47822] text-xs flex items-center justify-center font-bold">
                     {i + 1}
@@ -377,9 +377,9 @@ export default function CourseDetailClient({ course }: { course: Course }) {
                   <span className={`text-sm truncate ${isDark ? "text-white/80" : "text-gray-700"}`}>{mod.title}</span>
                 </div>
               ))}
-              {course.modules.length > 3 && (
+              {(course.modules?.length ?? 0) > 3 && (
                 <p className={`text-xs text-center ${isDark ? "text-white/50" : "text-gray-500"}`}>
-                  +{course.modules.length - 3} more modules
+                  +{(course.modules?.length ?? 0) - 3} more modules
                 </p>
               )}
             </div>
