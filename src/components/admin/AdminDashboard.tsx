@@ -1183,10 +1183,10 @@ export default function AdminDashboard() {
                       onChange={(e) => setFilterStatus(e.target.value)}
                       className={`bg-transparent text-sm outline-none ${isDark ? "text-white" : "text-gray-900"}`}
                     >
-                      <option value="all">All Status</option>
-                      <option value="pending">Pending</option>
-                      <option value="approved">Approved</option>
-                      <option value="rejected">Rejected</option>
+                      <option value="all" className={isDark ? "bg-[#1a1a24] text-white" : ""}>All Status</option>
+                      <option value="pending" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Pending</option>
+                      <option value="approved" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Approved</option>
+                      <option value="rejected" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Rejected</option>
                     </select>
                   </div>
                 </div>
@@ -1611,10 +1611,10 @@ export default function AdminDashboard() {
                         : "bg-white border-gray-200 text-gray-900"
                     }`}
                   >
-                    <option value="all">All Roles</option>
-                    <option value="student">Students</option>
-                    <option value="admin">Admins</option>
-                    <option value="instructor">Instructors</option>
+                    <option value="all" className={isDark ? "bg-[#1a1a24] text-white" : ""}>All Roles</option>
+                    <option value="student" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Students</option>
+                    <option value="admin" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Admins</option>
+                    <option value="instructor" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Instructors</option>
                   </select>
                 </div>
               </div>
@@ -1822,9 +1822,9 @@ export default function AdminDashboard() {
                             : "bg-gray-50 border-gray-200 text-gray-900"
                         }`}
                       >
-                        <option value="student">Student</option>
-                        <option value="admin">Admin</option>
-                        <option value="instructor">Instructor</option>
+                        <option value="student" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Student</option>
+                        <option value="admin" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Admin</option>
+                        <option value="instructor" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Instructor</option>
                       </select>
                     </div>
 
@@ -1841,9 +1841,9 @@ export default function AdminDashboard() {
                             : "bg-gray-50 border-gray-200 text-gray-900"
                         }`}
                       >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="suspended">Suspended</option>
+                        <option value="active" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Active</option>
+                        <option value="inactive" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Inactive</option>
+                        <option value="suspended" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Suspended</option>
                       </select>
                     </div>
 
@@ -2046,11 +2046,11 @@ export default function AdminDashboard() {
                               : "bg-white border-gray-300 text-gray-900"
                           }`}
                         >
-                          <option value="">Select level</option>
-                          <option value="Beginner">Beginner</option>
-                          <option value="Intermediate">Intermediate</option>
-                          <option value="Advanced">Advanced</option>
-                          <option value="All Levels">All Levels</option>
+                          <option value="" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Select level</option>
+                          <option value="Beginner" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Beginner</option>
+                          <option value="Intermediate" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Intermediate</option>
+                          <option value="Advanced" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Advanced</option>
+                          <option value="All Levels" className={isDark ? "bg-[#1a1a24] text-white" : ""}>All Levels</option>
                         </select>
                       </div>
 
@@ -2316,11 +2316,11 @@ export default function AdminDashboard() {
                               : "bg-white border-gray-300 text-gray-900"
                           }`}
                         >
-                          <option value="">Select level</option>
-                          <option value="Beginner">Beginner</option>
-                          <option value="Intermediate">Intermediate</option>
-                          <option value="Advanced">Advanced</option>
-                          <option value="All Levels">All Levels</option>
+                          <option value="" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Select level</option>
+                          <option value="Beginner" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Beginner</option>
+                          <option value="Intermediate" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Intermediate</option>
+                          <option value="Advanced" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Advanced</option>
+                          <option value="All Levels" className={isDark ? "bg-[#1a1a24] text-white" : ""}>All Levels</option>
                         </select>
                       </div>
 
@@ -3247,9 +3247,9 @@ export default function AdminDashboard() {
                             onChange={(e) => setLmsCourseFilter(e.target.value)}
                             className={`text-xs px-3 py-2 rounded-lg border outline-none ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-gray-50 border-gray-200 text-gray-700"}`}
                           >
-                            <option value="all">All Courses</option>
+                            <option value="all" className={isDark ? "bg-[#1a1a24] text-white" : ""}>All Courses</option>
                             {lmsData.courses.map((c: any) => (
-                              <option key={c.id} value={String(c.id)}>{c.title}</option>
+                              <option key={c.id} value={String(c.id)} className={isDark ? "bg-[#1a1a24] text-white" : ""}>{c.title}</option>
                             ))}
                           </select>
                         </div>
@@ -3838,13 +3838,13 @@ export default function AdminDashboard() {
                           }`}
                           required
                         >
-                          <option value="">Select category</option>
-                          <option value="AI">AI</option>
-                          <option value="Technology">Technology</option>
-                          <option value="Startups">Startups</option>
-                          <option value="Cybersecurity">Cybersecurity</option>
-                          <option value="Education">Education</option>
-                          <option value="Innovation">Innovation</option>
+                          <option value="" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Select category</option>
+                          <option value="AI" className={isDark ? "bg-[#1a1a24] text-white" : ""}>AI</option>
+                          <option value="Technology" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Technology</option>
+                          <option value="Startups" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Startups</option>
+                          <option value="Cybersecurity" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Cybersecurity</option>
+                          <option value="Education" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Education</option>
+                          <option value="Innovation" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Innovation</option>
                         </select>
                       </div>
 
@@ -4400,36 +4400,6 @@ export default function AdminDashboard() {
           {activeSection === "settings" && (
             <SettingsSection isDark={isDark} />
           )}
-
-          {/* Other sections placeholder */}
-         {!["dashboard", "applications", "courses", "portfolio", "testimonials", "payments", "lms", "certificates", "team", "course-assignment", "blog", "settings"].includes(activeSection) && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className={`flex flex-col items-center justify-center py-24 text-center rounded-2xl ${
-                isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-lg"
-              }`}
-            >
-              <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-5 ${
-                isDark ? "bg-white/5" : "bg-gray-100"
-              }`}>
-                <Settings className={`w-10 h-10 ${isDark ? "text-white/20" : "text-gray-300"}`} />
-              </div>
-              <h3 className={`text-2xl font-bold mb-2 capitalize ${isDark ? "text-white" : "text-gray-900"}`}>
-                {activeSection}
-              </h3>
-              <p className={`text-sm max-w-xs mb-6 ${isDark ? "text-white/50" : "text-gray-500"}`}>
-                This section is part of Phase 3 development. Backend integration required.
-              </p>
-              <button
-                onClick={() => setActiveSection("dashboard")}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#f47822] text-white font-medium hover:bg-[#e06b18] transition-all"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Back to Dashboard
-              </button>
-            </motion.div>
-          )}
         </div>
       </main>
     </div>
@@ -4586,13 +4556,13 @@ function CertificatesSection({ isDark }: { isDark: boolean }) {
             />
           </div>
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className={`${inputCls} w-auto`}>
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="revoked">Revoked</option>
+            <option value="all" className={isDark ? "bg-[#1a1a24] text-white" : ""}>All Status</option>
+            <option value="active" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Active</option>
+            <option value="revoked" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Revoked</option>
           </select>
           <select value={courseFilter} onChange={e => setCourseFilter(e.target.value)} className={`${inputCls} w-auto`}>
-            <option value="all">All Courses</option>
-            {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+            <option value="all" className={isDark ? "bg-[#1a1a24] text-white" : ""}>All Courses</option>
+            {courses.map(c => <option key={c.id} value={c.id} className={isDark ? "bg-[#1a1a24] text-white" : ""}>{c.title}</option>)}
           </select>
           <button type="submit" className="px-4 py-2 bg-[#f47822] text-white rounded-xl text-sm font-semibold hover:bg-[#e06b18] transition-colors">
             Search
@@ -4707,8 +4677,8 @@ function CertificatesSection({ isDark }: { isDark: boolean }) {
               <div>
                 <label className={`text-xs font-semibold mb-1 block ${sub}`}>Course *</label>
                 <select value={issueForm.course_id} onChange={e => handleIssueCourseChange(e.target.value)} className={inputCls}>
-                  <option value="">Select course…</option>
-                  {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                  <option value="" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Select course…</option>
+                  {courses.map(c => <option key={c.id} value={c.id} className={isDark ? "bg-[#1a1a24] text-white" : ""}>{c.title}</option>)}
                 </select>
               </div>
 
@@ -4718,9 +4688,9 @@ function CertificatesSection({ isDark }: { isDark: boolean }) {
                   <div className="flex items-center gap-2 py-2"><Loader2 className="w-4 h-4 animate-spin text-[#f47822]" /><span className={`text-xs ${sub}`}>Loading students…</span></div>
                 ) : (
                   <select value={issueForm.user_id} onChange={e => setIssueForm(f => ({ ...f, user_id: e.target.value }))} className={inputCls} disabled={!issueForm.course_id}>
-                    <option value="">Select student…</option>
+                    <option value="" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Select student…</option>
                     {eligibleStudents.map(s => (
-                      <option key={s.id} value={s.id} disabled={!!s.has_cert}>
+                      <option key={s.id} value={s.id} disabled={!!s.has_cert} className={isDark ? "bg-[#1a1a24] text-white" : ""}>
                         {s.name} ({s.email}){s.has_cert ? " — cert issued" : ""}
                       </option>
                     ))}
@@ -4960,13 +4930,13 @@ function PortfolioSection({ isDark }: { isDark: boolean }) {
             <input placeholder="Search projects…" value={search} onChange={e => setSearch(e.target.value)} className={`${inputCls} pl-9`} />
           </div>
           <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className={`${inputCls} w-auto`}>
-            <option value="all">All Categories</option>
-            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            <option value="all" className={isDark ? "bg-[#1a1a24] text-white" : ""}>All Categories</option>
+            {categories.map(c => <option key={c} value={c} className={isDark ? "bg-[#1a1a24] text-white" : ""}>{c}</option>)}
           </select>
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className={`${inputCls} w-auto`}>
-            <option value="all">All Status</option>
-            <option value="active">Published</option>
-            <option value="inactive">Hidden</option>
+            <option value="all" className={isDark ? "bg-[#1a1a24] text-white" : ""}>All Status</option>
+            <option value="active" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Published</option>
+            <option value="inactive" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Hidden</option>
           </select>
           <button type="submit" className="px-4 py-2 bg-[#f47822] text-white rounded-xl text-sm font-semibold hover:bg-[#e06b18] transition-colors">Search</button>
         </form>
