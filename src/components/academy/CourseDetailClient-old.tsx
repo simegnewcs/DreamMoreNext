@@ -277,7 +277,7 @@ export default function CourseDetailClient({ course }: { course: Course }) {
                 Technologies & Tools
               </h3>
               <div className="flex flex-wrap justify-center gap-2">
-                {course.technologies.map((tech) => (
+                {course.technologies?.map((tech) => (
                   <span
                     key={tech}
                     className="px-3 py-1.5 rounded-full text-xs font-medium border"
