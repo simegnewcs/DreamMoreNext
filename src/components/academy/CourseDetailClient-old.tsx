@@ -214,7 +214,7 @@ export default function CourseDetailClient({ course }: { course: Course }) {
               <div className={`text-center p-3 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-50"}`}>
                 <Users className="w-5 h-5 text-[#f47822] mx-auto mb-1" />
                 <p className="text-xs text-[#f47822] font-medium">Students</p>
-                <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{course.students.toLocaleString()}</p>
+                <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{(course.students ?? 0).toLocaleString()}</p>
               </div>
             </div>
 
