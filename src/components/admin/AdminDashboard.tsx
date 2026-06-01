@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Users, FileText, CreditCard, BookOpen, Monitor,
   Award, Newspaper, Settings, LogOut, CheckCircle, XCircle,
-  RefreshCw, Eye, TrendingUp, Clock, AlertCircle, Menu, X,
+  RefreshCw, Eye, TrendingUp, Clock, AlertCircle, Menu, X, Home,
   Sun, Moon, Bell, Search, Filter, MoreVertical, ChevronDown,
   ArrowUpRight, DollarSign, GraduationCap, BarChart3, Plus, Save, Trash2, Pencil,
   Loader2, Video, BookMarked, Users2, ChevronRight, Play, FileArchive, ClipboardList, Layers, Upload,
@@ -900,6 +900,19 @@ export default function AdminDashboard() {
                 </motion.div>
               )}
             </div>
+
+            {/* Back to Home */}
+            <Link
+              href="/"
+              className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+                isDark 
+                  ? "text-white/60 hover:text-white hover:bg-white/5" 
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              }`}
+            >
+              <Home className="w-4 h-4" />
+              <span>Back to Home</span>
+            </Link>
 
             {/* User Profile */}
             <div className={`flex items-center gap-2 pl-3 border-l ${isDark ? "border-white/10" : "border-gray-200"}`}>
@@ -1976,7 +1989,7 @@ export default function AdminDashboard() {
                           <option value="digital-marketing" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Digital Marketing</option>
                           <option value="cinematography" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Cinematography</option>
                           <option value="web-mobile-development" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Web and Mobile App Development</option>
-                          <option value="cpp-programming" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Programming Language C++</option>
+                          <option value="cpp-programming" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Programming Language C++, Java, Python, JavaScript</option>
                           <option value="basic-computer" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Basic Computer Skills</option>
                           <option value="computer-maintenance" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Computer Maintenance</option>
                           <option value="mobile-maintenance" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Mobile Maintenance</option>
@@ -2246,7 +2259,7 @@ export default function AdminDashboard() {
                           <option value="digital-marketing" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Digital Marketing</option>
                           <option value="cinematography" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Cinematography</option>
                           <option value="web-mobile-development" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Web and Mobile App Development</option>
-                          <option value="cpp-programming" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Programming Language C++</option>
+                          <option value="cpp-programming" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Programming Language C++, Java, Python, JavaScript</option>
                           <option value="basic-computer" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Basic Computer Skills</option>
                           <option value="computer-maintenance" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Computer Maintenance</option>
                           <option value="mobile-maintenance" className={isDark ? "bg-[#1a1a24] text-white" : ""}>Mobile Maintenance</option>

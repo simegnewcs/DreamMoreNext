@@ -11,13 +11,13 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "light",
+  theme: "dark",
   toggleTheme: () => {},
   setTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
+  const [theme, setThemeState] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -28,8 +28,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setThemeState(saved);
       document.documentElement.classList.toggle("light", saved === "light");
     } else {
-      // Default to light mode
-      document.documentElement.classList.add("light");
+      // Default to dark mode
+      document.documentElement.classList.add("dark");
     }
   }, []);
 

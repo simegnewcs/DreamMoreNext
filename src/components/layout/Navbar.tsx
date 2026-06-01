@@ -34,7 +34,7 @@ const navLinks = [
       { label: "Digital Marketing", href: "/academy/course/digital-marketing" },
       { label: "Cinematography", href: "/academy/course/cinematography" },
       { label: "Web & Mobile Development", href: "/academy/course/web-mobile-development" },
-      { label: "Programming Language C++", href: "/academy/course/cpp-programming" },
+      { label: "Programming Language C++, Java, Python, JavaScript", href: "/academy/course/cpp-programming" },
       { label: "Basic Computer Skills", href: "/academy/course/basic-computer" },
       { label: "Computer Maintenance", href: "/academy/course/computer-maintenance" },
       { label: "Mobile Maintenance", href: "/academy/course/mobile-maintenance" },

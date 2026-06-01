@@ -8,7 +8,7 @@ const knowledgeBase = {
     { name: "UI/UX Design", duration: "3 months", price: 6000, description: "User interface and experience design fundamentals" },
     { name: "Graphic Design", duration: "3 months", price: 6000, description: "Visual design, branding, and creative tools" },
     { name: "Digital Marketing", duration: "3 months", price: 6000, description: "SEO, social media marketing, and online advertising" },
-    { name: "C++ Programming", duration: "3 months", price: 6000, description: "Fundamentals and advanced C++ programming" },
+    { name: "Programming Language C++, Java, Python, JavaScript", duration: "3 months", price: 6000, description: "Fundamentals and advanced programming in C++, Java, Python, and JavaScript" },
   ],
   pricing: {
     standard: 6000,
