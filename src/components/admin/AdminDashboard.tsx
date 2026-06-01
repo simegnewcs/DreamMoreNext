@@ -1919,13 +1919,26 @@ export default function AdminDashboard() {
                     <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{courses.length} courses available</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowAddCourse(!showAddCourse)}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#f47822] text-white text-sm font-semibold hover:bg-[#e06b18] transition-all"
-                >
-                  <Plus className="w-4 h-4" />
-                  {showAddCourse ? "Cancel" : "Add Course"}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowAddCategoryModal(true)}
+                    className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                      isDark 
+                        ? "bg-white/10 text-white hover:bg-white/20 border border-white/10" 
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                    }`}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Category
+                  </button>
+                  <button
+                    onClick={() => setShowAddCourse(!showAddCourse)}
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#f47822] text-white text-sm font-semibold hover:bg-[#e06b18] transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {showAddCourse ? "Cancel" : "Add Course"}
+                  </button>
+                </div>
               </div>
 
               {/* Add Course Form */}

@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, Sun, Moon, User, LogOut, LayoutDashboard } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { coursesAPI } from "@/lib/api";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -27,24 +28,12 @@ const navLinks = [
   {
     label: "Academy",
     href: "/academy",
-    children: [
+    getChildren: (dynamicCourses: any[]) => [
       { label: "All Courses", href: "/academy" },
-      { label: "Graphics Designing", href: "/academy/course/graphics-designing" },
-      { label: "Video Editing", href: "/academy/course/video-editing" },
-      { label: "Digital Marketing", href: "/academy/course/digital-marketing" },
-      { label: "Cinematography", href: "/academy/course/cinematography" },
-      { label: "Web & Mobile Development", href: "/academy/course/web-mobile-development" },
-      { label: "Programming Language C++, Java, Python, JavaScript", href: "/academy/course/cpp-programming" },
-      { label: "Basic Computer Skills", href: "/academy/course/basic-computer" },
-      { label: "Computer Maintenance", href: "/academy/course/computer-maintenance" },
-      { label: "Mobile Maintenance", href: "/academy/course/mobile-maintenance" },
-      { label: "AI for Business", href: "/academy/course/ai-business" },
-      { label: "Cybersecurity & Data Safety", href: "/academy/course/cybersecurity" },
-      { label: "Sales & Career Development", href: "/academy/course/sales-career" },
-      { label: "Robotics & Drone Technology", href: "/academy/course/robotics-drone" },
-      { label: "English Language", href: "/academy/course/english-language" },
-      { label: "AI-Powered Freelancing", href: "/academy/course/ai-freelancing" },
-      { label: "3D Modeling & Prototyping", href: "/academy/course/3d-modeling" },
+      ...(dynamicCourses?.map(course => ({
+        label: course.title,
+        href: `/academy/course/${course.slug}`
+      })) || []),
     ],
   },
   { label: "About", href: "/about" },
@@ -60,6 +49,7 @@ export default function Navbar() {
   const [dropdown, setDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [user, setUser] = useState<{name: string; email: string; role: string} | null>(null);
+  const [courses, setCourses] = useState<any[]>([]);
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
   const pathname = usePathname();
@@ -89,6 +79,21 @@ export default function Navbar() {
       window.removeEventListener("storage", checkUser);
       window.removeEventListener("userUpdated", handleUserUpdate);
     };
+  }, []);
+
+  // Fetch courses for dynamic dropdown
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await coursesAPI.getAll({ limit: 50 });
+        if (response.success && response.data?.courses) {
+          setCourses(response.data.courses);
+        }
+      } catch (error) {
+        console.error("Failed to fetch courses for navbar:", error);
+      }
+    };
+    fetchCourses();
   }, []);
   
   // Re-check user when pathname changes (after navigation)
@@ -147,8 +152,9 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) =>
-              link.children ? (
+            {navLinks.map((link) => {
+              const children = link.getChildren ? link.getChildren(courses) : link.children;
+              return children ? (
                 <div
                   key={link.label}
                   className="relative"
@@ -171,18 +177,18 @@ export default function Navbar() {
                         exit={{ opacity: 0, y: 8 }}
                         transition={{ duration: 0.15 }}
                         className={`absolute top-full left-0 mt-1 rounded-xl overflow-hidden shadow-xl ${
-                          link.children.length > 6 ? "w-[600px]" : "w-52"
+                          children.length > 6 ? "w-[600px]" : "w-52"
                         } ${isDark ? "glass-dark" : "bg-white border border-gray-200"}`}
                       >
-                        <div className={link.children.length > 6 ? "grid grid-cols-3 p-2 gap-0.5" : ""}>
-                          {link.children.map((child) => (
+                        <div className={children.length > 6 ? "grid grid-cols-3 p-2 gap-0.5" : ""}>
+                          {children.map((child) => (
                             <Link
                               key={child.href}
                               href={child.href}
                               className={`block px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                                 isDark
-                                  ? "text-white/70 hover:text-white hover:bg-white/5"
-                                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                  ? "text-white/70 hover:text-white hover:bg-[#f47822]/20"
+                                  : "text-gray-600 hover:text-[#f47822] hover:bg-[#f47822]/10"
                               }`}
                             >
                               {child.label}
@@ -209,8 +215,8 @@ export default function Navbar() {
                 >
                   {link.label}
                 </Link>
-              )
-            )}
+              );
+            })}
           </div>
 
           {/* CTA & Theme Toggle */}
@@ -308,60 +314,63 @@ export default function Navbar() {
             }`}
           >
             <div className="px-4 py-6 space-y-1">
-              {navLinks.map((link) => (
-                <div key={link.label}>
-                  {link.children ? (
-                    <button
-                      onClick={() => setMobileExpanded(mobileExpanded === link.label ? null : link.label)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                        isDark
-                          ? "text-white/70 hover:text-white hover:bg-white/5"
-                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                      }`}
-                    >
-                      {link.label}
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          mobileExpanded === link.label ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-                  ) : (
-                    <Link
-                      href={link.href}
-                      className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                        pathname === link.href
-                          ? isDark
-                            ? "text-cyan-400 bg-cyan-400/10"
-                            : "text-orange-500 bg-orange-50"
-                          : isDark
+              {navLinks.map((link) => {
+                const children = link.getChildren ? link.getChildren(courses) : link.children;
+                return (
+                  <div key={link.label}>
+                    {children ? (
+                      <button
+                        onClick={() => setMobileExpanded(mobileExpanded === link.label ? null : link.label)}
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                          isDark
                             ? "text-white/70 hover:text-white hover:bg-white/5"
                             : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  )}
-                  {link.children && mobileExpanded === link.label && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      {link.children.map((child) => (
-                        <Link
-                          key={child.href}
-                          href={child.href}
-                          onClick={() => setMobileOpen(false)}
-                          className={`block px-4 py-2 rounded-lg text-xs transition-all ${
-                            isDark
-                              ? "text-white/50 hover:text-white/80 hover:bg-white/5"
-                              : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        {link.label}
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            mobileExpanded === link.label ? "rotate-180" : ""
                           }`}
-                        >
-                          {child.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                        />
+                      </button>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                          pathname === link.href
+                            ? isDark
+                              ? "text-cyan-400 bg-cyan-400/10"
+                              : "text-orange-500 bg-orange-50"
+                            : isDark
+                              ? "text-white/70 hover:text-white hover:bg-white/5"
+                              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    )}
+                    {children && mobileExpanded === link.label && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {children.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            onClick={() => setMobileOpen(false)}
+                            className={`block px-4 py-2 rounded-lg text-xs transition-all ${
+                              isDark
+                                ? "text-white/50 hover:text-white hover:bg-[#f47822]/20"
+                                : "text-gray-500 hover:text-[#f47822] hover:bg-[#f47822]/10"
+                            }`}
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
               <div className="pt-4 flex flex-col gap-2">
                 {user ? (
                   <>
