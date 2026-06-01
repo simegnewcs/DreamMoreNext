@@ -17,7 +17,7 @@ const knowledgeBase = {
   },
   contact: {
     email: "support@dreammoredigitals.com",
-    phone: "+251 911 234 567",
+    phone: "0993132122",
     website: "https://www.dreammoredigitals.com",
     address: "Addis Ababa, Ethiopia"
   },
