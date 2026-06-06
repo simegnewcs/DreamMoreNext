@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { InstructorProvider, useInstructor } from "@/context/InstructorContext";
 import { useAuth } from "@/hooks/useAuth";
+import { signOut } from "next-auth/react";
 
 interface User {
   id: number;
@@ -51,7 +52,7 @@ const studentNavSections = [
 ];
 
 // ── Instructor sidebar content ─────────────────────────────────────────────
-function InstructorSidebar({ isCollapsed, user, onLogout }: { isCollapsed: boolean; user: User | null; onLogout: () => void }) {
+function InstructorSidebar({ isCollapsed, user, onLogout, isLoggingOut }: { isCollapsed: boolean; user: User | null; onLogout: () => void; isLoggingOut?: boolean }) {
   const pathname = usePathname();
   const { assignedCourses, stats, loading } = useInstructor();
   const [coursesOpen, setCoursesOpen] = useState(true);
@@ -177,8 +178,12 @@ function InstructorSidebar({ isCollapsed, user, onLogout }: { isCollapsed: boole
                 <p className="text-xs font-semibold text-gray-900 truncate">{user?.name || "Instructor"}</p>
                 <p className="text-[10px] text-orange-500 font-medium">Instructor</p>
               </div>
-              <button onClick={onLogout} className="p-1.5 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors" title="Logout">
-                <LogOut className="w-3.5 h-3.5" />
+              <button onClick={onLogout} disabled={isLoggingOut} className="p-1.5 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50" title="Logout">
+                {isLoggingOut ? (
+                  <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin block" />
+                ) : (
+                  <LogOut className="w-3.5 h-3.5" />
+                )}
               </button>
             </>
           )}
@@ -189,7 +194,7 @@ function InstructorSidebar({ isCollapsed, user, onLogout }: { isCollapsed: boole
 }
 
 // ── Student sidebar content ────────────────────────────────────────────────
-function StudentSidebar({ isCollapsed, user, onLogout }: { isCollapsed: boolean; user: User | null; onLogout: () => void }) {
+function StudentSidebar({ isCollapsed, user, onLogout, isLoggingOut }: { isCollapsed: boolean; user: User | null; onLogout: () => void; isLoggingOut?: boolean }) {
   const pathname = usePathname();
   const isActive = (href: string) =>
     href === "/lms" ? pathname === "/lms" : pathname?.startsWith(href);
@@ -261,8 +266,12 @@ function StudentSidebar({ isCollapsed, user, onLogout }: { isCollapsed: boolean;
                 <p className="text-xs font-semibold text-gray-900 truncate">{user?.name || "Student"}</p>
                 <p className="text-[10px] text-gray-500 truncate">{user?.email || ""}</p>
               </div>
-              <button onClick={onLogout} className="p-1.5 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors" title="Logout">
-                <LogOut className="w-3.5 h-3.5" />
+              <button onClick={onLogout} disabled={isLoggingOut} className="p-1.5 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50" title="Logout">
+                {isLoggingOut ? (
+                  <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin block" />
+                ) : (
+                  <LogOut className="w-3.5 h-3.5" />
+                )}
               </button>
             </>
           )}
@@ -290,15 +299,29 @@ function LMSLayoutInner({ children, course }: LMSLayoutProps) {
     }
   }, [instructorLoading, isInstructor, course, canAccessCourse, router]);
 
-  const handleLogout = () => {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    // Small delay for smooth transition
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Clear localStorage
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event("userUpdated"));
+    
+    // Sign out from NextAuth (Google session)
+    await signOut({ redirect: false });
+    
+    // Hard redirect to clear all state
     window.location.href = "/login";
   };
 
   const SidebarContent = isInstructor
-    ? () => <InstructorSidebar isCollapsed={isCollapsed} user={user} onLogout={handleLogout} />
-    : () => <StudentSidebar isCollapsed={isCollapsed} user={user} onLogout={handleLogout} />;
+    ? () => <InstructorSidebar isCollapsed={isCollapsed} user={user} onLogout={handleLogout} isLoggingOut={isLoggingOut} />
+    : () => <StudentSidebar isCollapsed={isCollapsed} user={user} onLogout={handleLogout} isLoggingOut={isLoggingOut} />;
 
   // Show access-denied if instructor + unassigned course (before redirect fires)
   const accessDenied = !instructorLoading && isInstructor && course && !canAccessCourse(course.slug);

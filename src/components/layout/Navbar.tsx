@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, Sun, Moon, User, LogOut, LayoutDashboard } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { coursesAPI } from "@/lib/api";
+import { signOut } from "next-auth/react";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -106,11 +107,25 @@ export default function Navbar() {
     }
   }, [pathname]);
 
-  const handleLogout = () => {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    // Small delay for smooth transition
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Clear localStorage
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setUser(null);
     window.dispatchEvent(new Event("userUpdated"));
-    router.push("/");
+    
+    // Sign out from NextAuth (Google session)
+    await signOut({ redirect: false });
+    
+    // Hard redirect to clear all state
+    window.location.href = "/";
   };
 
   useEffect(() => {
@@ -245,14 +260,24 @@ export default function Navbar() {
                 {/* Logout Button */}
                 <button
                   onClick={handleLogout}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  disabled={isLoggingOut}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                     isDark 
                       ? "text-red-400 hover:bg-red-400/10" 
                       : "text-red-500 hover:bg-red-50"
                   }`}
                 >
-                  <LogOut className="w-4 h-4" />
-                  Logout
+                  {isLoggingOut ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      Logging out...
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </>
+                  )}
                 </button>
               </div>
             ) : (
@@ -387,14 +412,34 @@ export default function Navbar() {
                       )}
                     </div>
                     {/* Panel link for mobile */}
-                    {(user.role === "admin" || user.role === "instructor") && (
+                    {user.role === "admin" && (
                       <Link
-                        href={user.role === "admin" ? "/admin" : "/instructor"}
+                        href="/admin"
                         onClick={() => setMobileOpen(false)}
                         className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold bg-[#f47822] text-white hover:bg-[#e06b18] transition-all"
                       >
                         <LayoutDashboard className="w-4 h-4" />
-                        Go to Panel
+                        Admin Panel
+                      </Link>
+                    )}
+                    {user.role === "instructor" && (
+                      <Link
+                        href="/instructor"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold bg-[#f47822] text-white hover:bg-[#e06b18] transition-all"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        Instructor Panel
+                      </Link>
+                    )}
+                    {user.role === "student" && (
+                      <Link
+                        href="/lms"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold bg-[#f47822] text-white hover:bg-[#e06b18] transition-all"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        My Learning
                       </Link>
                     )}
                     <button
@@ -402,14 +447,24 @@ export default function Navbar() {
                         handleLogout();
                         setMobileOpen(false);
                       }}
-                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
+                      disabled={isLoggingOut}
+                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                         isDark 
                           ? "bg-red-500/10 text-red-400 hover:bg-red-500/20" 
                           : "bg-red-50 text-red-500 hover:bg-red-100"
                       }`}
                     >
-                      <LogOut className="w-4 h-4" />
-                      Logout
+                      {isLoggingOut ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          Logging out...
+                        </>
+                      ) : (
+                        <>
+                          <LogOut className="w-4 h-4" />
+                          Logout
+                        </>
+                      )}
                     </button>
                   </>
                 ) : (
