@@ -28,11 +28,11 @@ export default function SupportPage() {
             </p>
             <div className="space-y-3">
               <a 
-                href="mailto:support@dreammoredigitals.com" 
+                href="mailto:suport@dreammoredigitals.com" 
                 className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#f47822] transition-colors"
               >
                 <Mail className="w-4 h-4" />
-                support@dreammoredigitals.com
+                suport@dreammoredigitals.com
               </a>
               <a 
                 href="tel:+251993132122" 
