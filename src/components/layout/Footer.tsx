@@ -66,9 +66,9 @@ export default function Footer() {
             </p>
             {/* Contact info */}
             <div className="space-y-3">
-              <a href="mailto:info@dreammoredigitals.com" className={`flex items-center gap-3 text-sm transition-colors ${isDark ? "text-white/50 hover:text-orange-400" : "text-gray-600 hover:text-orange-500"}`}>
+              <a href="mailto:support@dreammoredigitals.com" className={`flex items-center gap-3 text-sm transition-colors ${isDark ? "text-white/50 hover:text-orange-400" : "text-gray-600 hover:text-orange-500"}`}>
                 <Mail className="w-4 h-4" style={{ color: "#f47822" }} />
-                info@dreammoredigitals.com
+                support@dreammoredigitals.com
               </a>
               <a href="tel:+251993132122" className={`flex items-center gap-3 text-sm transition-colors ${isDark ? "text-white/50 hover:text-orange-400" : "text-gray-600 hover:text-orange-500"}`}>
                 <Phone className="w-4 h-4" style={{ color: "#f47822" }} />

@@ -6032,7 +6032,7 @@ function CourseAssignmentSection({ isDark }: { isDark: boolean }) {
 function SettingsSection({ isDark }: { isDark: boolean }) {
   const [settings, setSettings] = useState({
     siteName: "DreamMore",
-    contactEmail: "support@dreammore.com",
+    contactEmail: "support@dreammoredigitals.com",
     contactPhone: "+251 911 234 567",
     cbeAccount: "1000765205852",
     telebirrAccount: "0993132122",
