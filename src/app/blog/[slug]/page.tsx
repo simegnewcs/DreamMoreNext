@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { getBlogBySlug, getAllBlogs } from "@/lib/db/blogs";
 import BlogDetailClient from "@/components/blog/BlogDetailClient";
 
+// Force dynamic rendering to get fresh data
+export const dynamic = "force-dynamic";
+
 interface BlogDetailPageProps {
   params: Promise<{
     slug: string;
