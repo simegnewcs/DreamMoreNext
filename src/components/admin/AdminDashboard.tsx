@@ -32,6 +32,7 @@ const getSidebarItems = (stats: { users: number; applications: number; courses: 
   { icon: Monitor, label: "LMS", id: "lms", badge: null },
   { icon: Award, label: "Certificates", id: "certificates", badge: null },
   { icon: Newspaper, label: "Blog", id: "blog", badge: null },
+  { icon: Building2, label: "Trusted By", id: "trusted-by", badge: null },
   { icon: TrendingUp, label: "Portfolio", id: "portfolio", badge: null },
   { icon: BarChart3, label: "Testimonials", id: "testimonials", badge: null },
   { icon: UserCheck2, label: "Team", id: "team", badge: null },
@@ -120,6 +121,19 @@ export default function AdminDashboard() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<any>(null);
   const [deletingBlog, setDeletingBlog] = useState(false);
+
+  // Trusted Brands management state
+  const [brands, setBrands] = useState<any[]>([]);
+  const [showAddBrand, setShowAddBrand] = useState(false);
+  const [newBrand, setNewBrand] = useState({
+    name: "",
+    logo: "",
+  });
+  const [editingBrand, setEditingBrand] = useState<any>(null);
+  const [brandImgUploading, setBrandImgUploading] = useState(false);
+  const [deleteBrandModalOpen, setDeleteBrandModalOpen] = useState(false);
+  const [brandToDelete, setBrandToDelete] = useState<any>(null);
+  const [deletingBrand, setDeletingBrand] = useState(false);
 
   // Custom categories state
   const [customCategories, setCustomCategories] = useState<string[]>([]);
@@ -215,6 +229,17 @@ export default function AdminDashboard() {
           }
         } catch (blogError) {
           console.error("Error loading blogs:", blogError);
+        }
+
+        // Load trusted brands from API
+        try {
+          const brandsRes = await fetch("/api/admin/trusted-brands");
+          const brandsData = await brandsRes.json();
+          if (brandsData.success) {
+            setBrands(brandsData.brands || []);
+          }
+        } catch (brandError) {
+          console.error("Error loading trusted brands:", brandError);
         }
 
         // Load payment accounts from API (database)
@@ -4153,6 +4178,352 @@ export default function AdminDashboard() {
                   )}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ── TRUSTED BRANDS MANAGEMENT ───────────────────────────────── */}
+          {activeSection === "trusted-by" && (
+            <div className="space-y-6">
+              {/* Header */}
+              <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl ${
+                isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-sm"
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#f47822]/10 flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-[#f47822]" />
+                  </div>
+                  <div>
+                    <h2 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Trusted Brands</h2>
+                    <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{brands.length} trusted brands</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    if (showAddBrand) {
+                      setShowAddBrand(false);
+                      setEditingBrand(null);
+                      setNewBrand({ name: "", logo: "" });
+                    } else {
+                      setEditingBrand(null);
+                      setNewBrand({ name: "", logo: "" });
+                      setShowAddBrand(true);
+                    }
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#f47822] text-white text-sm font-semibold hover:bg-[#e06b18] transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  {showAddBrand ? "Cancel" : "Add Trusted Brand"}
+                </button>
+              </div>
+
+              {/* Add/Edit Form */}
+              <AnimatePresence>
+                {showAddBrand && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className={`rounded-2xl p-6 ${isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-lg"}`}
+                  >
+                    <h3 className={`text-lg font-bold mb-5 flex items-center gap-2 ${isDark ? "text-white" : "text-gray-900"}`}>
+                      <Plus className="w-5 h-5 text-[#f47822]" />
+                      {editingBrand ? "Edit Trusted Brand" : "Add New Trusted Brand"}
+                    </h3>
+                    
+                    <form onSubmit={async (e) => {
+                      e.preventDefault();
+                      try {
+                        const isEditing = editingBrand && editingBrand.id;
+                        const url = isEditing 
+                          ? `/api/admin/trusted-brands/${editingBrand.id}` 
+                          : '/api/admin/trusted-brands';
+                        const method = isEditing ? 'PUT' : 'POST';
+                        
+                        const res = await fetch(url, {
+                          method,
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(newBrand),
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          if (isEditing) {
+                            setBrands(brands.map(b => b.id === editingBrand.id ? data.brand : b));
+                            setEditingBrand(null);
+                          } else {
+                            setBrands([data.brand, ...brands]);
+                          }
+                          setShowAddBrand(false);
+                          setNewBrand({ name: "", logo: "" });
+                        } else {
+                          alert(data.message || 'Error saving brand');
+                        }
+                      } catch (error) {
+                        console.error('Error saving brand:', error);
+                        alert('Error saving brand');
+                      }
+                    }} className="space-y-4">
+                      {/* Brand Name */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Brand Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={newBrand.name}
+                          onChange={(e) => setNewBrand({...newBrand, name: e.target.value})}
+                          className={`w-full px-4 py-2.5 rounded-xl border text-sm ${
+                            isDark 
+                              ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                          }`}
+                          placeholder="e.g., Google"
+                          required
+                        />
+                      </div>
+
+                      {/* Logo Upload / URL */}
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                          Logo Upload *
+                        </label>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <input
+                            type="text"
+                            value={newBrand.logo}
+                            onChange={(e) => setNewBrand({...newBrand, logo: e.target.value})}
+                            className={`flex-1 px-4 py-2.5 rounded-xl border text-sm ${
+                              isDark 
+                                ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
+                                : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                            }`}
+                            placeholder="Logo URL or upload using the button →"
+                            required
+                          />
+                          <div className="relative">
+                            <button
+                              type="button"
+                              disabled={brandImgUploading}
+                              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white text-sm font-semibold transition-all"
+                            >
+                              {brandImgUploading ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  Uploading…
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="w-4 h-4" />
+                                  Upload Logo
+                                </>
+                              )}
+                            </button>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              disabled={brandImgUploading}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setBrandImgUploading(true);
+                                try {
+                                  const fd = new FormData();
+                                  fd.append("file", file);
+                                  const res = await fetch("/api/upload/trusted-brand", { method: "POST", body: fd });
+                                  const data = await res.json();
+                                  if (data.success) {
+                                    setNewBrand(prev => ({ ...prev, logo: data.url }));
+                                  } else {
+                                    alert(data.error || "Upload failed");
+                                  }
+                                } catch (err) {
+                                  console.error("Upload error:", err);
+                                  alert("Upload failed");
+                                } finally {
+                                  setBrandImgUploading(false);
+                                  e.target.value = "";
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+                        {newBrand.logo && (
+                          <div className="mt-3">
+                            <span className={`block text-xs font-medium mb-1 ${isDark ? "text-white/40" : "text-gray-400"}`}>Preview:</span>
+                            <div className={`w-24 h-12 p-2 rounded-lg flex items-center justify-center ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
+                              <img src={newBrand.logo} alt="Preview" className="max-w-full max-h-full object-contain" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Submit */}
+                      <div className="flex gap-3 pt-2">
+                        <button
+                          type="submit"
+                          className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#f47822] text-white text-sm font-semibold hover:bg-[#e06b18] transition-all"
+                        >
+                          <Save className="w-4 h-4" />
+                          Save Brand
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAddBrand(false);
+                            setEditingBrand(null);
+                            setNewBrand({ name: "", logo: "" });
+                          }}
+                          className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                            isDark
+                              ? "bg-white/5 text-white/60 hover:bg-white/10"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Grid List */}
+              <div className={`rounded-2xl p-6 ${isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-sm"}`}>
+                <h3 className={`font-semibold mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>All Trusted Brands</h3>
+                
+                {brands.length === 0 ? (
+                  <div className={`py-12 text-center ${isDark ? "text-white/50" : "text-gray-500"}`}>
+                    <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p>No trusted brands yet. Click "Add Trusted Brand" to create one.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {brands.map((brand: any) => (
+                      <div
+                        key={brand.id}
+                        className={`relative group p-4 rounded-xl flex flex-col items-center justify-center gap-3 transition-all border ${
+                          isDark 
+                            ? "bg-white/5 border-white/5 hover:border-white/10" 
+                            : "bg-white border-gray-200 hover:border-gray-300 shadow-sm"
+                        }`}
+                      >
+                        <div className={`w-full h-16 flex items-center justify-center p-2 rounded-lg ${
+                          isDark ? "bg-white/5" : "bg-gray-50"
+                        }`}>
+                          <img src={brand.logo} alt={brand.name} className="max-w-full max-h-full object-contain" />
+                        </div>
+                        <span className={`text-xs font-bold text-center truncate w-full ${isDark ? "text-white" : "text-gray-900"}`}>
+                          {brand.name}
+                        </span>
+                        
+                        {/* Hover Actions */}
+                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-[#0a0a0f]/80 p-1 rounded-lg backdrop-blur-sm">
+                          <button
+                            onClick={() => {
+                              setEditingBrand(brand);
+                              setNewBrand({ name: brand.name, logo: brand.logo });
+                              setShowAddBrand(true);
+                            }}
+                            className="p-1 rounded text-blue-400 hover:bg-white/10"
+                            title="Edit"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setBrandToDelete(brand);
+                              setDeleteBrandModalOpen(true);
+                            }}
+                            className="p-1 rounded text-red-400 hover:bg-white/10"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── DELETE BRAND CONFIRMATION MODAL ─────────────────────────── */}
+          {deleteBrandModalOpen && brandToDelete && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`w-full max-w-md rounded-2xl p-6 ${isDark ? "bg-[#1a1a24] border border-white/10" : "bg-white border border-gray-200 shadow-xl"}`}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
+                    <Trash2 className="w-6 h-6 text-red-500" />
+                  </div>
+                  <div>
+                    <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      Delete Trusted Brand?
+                    </h3>
+                  </div>
+                </div>
+                
+                <p className={`text-sm mb-6 ${isDark ? "text-white/70" : "text-gray-600"}`}>
+                  Are you sure you want to delete <strong className={isDark ? "text-white" : "text-gray-900"}>"{brandToDelete.name}"</strong>? This action cannot be undone.
+                </p>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setDeleteBrandModalOpen(false);
+                      setBrandToDelete(null);
+                    }}
+                    className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      isDark 
+                        ? "bg-white/10 text-white hover:bg-white/15" 
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                    disabled={deletingBrand}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setDeletingBrand(true);
+                      try {
+                        const res = await fetch(`/api/admin/trusted-brands/${brandToDelete.id}`, { method: 'DELETE' });
+                        if (res.ok) {
+                          setBrands(brands.filter((b) => b.id !== brandToDelete.id));
+                          setDeleteBrandModalOpen(false);
+                          setBrandToDelete(null);
+                        } else {
+                          const data = await res.json();
+                          alert(data.message || 'Failed to delete brand');
+                        }
+                      } catch (error) {
+                        console.error('Error deleting brand:', error);
+                        alert('Error deleting brand');
+                      } finally {
+                        setDeletingBrand(false);
+                      }
+                    }}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                    disabled={deletingBrand}
+                  >
+                    {deletingBrand ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
             </div>
           )}
 

@@ -248,5 +248,14 @@ INSERT IGNORE INTO testimonials (name, company, role, content, rating) VALUES
 
 -- Insert sample applications
 INSERT IGNORE INTO applications (course_id, name, email, phone, status, amount) 
-SELECT c.id, 'Abebe Tadesse', 'abebe@example.com', '+251911234567', 'pending', c.price 
 FROM courses c WHERE c.slug = 'full-stack-development';
+
+-- Trusted Brands table
+CREATE TABLE IF NOT EXISTS trusted_brands (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  logo VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+

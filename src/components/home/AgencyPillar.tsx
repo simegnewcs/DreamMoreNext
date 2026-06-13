@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Code2, Palette, TrendingUp, Layers, ArrowUpRight, CheckCircle2 } from "lucide-react";
@@ -18,11 +19,27 @@ const stats = [
   { value: "3x",   label: "Avg. ROI Uplift" },
 ];
 
-const clients = ["Hella Coffee", "EthioHealth", "AgroConnect", "BankDash", "Addis Brand Co.", "Urban Bites", "StrLink"];
+const clients = ["Hella Coffee", "ጋሪ ፋብሪካ", "Sosina Tibeb", "ሰርካለም ባልትና", "ወንዳለ እና ጓድኞቹ የቢሮ የንጨት ስራ", "እንዝርት ዲዛይን", "Hanna Ayele Caltural cloths"];
 
 export default function AgencyPillar() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [brands, setBrands] = useState<{ id: number; name: string; logo: string }[]>([]);
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const res = await fetch("/api/trusted-brands");
+        const data = await res.json();
+        if (data.success && data.brands && data.brands.length > 0) {
+          setBrands(data.brands);
+        }
+      } catch (err) {
+        console.error("Error fetching trusted brands:", err);
+      }
+    };
+    fetchBrands();
+  }, []);
 
   return (
     <section
@@ -324,15 +341,28 @@ export default function AgencyPillar() {
         <div className="flex overflow-hidden">
           <motion.div
             animate={{ x: ["0%", "-50%"] }}
-            transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-            className="flex gap-12 items-center flex-shrink-0 whitespace-nowrap pr-12"
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            className="flex gap-16 items-center flex-shrink-0 whitespace-nowrap pr-16"
           >
-            {[...clients, ...clients].map((name, i) => (
-              <span
-                key={i}
-                className={`text-sm font-bold tracking-wider transition-colors cursor-default ${isDark ? "text-white/25 hover:text-white/50" : "text-gray-400 hover:text-gray-600"}`}
-              >
-                {name}
+            {(brands.length > 0
+              ? [...brands, ...brands, ...brands, ...brands]
+              : clients.map((name, i) => ({ id: i, name, logo: "" }))
+            ).map((brand: any, i) => (
+              <span key={i} className="inline-flex items-center gap-3">
+                {brand.logo && (
+                  <img
+                    src={brand.logo}
+                    alt={brand.name}
+                    className="w-8 h-8 rounded-full object-cover border border-white/10 transition-all duration-300"
+                  />
+                )}
+                <span
+                  className={`text-sm font-bold tracking-wider transition-colors cursor-default ${
+                    isDark ? "text-white/25 hover:text-white/50" : "text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  {brand.name}
+                </span>
               </span>
             ))}
           </motion.div>
