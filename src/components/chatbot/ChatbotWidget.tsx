@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -13,13 +13,14 @@ interface Message {
   timestamp: Date;
 }
 
+// Quick questions for common user intents
 const quickQuestions = [
-  "What courses do you offer?",
-  "How do I apply?",
-  "What are the prices?",
-  "Do you offer certificates?",
-  "Payment options?",
-  "Contact info?",
+  "📚 What courses do you offer?",
+  "📝 How do I enroll?",
+  "💰 How much are the courses?",
+  "🎓 Do you give certificates?",
+  "💳 What payment methods?",
+  "🤝 Can I pay in installments?",
 ];
 
 export default function ChatbotWidget() {
@@ -31,7 +32,7 @@ export default function ChatbotWidget() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "👋 Hi! I'm DreamMore Bot. How can I help you today?\n\nAsk me about courses, pricing, or how to apply!",
+      text: "👋 Hi! I'm Dreamy, your DreamMore AI assistant!\n\nI can help you with:\n• 📚 Course information (16+ courses)\n• 📝 How to enroll step by step\n• 💰 Pricing & payment options\n• 🎓 Certificates & job placement\n• 🤝 Installment plans\n• 🏢 Agency services\n\nWhat would you like to know?",
       isUser: false,
       timestamp: new Date(),
     },
@@ -90,7 +91,6 @@ export default function ChatbotWidget() {
       const data = await response.json();
 
       if (data.success) {
-        // Update session ID if new one returned
         if (data.data.sessionId && data.data.sessionId !== sessionId) {
           setSessionId(data.data.sessionId);
           localStorage.setItem('chatbot_session_id', data.data.sessionId);
@@ -114,7 +114,7 @@ export default function ChatbotWidget() {
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          text: "Sorry, I'm having trouble connecting right now. Please try again or contact us at support@dreammoredigitals.com",
+          text: "I'm having trouble connecting right now. Please visit our website directly at www.dreammoredigitals.com or contact support@dreammoredigitals.com for immediate assistance.",
           isUser: false,
           timestamp: new Date(),
         },
@@ -126,7 +126,9 @@ export default function ChatbotWidget() {
   };
 
   const handleQuickQuestion = (question: string) => {
-    handleSend(question);
+    // Remove emoji prefix for cleaner matching
+    const cleanQuestion = question.replace(/^[^\w]+/, '');
+    handleSend(cleanQuestion);
   };
 
   return (
@@ -179,8 +181,11 @@ export default function ChatbotWidget() {
                   <Bot className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-white font-semibold text-sm">DreamMore Bot</p>
-                  <p className="text-white/70 text-xs">Online</p>
+                  <p className="text-white font-semibold text-sm">Dreamy AI Assistant</p>
+                  <p className="text-white/70 text-xs flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    Online • Powered by DreamMore
+                  </p>
                 </div>
               </div>
               <button
@@ -193,7 +198,7 @@ export default function ChatbotWidget() {
 
             {/* Messages */}
             <div
-              className="h-80 overflow-y-auto p-4 space-y-3"
+              className="h-96 overflow-y-auto p-4 space-y-3"
               style={{
                 background: isDark ? "#13122a" : "#f8f9fa",
               }}
@@ -219,14 +224,14 @@ export default function ChatbotWidget() {
                     )}
                   </div>
                   <div
-                    className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${
+                    className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm ${
                       msg.isUser
                         ? "bg-[#f47822] text-white rounded-br-md"
                         : isDark
                         ? "bg-white/10 text-white rounded-bl-md"
                         : "bg-white text-gray-800 rounded-bl-md shadow-sm"
                     }`}
-                    dangerouslySetInnerHTML={{ __html: msg.text }}
+                    dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br/>') }}
                   />
                 </div>
               ))}
@@ -303,7 +308,7 @@ export default function ChatbotWidget() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Type a message..."
+                  placeholder="Ask me anything about DreamMore..."
                   className={`flex-1 px-3 py-2 rounded-xl text-sm outline-none transition-colors ${
                     isDark
                       ? "bg-white/10 text-white placeholder:text-white/40 focus:bg-white/15"
