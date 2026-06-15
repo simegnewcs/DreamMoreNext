@@ -13,14 +13,13 @@ interface Message {
   timestamp: Date;
 }
 
-// Quick questions for common user intents
 const quickQuestions = [
-  "📚 What courses do you offer?",
-  "📝 How do I enroll?",
-  "💰 How much are the courses?",
-  "🎓 Do you give certificates?",
-  "💳 What payment methods?",
-  "🤝 Can I pay in installments?",
+  "What courses do you offer?",
+  "How do I enroll?",
+  "What are the prices?",
+  "Do you offer certificates?",
+  "Payment options?",
+  "Is DreamMore different from other agencies?",
 ];
 
 export default function ChatbotWidget() {
@@ -32,7 +31,7 @@ export default function ChatbotWidget() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "👋 Hi! I'm Dreamy, your DreamMore AI assistant!\n\nI can help you with:\n• 📚 Course information (16+ courses)\n• 📝 How to enroll step by step\n• 💰 Pricing & payment options\n• 🎓 Certificates & job placement\n• 🤝 Installment plans\n• 🏢 Agency services\n\nWhat would you like to know?",
+      text: "👋 Hi! I'm Dreamy, your DreamMore AI assistant!\n\nI can help you with:\n• 📚 Course information & enrollment\n• 💰 Pricing & payment options\n• � Agency services & portfolio\n• �🎓 Certificates & student support\n• 📞 Contact & support\n\nWhat would you like to know?",
       isUser: false,
       timestamp: new Date(),
     },
@@ -114,7 +113,7 @@ export default function ChatbotWidget() {
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          text: "I'm having trouble connecting right now. Please visit our website directly at www.dreammoredigitals.com or contact support@dreammoredigitals.com for immediate assistance.",
+          text: "That's an exceptionally precise and important question! While my knowledge base covers a wide range of topics, I want to make sure you receive a completely definitive answer for this one. Please share your question directly with our team — they will follow up with full accuracy and speed.\n\n📧 Email: support@dreammoredigitals.com\n📞 Phone/WhatsApp: +251 993 132 122\n📱 Telegram: @dreammoredigitals\n\nWe will respond within hours!",
           isUser: false,
           timestamp: new Date(),
         },
@@ -126,9 +125,7 @@ export default function ChatbotWidget() {
   };
 
   const handleQuickQuestion = (question: string) => {
-    // Remove emoji prefix for cleaner matching
-    const cleanQuestion = question.replace(/^[^\w]+/, '');
-    handleSend(cleanQuestion);
+    handleSend(question);
   };
 
   return (
@@ -308,7 +305,7 @@ export default function ChatbotWidget() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Ask me anything about DreamMore..."
+                  placeholder="Type your question..."
                   className={`flex-1 px-3 py-2 rounded-xl text-sm outline-none transition-colors ${
                     isDark
                       ? "bg-white/10 text-white placeholder:text-white/40 focus:bg-white/15"
