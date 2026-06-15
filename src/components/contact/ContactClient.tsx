@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Send, Loader2, CheckCircle, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
 const contactInfo = [
@@ -16,17 +15,6 @@ const contactInfo = [
 export default function ContactClient() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    setSent(true);
-  };
 
   return (
     <div className={`min-h-screen pt-20 ${isDark ? "bg-[#0a0a0f]" : "bg-gray-50"}`}>
@@ -48,145 +36,42 @@ export default function ContactClient() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-          {/* Contact info */}
-          <div className="lg:col-span-2 space-y-4">
-            <h3 className={`text-lg font-bold mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>Contact Information</h3>
-            {contactInfo.map((info) => {
-              const Icon = info.icon;
-              return (
-                <motion.a
-                  key={info.label}
-                  href={info.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className={`flex items-center gap-4 rounded-xl p-4 transition-all duration-200 group ${isDark ? "glass hover:border-white/15" : "bg-white border border-gray-200 hover:border-orange-300 shadow-sm"}`}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <h3 className={`text-lg font-bold mb-6 col-span-full ${isDark ? "text-white" : "text-gray-900"}`}>Contact Information</h3>
+          {contactInfo.map((info) => {
+            const Icon = info.icon;
+            return (
+              <motion.a
+                key={info.label}
+                href={info.href}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className={`flex items-center gap-4 rounded-xl p-5 transition-all duration-200 group ${isDark ? "glass hover:border-white/15" : "bg-white border border-gray-200 hover:border-orange-300 shadow-sm"}`}
+              >
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                  style={{ background: info.color + (isDark ? "15" : "20"), border: `1px solid ${info.color}${isDark ? "25" : "40"}` }}
                 >
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
-                    style={{ background: info.color + (isDark ? "15" : "20"), border: `1px solid ${info.color}${isDark ? "25" : "40"}` }}
-                  >
-                    <Icon className="w-5 h-5" style={{ color: info.color }} />
-                  </div>
-                  <div>
-                    <div className={`text-xs mb-0.5 ${isDark ? "text-white/40" : "text-gray-500"}`}>{info.label}</div>
-                    <div className={`text-sm font-medium transition-colors ${isDark ? "text-white group-hover:text-orange-400" : "text-gray-900 group-hover:text-orange-500"}`}>{info.value}</div>
-                  </div>
-                </motion.a>
-              );
-            })}
-
-            {/* Map placeholder */}
-            <div className={`rounded-2xl overflow-hidden mt-6 ${isDark ? "glass" : "bg-white border border-gray-200 shadow-sm"}`}>
-              <div className={`h-48 flex items-center justify-center ${isDark ? "bg-gradient-to-br from-slate-800/60 to-slate-900/40" : "bg-gradient-to-br from-gray-100 to-gray-200"}`}>
-                <div className="text-center">
-                  <MapPin className={`w-10 h-10 mx-auto mb-2 ${isDark ? "text-white/15" : "text-gray-400"}`} />
-                  <p className={`text-xs ${isDark ? "text-white/30" : "text-gray-500"}`}>Bole Road, Addis Ababa</p>
-                  <p className={`text-xs ${isDark ? "text-white/20" : "text-gray-400"}`}>Google Maps integration coming soon</p>
+                  <Icon className="w-6 h-6" style={{ color: info.color }} />
                 </div>
+                <div>
+                  <div className={`text-sm mb-1 ${isDark ? "text-white/40" : "text-gray-500"}`}>{info.label}</div>
+                  <div className={`text-base font-medium transition-colors ${isDark ? "text-white group-hover:text-orange-400" : "text-gray-900 group-hover:text-orange-500"}`}>{info.value}</div>
+                </div>
+              </motion.a>
+            );
+          })}
+
+          {/* Map placeholder */}
+          <div className={`rounded-2xl overflow-hidden col-span-full ${isDark ? "glass" : "bg-white border border-gray-200 shadow-sm"}`}>
+            <div className={`h-64 flex items-center justify-center ${isDark ? "bg-gradient-to-br from-slate-800/60 to-slate-900/40" : "bg-gradient-to-br from-gray-100 to-gray-200"}`}>
+              <div className="text-center">
+                <MapPin className={`w-12 h-12 mx-auto mb-3 ${isDark ? "text-white/15" : "text-gray-400"}`} />
+                <p className={`text-sm ${isDark ? "text-white/30" : "text-gray-500"}`}>Bole Road, Addis Ababa</p>
+                <p className={`text-sm ${isDark ? "text-white/20" : "text-gray-400"}`}>Google Maps integration coming soon</p>
               </div>
             </div>
-          </div>
-
-          {/* Contact form */}
-          <div className="lg:col-span-3">
-            {sent ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className={`rounded-2xl p-10 text-center h-full flex flex-col items-center justify-center ${isDark ? "glass" : "bg-white border border-gray-200 shadow-sm"}`}
-              >
-                <div className="w-16 h-16 rounded-full bg-green-400/10 border border-green-400/20 flex items-center justify-center mb-4">
-                  <CheckCircle className="w-8 h-8 text-green-400" />
-                </div>
-                <h3 className={`text-2xl font-black mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>Message Sent!</h3>
-                <p className={`text-sm ${isDark ? "text-white/55" : "text-gray-600"}`}>We&apos;ll get back to you within 24 hours.</p>
-              </motion.div>
-            ) : (
-              <form onSubmit={handleSubmit} className={`rounded-2xl p-8 space-y-5 ${isDark ? "glass" : "bg-white border border-gray-200 shadow-sm"}`}>
-                <h3 className={`text-lg font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>Send Us a Message</h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/65" : "text-gray-700"}`}>Your Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      placeholder="Full name"
-                      className={`w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-orange-400/50 transition-colors ${
-                        isDark 
-                          ? "bg-white/5 border border-white/10 text-white placeholder-white/30" 
-                          : "bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400"
-                      }`}
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/65" : "text-gray-600"}`}>Email Address</label>
-                    <input
-                      type="email"
-                      required
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="your@email.com"
-                      className={`w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-orange-400/50 transition-colors ${
-                        isDark 
-                          ? "bg-white/5 border border-white/10 text-white placeholder-white/30" 
-                          : "bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400"
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/65" : "text-gray-600"}`}>Subject</label>
-                  <input
-                    type="text"
-                    required
-                    value={form.subject}
-                    onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                    placeholder="How can we help?"
-                    className={`w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-orange-400/50 transition-colors ${
-                      isDark 
-                        ? "bg-white/5 border border-white/10 text-white placeholder-white/30" 
-                        : "bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/65" : "text-gray-600"}`}>Message</label>
-                  <textarea
-                    required
-                    value={form.message}
-                    onChange={(e) => setForm({ ...form, message: e.target.value })}
-                    placeholder="Tell us about your project, question, or idea..."
-                    rows={6}
-                    className={`w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-orange-400/50 transition-colors resize-none ${
-                      isDark 
-                        ? "bg-white/5 border border-white/10 text-white placeholder-white/30" 
-                        : "bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400"
-                    }`}
-                  />
-                </div>
-
-                <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-3 text-sm">
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      Send Message
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
           </div>
         </div>
       </div>

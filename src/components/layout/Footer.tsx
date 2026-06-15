@@ -9,7 +9,6 @@ const footerLinks = {
   company: [
     { label: "About Us", href: "/about" },
     { label: "Our Team", href: "/team" },
-    { label: "Careers", href: "/careers" },
     { label: "Blog", href: "/blog" },
     { label: "Contact", href: "/contact" },
   ],
@@ -23,9 +22,9 @@ const footerLinks = {
   ],
   academy: [
     { label: "All Courses", href: "/academy" },
-    { label: "Full Stack Dev", href: "/academy/course/full-stack-development" },
-    { label: "UI/UX Design", href: "/academy/course/ui-ux-design" },
-    { label: "AI Engineering", href: "/academy/course/ai-engineering" },
+    { label: "Web & Mobile Dev", href: "/academy/course/web-mobile-development" },
+    { label: "Graphics Design", href: "/academy/course/graphics-designing" },
+    { label: "AI for Business", href: "/academy/course/ai-business" },
     { label: "Cybersecurity", href: "/academy/course/cybersecurity" },
     { label: "Digital Marketing", href: "/academy/course/digital-marketing" },
   ],
