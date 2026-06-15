@@ -6,8 +6,67 @@ let cachedData: any = null;
 let cacheTimestamp: number = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// Define types for better type safety
+interface Course {
+  name: string;
+  price: number;
+}
+
+interface ScrapedData {
+  source: string;
+  lastScraped: string;
+  courses: Course[];
+  stats: {
+    totalCourses: number;
+    courseCountText: string;
+    studentsCount: string;
+    placementRate: string;
+  };
+  contact: {
+    phone: string;
+    email: string;
+  };
+  urls: {
+    academy: string;
+    agency: string;
+    contact: string;
+    about: string;
+  };
+}
+
+interface StaticKnowledgeBase {
+  organization: {
+    name: string;
+    description: string;
+    mission: string;
+    vision: string;
+    location: string;
+  };
+  agencyServices: string[];
+  pricing: {
+    standardCourse: number;
+    webDevelopment: number;
+    currency: string;
+    installment: string;
+  };
+  enrollmentSteps: string[];
+  contact: {
+    email: string;
+    phone: string;
+    telegram: string;
+    instagram: string;
+    website?: string; // Added optional website property
+  };
+  faq: {
+    certificate: string;
+    onlineClasses: string;
+    beginnerFriendly: string;
+    duration: string;
+  };
+}
+
 // Dynamic scraper function
-async function scrapeDreamMoreWebsite() {
+async function scrapeDreamMoreWebsite(): Promise<ScrapedData | null> {
   const now = Date.now();
   
   // Return cached data if still valid
@@ -44,12 +103,12 @@ async function scrapeDreamMoreWebsite() {
 
     // Extract courses from the Academy page using regex patterns
     const courseMatches = academyHtml.matchAll(/<h3[^>]*>([^<]+)<\/h3>[\s\S]*?ETB\s*([\d,]+)/gi);
-    const courses = [];
+    const courses: Course[] = [];
     
     for (const match of courseMatches) {
       courses.push({
         name: match[1].trim(),
-        price: parseInt(match[2].replace(/,/g, ''))
+        price: parseInt(match[2].replace(/,/g, ''), 10)
       });
     }
 
@@ -58,14 +117,11 @@ async function scrapeDreamMoreWebsite() {
     const studentsMatch = academyHtml.match(/(\d+)\+?\s*Students?/i);
     const placementMatch = academyHtml.match(/(\d+)%\s*Job\s*Placement/i);
     
-    // Extract meta description for mission/vision
-    const metaDescMatch = homeHtml.match(/<meta name="description" content="([^"]+)"/i);
-    
     // Extract contact info from footer
     const phoneMatch = homeHtml.match(/(\+251\s*\d{3}\s*\d{6})/);
     const emailMatch = homeHtml.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
     
-    const scrapedData = {
+    const scrapedData: ScrapedData = {
       source: "https://www.dreammoredigitals.com",
       lastScraped: new Date().toISOString(),
       courses: courses,
@@ -101,7 +157,7 @@ async function scrapeDreamMoreWebsite() {
 }
 
 // Comprehensive knowledge base (fallback + static data)
-const staticKnowledgeBase = {
+const staticKnowledgeBase: StaticKnowledgeBase = {
   organization: {
     name: "DreamMore Digital Ecosystem",
     description: "Ethiopia's premier Digital Innovation Ecosystem with two core divisions: DreamMore Digitals (Agency) and DreamMore Skills Academy (Academy)",
@@ -140,7 +196,8 @@ const staticKnowledgeBase = {
     email: "support@dreammoredigitals.com",
     phone: "+251 993 132 122",
     telegram: "@dreammoredigitals",
-    instagram: "@dreammorecompany"
+    instagram: "@dreammorecompany",
+    website: "https://www.dreammoredigitals.com" // Added missing website property
   },
   
   faq: {
@@ -214,15 +271,15 @@ export async function POST(request: NextRequest) {
 }
 
 // Generate dynamic response using live website data
-async function generateDynamicResponse(message: string, liveData: any): Promise<string> {
+async function generateDynamicResponse(message: string, liveData: ScrapedData | null): Promise<string> {
   const lowerMsg = message.toLowerCase();
   const dataSource = liveData || staticKnowledgeBase;
   
   // ===== COURSES (using live data) =====
   if (lowerMsg.includes('course') || lowerMsg.includes('what do you offer') || lowerMsg.includes('what can i learn')) {
     if (liveData && liveData.courses && liveData.courses.length > 0) {
-      const courseList = liveData.courses.slice(0, 10).map(c => 
-        `<div><span style="color: #f47822;">•</span> <b>${c.name}</b> — ETB ${c.price.toLocaleString()}</div>`
+      const courseList = liveData.courses.slice(0, 10).map((course: Course) => 
+        `<div><span style="color: #f47822;">•</span> <b>${course.name}</b> — ETB ${course.price.toLocaleString()}</div>`
       ).join('');
       
       const remainingCount = liveData.courses.length - 10;
@@ -343,8 +400,8 @@ Contact admissions to arrange: ${staticKnowledgeBase.contact.phone}</div>
 
   // ===== AGENCY SERVICES =====
   if (lowerMsg.includes('agency') || (lowerMsg.includes('service') && lowerMsg.includes('offer'))) {
-    const servicesList = staticKnowledgeBase.agencyServices.map(s => 
-      `<div><span style="color: #f47822;">▹</span> ${s}</div>`
+    const servicesList = staticKnowledgeBase.agencyServices.map((service: string) => 
+      `<div><span style="color: #f47822;">▹</span> ${service}</div>`
     ).join('');
     
     return `<div style="margin-bottom: 10px;">🚀 <b>DreamMore Agency Services:</b></div>
@@ -360,14 +417,14 @@ ${servicesList}
 <div><span style="color: #f47822;">📱</span> Phone/WhatsApp: <a href="tel:${staticKnowledgeBase.contact.phone}" style="color: #f47822;">${staticKnowledgeBase.contact.phone}</a></div>
 <div><span style="color: #f47822;">📢</span> Telegram: ${staticKnowledgeBase.contact.telegram}</div>
 <div><span style="color: #f47822;">📷</span> Instagram: ${staticKnowledgeBase.contact.instagram}</div>
-<div style="margin-top: 10px;">🌐 <b>Website:</b> <a href="https://www.dreammoredigitals.com" target="_blank" style="color: #f47822;">dreammoredigitals.com</a></div>
+<div style="margin-top: 10px;">🌐 <b>Website:</b> <a href="${staticKnowledgeBase.contact.website}" target="_blank" style="color: #f47822;">${staticKnowledgeBase.contact.website}</a></div>
 <div style="margin-top: 10px;">👉 <a href="${liveData?.urls?.contact || 'https://www.dreammoredigitals.com/contact'}" target="_blank" style="color: #f47822; text-decoration: underline;">Contact form & office location</a></div>`;
   }
 
   // ===== GREETING =====
   if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('hey')) {
     return `<div style="margin-bottom: 10px;">👋 Hello! I'm Dreamy, your DreamMore AI assistant!</div>
-<div style="line-height: 1.6;">I'm connected to our live website at <a href="https://www.dreammoredigitals.com" target="_blank" style="color: #f47822;">dreammoredigitals.com</a> and can help you with:</div>
+<div style="line-height: 1.6;">I'm connected to our live website at <a href="${staticKnowledgeBase.contact.website}" target="_blank" style="color: #f47822;">dreammoredigitals.com</a> and can help you with:</div>
 <div>• 📚 <b>Course information</b> — see all ${liveData?.courses?.length || '16+'} courses</div>
 <div>• 📝 <b>How to enroll</b> — step-by-step guide</div>
 <div>• 💰 <b>Pricing & payments</b> — fees, installments, methods</div>
@@ -381,7 +438,7 @@ ${servicesList}
   return `<div style="margin-bottom: 10px;">❓ I want to make sure you get the most accurate information from our website.</div>
 <div style="line-height: 1.6;">Please visit our official website or contact our team directly for specific questions:</div>
 <div style="margin-top: 10px; padding: 10px; background: rgba(244, 120, 34, 0.1); border-radius: 8px;">
-<div>🌐 <b>Website:</b> <a href="https://www.dreammoredigitals.com" target="_blank" style="color: #f47822;">www.dreammoredigitals.com</a></div>
+<div>🌐 <b>Website:</b> <a href="${staticKnowledgeBase.contact.website}" target="_blank" style="color: #f47822;">${staticKnowledgeBase.contact.website}</a></div>
 <div>📧 <b>Email:</b> <a href="mailto:${staticKnowledgeBase.contact.email}" style="color: #f47822;">${staticKnowledgeBase.contact.email}</a></div>
 <div>📞 <b>Call/WhatsApp:</b> <a href="tel:${staticKnowledgeBase.contact.phone}" style="color: #f47822;">${staticKnowledgeBase.contact.phone}</a></div>
 <div>📱 <b>Telegram:</b> ${staticKnowledgeBase.contact.telegram}</div>
