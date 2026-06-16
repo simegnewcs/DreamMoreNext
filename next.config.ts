@@ -1,11 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    turbo: {
-      // Forces Turbopack to stop looking at your C:\ drive and stay in this project folder
-      root: process.cwd(), 
-    },
+  turbopack: {
+    root: process.cwd(),
   },
   images: {
     remotePatterns: [
