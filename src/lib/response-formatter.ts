@@ -139,7 +139,7 @@ export function formatResponse(text: string): FormattedResponse {
   // Format emails
   formattedHtml = formattedHtml.replace(emailPattern, (email) => {
     hasLinks = true;
-    return `<a href="mailto:${email}" class="text-[#f47822] hover:underline">${email}</a>`;
+    return `<a href="https://mail.google.com/mail/?view=cm&fs=1&to=${email}" target="_blank" rel="noopener noreferrer" class="text-[#f47822] hover:underline">${email}</a>`;
   });
   
   // Format line breaks
@@ -281,7 +281,7 @@ export function formatContactCard(
         </div>
         <div class="flex items-center gap-3">
           <span class="text-xl">📧</span>
-          <a href="mailto:${email}" class="text-[#f47822] hover:underline">${email}</a>
+          <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${email}" target="_blank" rel="noopener noreferrer" class="text-[#f47822] hover:underline">${email}</a>
         </div>
         ${telegram ? `<div class="flex items-center gap-3"><span class="text-xl">💬</span><span class="dark:text-gray-200">Telegram: <strong class="dark:text-white">${telegram}</strong></span></div>` : ''}
         ${instagram ? `<div class="flex items-center gap-3"><span class="text-xl">📷</span><span class="dark:text-gray-200">Instagram: <strong class="dark:text-white">${instagram}</strong></span></div>` : ''}

@@ -80,8 +80,16 @@ function InstructorSidebar({ isCollapsed, user, onLogout, isLoggingOut }: { isCo
       </div>
 
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
+        {/* Go to Home */}
+        <Link href="/"
+          className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all text-gray-700 hover:bg-gray-50 ${isCollapsed ? "justify-center" : ""}`}
+          title={isCollapsed ? "Go to Home" : undefined}>
+          <Home className="w-4 h-4 flex-shrink-0 text-gray-500" />
+          {!isCollapsed && <span>Go to Home</span>}
+        </Link>
+
         {/* Dashboard */}
-        {!isCollapsed && <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 mb-1">Overview</p>}
+        {!isCollapsed && <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 mb-1 mt-2">Overview</p>}
         <Link href="/instructor"
           className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
             isActive("/instructor") ? "bg-orange-50 text-[#f47822]" : "text-gray-700 hover:bg-gray-50"
@@ -327,7 +335,7 @@ function LMSLayoutInner({ children, course }: LMSLayoutProps) {
   const accessDenied = !instructorLoading && isInstructor && course && !canAccessCourse(course.slug);
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex">
+    <div className="min-h-screen lg:h-screen flex lg:overflow-hidden lms-container">
       {/* Desktop Sidebar */}
       <aside className={`hidden lg:flex flex-col bg-white border-r border-zinc-200 sticky top-0 h-screen z-40 transition-all duration-200 ${isCollapsed ? "w-[60px]" : isInstructor ? "w-[240px]" : "w-[220px]"}`}>
         <SidebarContent />
@@ -361,7 +369,7 @@ function LMSLayoutInner({ children, course }: LMSLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto lg:mt-0 mt-14">
+      <main className="flex-1 overflow-y-auto lg:h-full lg:mt-0 mt-14">
         {accessDenied ? (
           <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
             <Lock className="w-14 h-14 text-gray-300 mb-4" />

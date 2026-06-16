@@ -65,7 +65,7 @@ export default function Footer() {
             </p>
             {/* Contact info */}
             <div className="space-y-3">
-              <a href="mailto:suport@dreammoredigitals.com" className={`flex items-center gap-3 text-sm transition-colors ${isDark ? "text-white/50 hover:text-orange-400" : "text-gray-600 hover:text-orange-500"}`}>
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=suport@dreammoredigitals.com" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-3 text-sm transition-colors ${isDark ? "text-white/50 hover:text-orange-400" : "text-gray-600 hover:text-orange-500"}`}>
                 <Mail className="w-4 h-4" style={{ color: "#f47822" }} />
                 suport@dreammoredigitals.com
               </a>

@@ -74,7 +74,7 @@ export default function AgencyHero() {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-white/10" : "bg-gray-200"}`}>
               <Play className={`w-3.5 h-3.5 fill-current ${isDark ? "text-white" : "text-gray-700"}`} />
             </div>
-            Watch Our Work
+            Watch Our Work 
           </button>
         </motion.div>
 

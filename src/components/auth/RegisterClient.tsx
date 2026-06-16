@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowRight, Loader2, User, Mail, Phone } from "lucide-react";
 import { authAPI } from "@/lib/api";
@@ -10,7 +9,6 @@ import { signIn } from "next-auth/react";
 import { useTheme } from "@/context/ThemeContext";
 
 export default function RegisterClient() {
-  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [showPassword, setShowPassword] = useState(false);
@@ -39,19 +37,7 @@ export default function RegisterClient() {
         return;
       }
 
-      // Store user data in localStorage
-      localStorage.setItem("user", JSON.stringify(result.data?.user));
-      localStorage.setItem("token", result.data?.token || "");
-
-      // Dispatch event to update Navbar
-      window.dispatchEvent(new Event("userUpdated"));
-
       setSuccess(true);
-
-      // Redirect after 2 seconds
-      setTimeout(() => {
-        router.push("/academy");
-      }, 2000);
 
     } catch (err) {
       setError("An error occurred. Please try again.");

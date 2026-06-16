@@ -28,7 +28,8 @@ export default function SupportPage() {
             </p>
             <div className="space-y-3">
               <a 
-                href="mailto:suport@dreammoredigitals.com" 
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=suport@dreammoredigitals.com" 
+                target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#f47822] transition-colors"
               >
                 <Mail className="w-4 h-4" />

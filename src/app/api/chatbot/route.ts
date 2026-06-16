@@ -439,7 +439,7 @@ ${servicesList}
 <div style="line-height: 1.6;">Please visit our official website or contact our team directly for specific questions:</div>
 <div style="margin-top: 10px; padding: 10px; background: rgba(244, 120, 34, 0.1); border-radius: 8px;">
 <div>🌐 <b>Website:</b> <a href="${staticKnowledgeBase.contact.website}" target="_blank" style="color: #f47822;">${staticKnowledgeBase.contact.website}</a></div>
-<div>📧 <b>Email:</b> <a href="mailto:${staticKnowledgeBase.contact.email}" style="color: #f47822;">${staticKnowledgeBase.contact.email}</a></div>
+<div>📧 <b>Email:</b> <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${staticKnowledgeBase.contact.email}" target="_blank" rel="noopener noreferrer" style="color: #f47822;">${staticKnowledgeBase.contact.email}</a></div>
 <div>📞 <b>Call/WhatsApp:</b> <a href="tel:${staticKnowledgeBase.contact.phone}" style="color: #f47822;">${staticKnowledgeBase.contact.phone}</a></div>
 <div>📱 <b>Telegram:</b> ${staticKnowledgeBase.contact.telegram}</div>
 </div>

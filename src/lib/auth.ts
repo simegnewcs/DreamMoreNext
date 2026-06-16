@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { query } from "./db";
+import { sendVerificationEmail } from "./email";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this-in-production";
 
@@ -45,7 +47,7 @@ export function verifyToken(token: string): User | null {
 export async function loginUser(email: string, password: string): Promise<{ user: User; token: string } | null> {
   try {
     const users = await query(
-      `SELECT id, email, password, name, role, avatar FROM users WHERE email = ? AND status = 'active'`,
+      `SELECT id, email, password, name, role, avatar, email_verified FROM users WHERE email = ? AND status = 'active'`,
       [email]
     );
 
@@ -56,7 +58,7 @@ export async function loginUser(email: string, password: string): Promise<{ user
     const user = (users as any[])[0];
     const isValid = await verifyPassword(password, user.password);
 
-    if (!isValid) {
+    if (!isValid || user.email_verified !== true && user.email_verified !== 1) {
       return null;
     }
 
@@ -79,17 +81,19 @@ export async function loginUser(email: string, password: string): Promise<{ user
 
 // Register user
 export async function registerUser(
-  email: string, 
-  password: string, 
-  name: string, 
+  email: string,
+  password: string,
+  name: string,
   role: string = 'student'
 ): Promise<{ user: User; token: string } | null> {
   try {
     const hashedPassword = await hashPassword(password);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     const result = await query(
-      `INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)`,
-      [email, hashedPassword, name, role]
+      `INSERT INTO users (email, password, name, role, email_verified, verification_token, verification_expires_at) VALUES (?, ?, ?, ?, 0, ?, ?)`,
+      [email, hashedPassword, name, role, verificationToken, verificationExpiresAt]
     );
 
     const userId = (result as any).insertId;
@@ -101,12 +105,20 @@ export async function registerUser(
       role
     };
 
+    const emailSent = await sendVerificationEmail(email, name, verificationToken);
+    if (!emailSent) {
+      throw new Error("Failed to send verification email");
+    }
+
     const token = generateToken(userData);
 
     return { user: userData, token };
-  } catch (error: any) {
-    if (error.code === 'ER_DUP_ENTRY') {
-      throw new Error('Email already exists');
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Email already exists') {
+      throw error;
+    }
+    if (error instanceof Error && error.message === 'Failed to send verification email') {
+      throw error;
     }
     console.error("Registration error:", error);
     return null;
@@ -129,5 +141,43 @@ export async function getUserById(id: number): Promise<User | null> {
   } catch (error) {
     console.error("Get user error:", error);
     return null;
+  }
+}
+
+// Change password
+export async function changePassword(
+  userId: number,
+  currentPassword: string,
+  newPassword: string
+): Promise<boolean> {
+  try {
+    // Get user's current password
+    const users = await query(
+      `SELECT password FROM users WHERE id = ? AND status = 'active'`,
+      [userId]
+    );
+
+    if ((users as any[]).length === 0) {
+      return false;
+    }
+
+    const user = (users as any[])[0];
+    const isValid = await verifyPassword(currentPassword, user.password);
+
+    if (!isValid) {
+      return false;
+    }
+
+    // Hash new password and update
+    const hashedPassword = await hashPassword(newPassword);
+    await query(
+      `UPDATE users SET password = ? WHERE id = ?`,
+      [hashedPassword, userId]
+    );
+
+    return true;
+  } catch (error) {
+    console.error("Change password error:", error);
+    return false;
   }
 }
