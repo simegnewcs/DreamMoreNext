@@ -170,6 +170,14 @@ export const authAPI = {
       body: JSON.stringify({ email, password, name, role }),
     });
   },
+
+  // Resend verification email
+  resendVerification: async (email: string) => {
+    return fetchAPI('/api/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
 };
 
 // Client-side data fetching helpers

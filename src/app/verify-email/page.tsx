@@ -1,11 +1,10 @@
 "use client";
 
-"use client";
-
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 function VerifyEmailContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -35,7 +34,7 @@ function VerifyEmailContent() {
         if (!isCancelled) {
           if (response.ok && result.success) {
             setStatus("success");
-            setMessage("Your email has been verified successfully.");
+            setMessage("Your email has been verified successfully. Redirecting to login...");
           } else {
             setStatus("error");
             setMessage(result.error || "Verification failed or the link has expired.");
@@ -55,6 +54,16 @@ function VerifyEmailContent() {
       isCancelled = true;
     };
   }, [token]);
+
+  useEffect(() => {
+    if (status !== "success") return;
+
+    const timer = window.setTimeout(() => {
+      router.replace("/login");
+    }, 2000);
+
+    return () => window.clearTimeout(timer);
+  }, [status, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">

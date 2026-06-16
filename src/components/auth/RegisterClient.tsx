@@ -16,6 +16,9 @@ export default function RegisterClient() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+  const [resendSuccess, setResendSuccess] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -26,6 +29,8 @@ export default function RegisterClient() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setResendMessage("");
+    setResendSuccess(false);
     setLoading(true);
 
     try {
@@ -44,6 +49,32 @@ export default function RegisterClient() {
       console.error("Registration error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!form.email) return;
+
+    setResendLoading(true);
+    setResendMessage("");
+    setResendSuccess(false);
+
+    try {
+      const result = await authAPI.resendVerification(form.email);
+
+      if (!result.success) {
+        setResendSuccess(false);
+        setResendMessage(result.error || "Failed to resend verification email.");
+      } else {
+        setResendSuccess(true);
+        setResendMessage("Verification email sent again. Please check your inbox.");
+      }
+    } catch (err) {
+      setResendSuccess(false);
+      setResendMessage("An error occurred while resending the verification email.");
+      console.error("Resend verification error:", err);
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -66,8 +97,34 @@ export default function RegisterClient() {
             <span className="text-3xl">🎉</span>
           </div>
           <h2 className={`text-2xl font-black mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>Account Created!</h2>
-          <p className={`text-sm mb-6 ${isDark ? "text-white/55" : "text-gray-600"}`}>Check your email to verify your account.</p>
-          <Link href="/login" className="btn-primary justify-center">Go to Login <ArrowRight className="w-4 h-4" /></Link>
+          <p className={`text-sm mb-4 ${isDark ? "text-white/55" : "text-gray-600"}`}>Check your email to verify your account.</p>
+
+          <button
+            type="button"
+            onClick={handleResendVerification}
+            disabled={resendLoading}
+            className={`w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${isDark ? "bg-white/5 text-white hover:bg-white/10" : "bg-gray-100 text-gray-800 hover:bg-gray-200"}`}
+          >
+            {resendLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                Send verification link again
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+
+          {resendMessage && (
+            <p className={`mt-3 text-sm ${resendSuccess ? (isDark ? "text-green-400" : "text-green-600") : (isDark ? "text-red-400" : "text-red-600")}`}>
+              {resendMessage}
+            </p>
+          )}
+
+          <Link href="/login" className="btn-primary justify-center mt-4">Go to Login <ArrowRight className="w-4 h-4" /></Link>
         </div>
       </div>
     );
