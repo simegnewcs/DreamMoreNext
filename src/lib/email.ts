@@ -20,9 +20,11 @@ export async function sendVerificationEmail(
 
   try {
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      from: process.env.EMAIL_FROM || `DreamMore <${process.env.EMAIL_USER}>`,
+      replyTo: process.env.EMAIL_FROM || process.env.EMAIL_USER,
       to: email,
-      subject: "Verify your email address",
+      subject: "DreamMore: Please verify your email address",
+      text: `Hi ${name},\n\nPlease verify your email address by visiting this link:\n${verificationUrl}\n\nThis link is valid for 24 hours.\n\nThanks,\nDreamMore Team`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #0f172a;">Welcome, ${name}!</h2>
@@ -33,8 +35,12 @@ export async function sendVerificationEmail(
             </a>
           </p>
           <p>This link is valid for 24 hours.</p>
+          <p style="font-size: 12px; color: #64748b;">DreamMore Team</p>
         </div>
       `,
+      headers: {
+        "Auto-Submitted": "auto-generated",
+      },
     });
 
     return Boolean(info.messageId);
