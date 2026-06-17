@@ -113,7 +113,7 @@ export default function ChatbotWidget() {
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          text: "That's an exceptionally precise and important question! While my knowledge base covers a wide range of topics, I want to make sure you receive a completely definitive answer for this one. Please share your question directly with our team — they will follow up with full accuracy and speed.\n\n📧 Email: support@dreammoredigitals.com\n📞 Phone/WhatsApp: +251 993 132 122\n📱 Telegram: @dreammoredigitals\n\nWe will respond within hours!",
+          text: "That's an exceptionally precise and important question! While my knowledge base covers a wide range of topics, I want to make sure you receive a completely definitive answer for this one. Please share your question directly with our team — they will follow up with full accuracy and speed.\n\n📧 Email: support@dreammoredigitals.com\n📞 Phone/WhatsApp: +251 993 132 122\n📱 Telegram: @Dreammore21\n\nWe will respond within hours!",
           isUser: false,
           timestamp: new Date(),
         },

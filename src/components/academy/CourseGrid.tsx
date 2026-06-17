@@ -9,8 +9,6 @@ import { fetchCourses, applicationsAPI } from "@/lib/api";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 
-const categories = ["all", "development", "design", "ai", "marketing", "security", "creative"];
-
 const courseBanner: Record<string, string> = {
   // Legacy mappings
   "full-stack-development":  "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80",
@@ -43,7 +41,6 @@ export default function CourseGrid() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const router = useRouter();
-  const [active, setActive] = useState("all");
   const { isLoggedIn } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
@@ -145,7 +142,7 @@ export default function CourseGrid() {
     return () => clearInterval(interval);
   }, [courses, isLoggedIn]);
 
-  const filtered = active === "all" ? courses : courses.filter((c) => c.category === active);
+  const filtered = courses;
 
   const handleApplyClick = (courseSlug: string) => {
     if (isLoggedIn) {
@@ -185,27 +182,9 @@ export default function CourseGrid() {
           </div>
         )}
 
-        {/* Category filter & Grid */}
+        {/* Grid */}
         {!loading && !error && (
         <>
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActive(cat)}
-              className="px-4 py-2 rounded-full text-sm font-semibold capitalize transition-all duration-200"
-              style={
-                active === cat
-                  ? { background: "rgba(244,120,34,0.15)", color: "#f47822", border: "1px solid rgba(244,120,34,0.35)" }
-                  : { color: isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.5)", border: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.1)" }
-              }
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filtered.map((course, i) => (
             <motion.div

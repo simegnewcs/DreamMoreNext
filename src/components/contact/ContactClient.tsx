@@ -29,8 +29,8 @@ const contactInfo = [
   { 
     icon: Send, 
     label: "Telegram", 
-    value: "@dreammoredigitals", 
-    href: "https://t.me/dreammoredigitals", 
+    value: "@Dreammore21", 
+    href: "https://t.me/Dreammore21", 
     color: "#00a9ff" 
   },
   { 
@@ -104,16 +104,7 @@ export default function ContactClient() {
               );
             })}
 
-            {/* Map placeholder */}
-            <div className={`rounded-2xl overflow-hidden mt-6 ${isDark ? "glass" : "bg-white border border-gray-200 shadow-sm"}`}>
-              <div className={`h-48 flex items-center justify-center ${isDark ? "bg-gradient-to-br from-slate-800/60 to-slate-900/40" : "bg-gradient-to-br from-gray-100 to-gray-200"}`}>
-                <div className="text-center">
-                  <MapPin className={`w-10 h-10 mx-auto mb-2 ${isDark ? "text-white/15" : "text-gray-400"}`} />
-                  <p className={`text-xs ${isDark ? "text-white/30" : "text-gray-500"}`}>Bahirdar, Ethiopia</p>
-                  <p className={`text-xs ${isDark ? "text-white/20" : "text-gray-400"}`}>Google Maps integration coming soon</p>
-                </div>
-              </div>
-            </div>
+
           </div>
 
           {/* Additional info */}
@@ -122,12 +113,38 @@ export default function ContactClient() {
             <p className={`text-sm leading-relaxed ${isDark ? "text-white/60" : "text-gray-600"}`}>
               We&apos;re here to help! Reach out to us through any of the contact methods listed on the left. Whether you have questions about our courses, need technical support, or want to discuss a project, our team is ready to assist you.
             </p>
-            <div className={`mt-6 p-4 rounded-xl ${isDark ? "bg-white/5" : "bg-gray-50"}`}>
-              <p className={`text-sm font-medium mb-1 ${isDark ? "text-white" : "text-gray-900"}`}>Business Hours</p>
-              <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-600"}`}>Monday - Friday: 9:00 AM - 6:00 PM</p>
-              <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-600"}`}>Saturday: 10:00 AM - 4:00 PM</p>
-              <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-600"}`}>Sunday: Closed</p>
+            <div className={`mt-6 rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"}`}>
+              <p className={`text-sm font-semibold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>Business Hours</p>
+              <div className="space-y-2">
+                <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${isDark ? "bg-emerald-500/10" : "bg-emerald-50"}`}>
+                  <span className={`text-xs font-medium ${isDark ? "text-emerald-200" : "text-emerald-700"}`}>Monday - Friday</span>
+                  <span className={`text-xs font-semibold ${isDark ? "text-emerald-100" : "text-emerald-800"}`}>2:00 AM - 11:00 AM</span>
+                </div>
+                <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${isDark ? "bg-emerald-500/10" : "bg-emerald-50"}`}>
+                  <span className={`text-xs font-medium ${isDark ? "text-emerald-200" : "text-emerald-700"}`}>Saturday</span>
+                  <span className={`text-xs font-semibold ${isDark ? "text-emerald-100" : "text-emerald-800"}`}>4:00 AM - 10:00 AM</span>
+                </div>
+                <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${isDark ? "bg-rose-500/10" : "bg-rose-50"}`}>
+                  <span className={`text-xs font-medium ${isDark ? "text-rose-200" : "text-rose-700"}`}>Sunday</span>
+                  <span className={`text-xs font-semibold ${isDark ? "text-rose-100" : "text-rose-800"}`}>Closed</span>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <div className="mt-10">
+          <div className={`rounded-3xl overflow-hidden border ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15633.689209243024!2d37.36822042324327!3d11.593211563643107!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1644d18394e94c53%3A0x8d1e38bd4dc4f170!2sSignal%20mall!5e0!3m2!1sen!2set!4v1781660032585!5m2!1sen!2set"
+              width="100%"
+              height="520"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="DreamMore Location"
+            />
           </div>
         </div>
       </div>
