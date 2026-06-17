@@ -6,6 +6,17 @@ import { motion } from "framer-motion";
 import { ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
+async function requestPasswordReset(email: string) {
+  const response = await fetch("/api/auth/forgot-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  const result = await response.json();
+  return { ok: response.ok, result };
+}
+
 export default function ForgotPasswordClient() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -21,9 +32,13 @@ export default function ForgotPasswordClient() {
     setLoading(true);
     
     try {
-      // TODO: Implement actual password reset API call
-      // For now, simulate success
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { ok, result } = await requestPasswordReset(email);
+
+      if (!ok || !result.success) {
+        setError(result.error || "Failed to send reset email.");
+        return;
+      }
+
       setSuccess(true);
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -80,7 +95,7 @@ export default function ForgotPasswordClient() {
             <div className="text-center py-8">
               <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-green-500" />
               <p className={`text-sm mb-6 ${isDark ? "text-white/70" : "text-gray-600"}`}>
-                If an account exists with <span className="font-semibold">{email}</span>, you'll receive password reset instructions shortly.
+                If an account exists with <span className="font-semibold">{email}</span>, you&apos;ll receive password reset instructions shortly.
               </p>
               <Link
                 href="/login"

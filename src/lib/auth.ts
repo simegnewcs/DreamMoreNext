@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { query } from "./db";
-import { sendVerificationEmail } from "./email";
+import { sendVerificationEmail, sendPasswordResetEmail } from "./email";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this-in-production";
 
@@ -122,6 +122,64 @@ export async function registerUser(
     }
     console.error("Registration error:", error);
     return null;
+  }
+}
+
+export async function requestPasswordReset(email: string): Promise<boolean> {
+  try {
+    const users = await query(
+      `SELECT id, email, name FROM users WHERE email = ? AND status = 'active'`,
+      [email]
+    );
+
+    if ((users as any[]).length === 0) {
+      return false;
+    }
+
+    const user = (users as any[])[0];
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await query(
+      `UPDATE users SET reset_token = ?, reset_expires_at = ? WHERE id = ?`,
+      [resetToken, resetExpiresAt, user.id]
+    );
+
+    return await sendPasswordResetEmail(user.email, user.name, resetToken);
+  } catch (error) {
+    console.error("Password reset request error:", error);
+    return false;
+  }
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<boolean> {
+  try {
+    const users = await query(
+      `SELECT id, email, reset_expires_at FROM users WHERE reset_token = ?`,
+      [token]
+    );
+
+    if ((users as any[]).length === 0) {
+      return false;
+    }
+
+    const user = (users as any[])[0];
+    const expiresAt = user.reset_expires_at ? new Date(user.reset_expires_at) : null;
+
+    if (!expiresAt || expiresAt < new Date()) {
+      return false;
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    await query(
+      `UPDATE users SET password = ?, reset_token = NULL, reset_expires_at = NULL WHERE id = ?`,
+      [hashedPassword, user.id]
+    );
+
+    return true;
+  } catch (error) {
+    console.error("Password reset error:", error);
+    return false;
   }
 }
 

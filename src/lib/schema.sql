@@ -18,10 +18,14 @@ CREATE TABLE IF NOT EXISTS users (
   email_verified TINYINT(1) DEFAULT 0,
   verification_token VARCHAR(255),
   verification_expires_at DATETIME NULL,
+  reset_token VARCHAR(255),
+  reset_expires_at DATETIME NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_email (email),
-  INDEX idx_role (role)
+  INDEX idx_role (role),
+  INDEX idx_verification_token (verification_token),
+  INDEX idx_reset_token (reset_token)
 );
 
 -- Courses table
