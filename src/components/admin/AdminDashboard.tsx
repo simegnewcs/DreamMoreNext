@@ -165,6 +165,10 @@ export default function AdminDashboard() {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userRoleFilter, setUserRoleFilter] = useState("all");
   const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [userDeleteModalOpen, setUserDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<any>(null);
+  const [deletingUser, setDeletingUser] = useState(false);
+  const [userActionMessage, setUserActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Fetch courses, applications, users and stats on mount
   useEffect(() => {
@@ -585,20 +589,30 @@ export default function AdminDashboard() {
   };
 
   // User handlers
-  const handleDeleteUser = async (userId: number) => {
-    if (confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-      setLoading(true);
-      const result = await usersAPI.delete(userId.toString());
-      
-      if (result.success) {
-        // Remove user from local state
-        setUsers(prev => prev.filter(u => u.id !== userId));
-        setStats(prev => ({ ...prev, users: prev.users - 1 }));
-        alert("User deleted successfully");
-      } else {
-        alert("Failed to delete user: " + result.error);
-      }
-      setLoading(false);
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    setLoading(true);
+    setDeletingUser(true);
+    setUserActionMessage(null);
+
+    const result = await usersAPI.delete(userToDelete.id.toString());
+
+    if (result.success) {
+      setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+      setStats(prev => ({ ...prev, users: prev.users - 1 }));
+      setUserActionMessage({ type: 'success', text: 'User deleted successfully' });
+    } else {
+      setUserActionMessage({ type: 'error', text: `Failed to delete user: ${result.error}` });
+    }
+
+    setDeletingUser(false);
+    setLoading(false);
+    setUserDeleteModalOpen(false);
+    setUserToDelete(null);
+
+    if (result.success) {
+      setTimeout(() => setUserActionMessage(null), 3000);
     }
   };
 
@@ -1683,6 +1697,20 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {userActionMessage && (
+                <div className={`px-4 py-3 rounded-xl border text-sm font-medium ${
+                  userActionMessage.type === 'success'
+                    ? isDark
+                      ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+                      : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : isDark
+                      ? 'bg-red-500/10 text-red-300 border-red-500/20'
+                      : 'bg-red-50 text-red-700 border-red-200'
+                }`}>
+                  {userActionMessage.text}
+                </div>
+              )}
+
               {/* Users Table */}
               <div className={`rounded-2xl overflow-hidden ${isDark ? "glass border border-white/10" : "bg-white border border-gray-200 shadow-lg"}`}>
                 <div className="overflow-x-auto">
@@ -1783,7 +1811,10 @@ export default function AdminDashboard() {
                                   <Pencil className="w-4 h-4" />
                                 </button>
                                 <button
-                                  onClick={() => handleDeleteUser(user.id)}
+                                  onClick={() => {
+                                    setUserToDelete(user);
+                                    setUserDeleteModalOpen(true);
+                                  }}
                                   className={`p-1.5 rounded-lg transition-colors ${
                                     isDark 
                                       ? "text-red-400 hover:bg-red-400/10" 
@@ -1949,6 +1980,73 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                   </form>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Delete User Confirmation Modal */}
+          <AnimatePresence>
+            {userDeleteModalOpen && userToDelete && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                onClick={() => {
+                  setUserDeleteModalOpen(false);
+                  setUserToDelete(null);
+                }}
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className={`w-full max-w-md rounded-2xl p-6 ${
+                    isDark ? "bg-[#1a1a24] border border-white/10" : "bg-white border border-gray-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
+                      <Trash2 className="w-6 h-6 text-red-500" />
+                    </div>
+                    <div>
+                      <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                        Delete User?
+                      </h3>
+                    </div>
+                  </div>
+
+                  <p className={`text-sm mb-6 ${isDark ? "text-white/70" : "text-gray-600"}`}>
+                    Are you sure you want to delete <strong className={isDark ? "text-white" : "text-gray-900"}>{userToDelete.name || userToDelete.email}</strong>? This action cannot be undone.
+                  </p>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserDeleteModalOpen(false);
+                        setUserToDelete(null);
+                      }}
+                      className={`flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors ${
+                        isDark 
+                          ? "bg-white/5 text-white hover:bg-white/10 border border-white/10" 
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                      }`}
+                      disabled={deletingUser}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteUser}
+                      disabled={deletingUser}
+                      className="flex-1 px-4 py-2.5 rounded-xl font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                    >
+                      {deletingUser ? "Deleting..." : "Delete User"}
+                    </button>
+                  </div>
                 </motion.div>
               </motion.div>
             )}
