@@ -12,6 +12,7 @@ async function fetchAPI<T>(
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       ...options,
     });
 

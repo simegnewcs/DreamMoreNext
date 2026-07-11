@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Sun, Moon, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, ChevronDown, Sun, Moon, User, LogOut, LayoutDashboard, Camera, Settings, Sparkles } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { coursesAPI } from "@/lib/api";
 import { signOut } from "next-auth/react";
@@ -49,8 +49,13 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdown, setDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
-  const [user, setUser] = useState<{name: string; email: string; role: string} | null>(null);
+  const [user, setUser] = useState<{name: string; email: string; role: string; avatar?: string} | null>(null);
   const [courses, setCourses] = useState<any[]>([]);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
   const pathname = usePathname();
@@ -109,6 +114,16 @@ export default function Navbar() {
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (profileMenuRef.current && profileMenuRef.current.contains(target)) return;
+      setProfileMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
     
@@ -128,6 +143,48 @@ export default function Navbar() {
     window.location.href = "/";
   };
 
+  const updateStoredUser = (updatedUser: any) => {
+    const nextUser = { ...(user || {}), ...updatedUser };
+    setUser(nextUser);
+    localStorage.setItem("user", JSON.stringify(nextUser));
+    window.dispatchEvent(new Event("userUpdated"));
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    setAvatarError(null);
+    setUploadingAvatar(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/user/avatar", {
+        method: "POST",
+        headers: token ? { "x-auth-token": token } : {},
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Upload failed");
+      }
+
+      updateStoredUser({ avatar: data.avatar });
+      setProfileMenuOpen(false);
+      const dashboardPath = user.role === "admin" ? "/admin" : user.role === "instructor" ? "/instructor" : "/lms";
+      router.push(dashboardPath);
+    } catch (error: any) {
+      setAvatarError(error.message || "Unable to upload avatar");
+    } finally {
+      setUploadingAvatar(false);
+      event.target.value = "";
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
@@ -138,6 +195,22 @@ export default function Navbar() {
     setMobileOpen(false);
     setMobileExpanded(null);
   }, [pathname]);
+
+  const handleNavigate = (href: string) => {
+    setDropdown(null);
+    setMobileOpen(false);
+    setProfileMenuOpen(false);
+    setMobileExpanded(null);
+
+    if (href === pathname) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    window.setTimeout(() => {
+      router.push(href);
+    }, 100);
+  };
 
   return (
     <motion.nav
@@ -197,17 +270,18 @@ export default function Navbar() {
                       >
                         <div className={children.length > 6 ? "grid grid-cols-3 p-2 gap-0.5" : ""}>
                           {children.map((child) => (
-                            <Link
+                            <button
                               key={child.href}
-                              href={child.href}
-                              className={`block px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                              type="button"
+                              onClick={() => handleNavigate(child.href)}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                                 isDark
                                   ? "text-white/70 hover:text-white hover:bg-[#f47822]/20"
                                   : "text-gray-600 hover:text-[#f47822] hover:bg-[#f47822]/10"
                               }`}
                             >
                               {child.label}
-                            </Link>
+                            </button>
                           ))}
                         </div>
                       </motion.div>
@@ -215,9 +289,10 @@ export default function Navbar() {
                   </AnimatePresence>
                 </div>
               ) : (
-                <Link
+                <button
                   key={link.label}
-                  href={link.href}
+                  type="button"
+                  onClick={() => handleNavigate(link.href)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     pathname === link.href
                       ? isDark 
@@ -229,7 +304,7 @@ export default function Navbar() {
                   }`}
                 >
                   {link.label}
-                </Link>
+                </button>
               );
             })}
           </div>
@@ -238,47 +313,84 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3">
-                {/* User Profile */}
-                <div className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#f47822] to-[#15142a] flex items-center justify-center text-white text-xs font-bold">
-                    {(user.name || user.email || "?").charAt(0).toUpperCase()}
-                  </div>
-                  <span className={`text-sm font-medium ${isDark ? "text-white" : "text-gray-700"}`}>
-                    {(user.name || user.email || "").split(" ")[0]}
-                  </span>
-                </div>
-                {/* Panel Button — admin & instructor only */}
-                {(user.role === "admin" || user.role === "instructor") && (
-                  <Link
-                    href={user.role === "admin" ? "/admin" : "/instructor"}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#f47822] text-white hover:bg-[#e06b18] transition-all"
+                <div className="relative" ref={profileMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setProfileMenuOpen((prev) => !prev)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all ${isDark ? "bg-white/5 hover:bg-white/10" : "bg-gray-100 hover:bg-gray-200"}`}
                   >
-                    <LayoutDashboard className="w-4 h-4" />
-                    Panel
-                  </Link>
-                )}
-                {/* Logout Button */}
-                <button
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                    isDark 
-                      ? "text-red-400 hover:bg-red-400/10" 
-                      : "text-red-500 hover:bg-red-50"
-                  }`}
-                >
-                  {isLoggingOut ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      Logging out...
-                    </>
-                  ) : (
-                    <>
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </>
-                  )}
-                </button>
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-[#f47822] to-[#15142a] border border-white/20 flex items-center justify-center text-white text-xs font-bold">
+                      {user.avatar ? (
+                        <img src={user.avatar} alt={user.name || user.email} className="w-full h-full object-cover" />
+                      ) : (
+                        (user.name || user.email || "?").charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <span className={`text-sm font-medium ${isDark ? "text-white" : "text-gray-700"}`}>
+                      {(user.name || user.email || "").split(" ")[0]}
+                    </span>
+                    <ChevronDown className="w-4 h-4 opacity-70" />
+                  </button>
+
+                  <AnimatePresence>
+                    {profileMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 8 }}
+                        transition={{ duration: 0.15 }}
+                        className={`absolute right-0 mt-2 w-56 rounded-xl shadow-xl border overflow-hidden ${isDark ? "bg-[#111827] border-white/10" : "bg-white border-gray-200"}`}
+                      >
+                        <div className={`px-4 py-3 border-b ${isDark ? "border-white/10" : "border-gray-200"}`}>
+                          <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{user.name || user.email}</p>
+                          <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{user.email}</p>
+                        </div>
+                        <div className="p-2">
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${isDark ? "text-white hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"}`}
+                          >
+                            <Camera className="w-4 h-4" />
+                            {uploadingAvatar ? "Uploading..." : "Upload photo"}
+                          </button>
+                          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+
+                          <button
+                            type="button"
+                            onClick={() => handleNavigate(user.role === "admin" ? "/admin" : user.role === "instructor" ? "/instructor" : "/lms")}
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${isDark ? "text-white hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"}`}
+                          >
+                            <LayoutDashboard className="w-4 h-4" />
+                            Dashboard
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleNavigate(user.role === "admin" ? "/admin" : user.role === "instructor" ? "/instructor" : "/lms/settings")}
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${isDark ? "text-white hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"}`}
+                          >
+                            <Settings className="w-4 h-4" />
+                            Account settings
+                          </button>
+                          <button
+                            onClick={() => {
+                              setProfileMenuOpen(false);
+                              handleLogout();
+                            }}
+                            disabled={isLoggingOut}
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all disabled:opacity-50 ${isDark ? "text-red-400 hover:bg-red-400/10" : "text-red-500 hover:bg-red-50"}`}
+                          >
+                            <LogOut className="w-4 h-4" />
+                            {isLoggingOut ? "Logging out..." : "Logout"}
+                          </button>
+                        </div>
+                        {avatarError && (
+                          <p className={`px-3 pb-3 text-xs ${isDark ? "text-red-400" : "text-red-500"}`}>{avatarError}</p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             ) : (
               <Link
@@ -400,8 +512,12 @@ export default function Navbar() {
                 {user ? (
                   <>
                     <div className={`flex items-center gap-3 px-4 py-3 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#f47822] to-[#15142a] flex items-center justify-center text-white font-bold">
-                        {(user.name || user.email || "?").charAt(0).toUpperCase()}
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-[#f47822] to-[#15142a] flex items-center justify-center text-white font-bold">
+                        {user.avatar ? (
+                          <img src={user.avatar} alt={user.name || user.email} className="w-full h-full object-cover" />
+                        ) : (
+                          (user.name || user.email || "?").charAt(0).toUpperCase()
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{user.name || user.email}</p>
