@@ -4,44 +4,45 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Sun, Moon, User, LogOut, LayoutDashboard, Camera, Settings, Sparkles } from "lucide-react";
+import { Menu, X, ChevronDown, Sun, Moon, User, LogOut, LayoutDashboard, Camera, Settings, Sparkles, Globe2 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { coursesAPI } from "@/lib/api";
 import { signOut } from "next-auth/react";
 
 const navLinks = [
-  { label: "Home", href: "/" },
+  { labelKey: "nav.home", href: "/" },
   {
-    label: "Agency",
+    labelKey: "nav.agency",
     href: "/agency",
     children: [
-      { label: "All Services", href: "/agency" },
-      { label: "Software Development", href: "/agency#software-development" },
-      { label: "Mobile App Development", href: "/agency#mobile-app-development" },
-      { label: "Website Development", href: "/agency#website-development" },
-      { label: "AI Solutions", href: "/agency#ai-solutions" },
-      { label: "UI/UX Design", href: "/agency#uiux-design" },
-      { label: "Branding & Identity", href: "/agency#branding-identity" },
-      { label: "Digital Marketing", href: "/agency#digital-marketing" },
-      { label: "CCTV Intelligence Systems", href: "/agency#cctv-intelligence-systems" },
+      { labelKey: "common.viewDetails", href: "/agency" },
+      { labelKey: "home.agencyCta", href: "/agency#software-development" },
+      { labelKey: "common.learnMore", href: "/agency#mobile-app-development" },
+      { labelKey: "common.learnMore", href: "/agency#website-development" },
+      { labelKey: "common.learnMore", href: "/agency#ai-solutions" },
+      { labelKey: "common.learnMore", href: "/agency#uiux-design" },
+      { labelKey: "common.learnMore", href: "/agency#branding-identity" },
+      { labelKey: "common.learnMore", href: "/agency#digital-marketing" },
+      { labelKey: "common.learnMore", href: "/agency#cctv-intelligence-systems" },
     ],
   },
   {
-    label: "Academy",
+    labelKey: "nav.academy",
     href: "/academy",
     getChildren: (dynamicCourses: any[]) => [
-      { label: "All Courses", href: "/academy" },
+      { labelKey: "common.viewDetails", href: "/academy" },
       ...(dynamicCourses?.map(course => ({
-        label: course.title,
+        labelKey: course.title,
         href: `/academy/course/${course.slug}`
       })) || []),
     ],
   },
-  { label: "About", href: "/about" },
-  { label: "Team", href: "/team" },
-  { label: "Testimonials", href: "/#testimonials" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" },
+  { labelKey: "nav.about", href: "/about" },
+  { labelKey: "nav.team", href: "/team" },
+  { labelKey: "nav.testimonials", href: "/#testimonials" },
+  { labelKey: "nav.blog", href: "/blog" },
+  { labelKey: "nav.contact", href: "/contact" },
 ];
 
 export default function Navbar() {
@@ -57,6 +58,7 @@ export default function Navbar() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t, isAmharic } = useLanguage();
   const isDark = theme === "dark";
   const pathname = usePathname();
   const router = useRouter();
@@ -242,11 +244,12 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => {
               const children = link.getChildren ? link.getChildren(courses) : link.children;
+              const label = t(link.labelKey);
               return children ? (
                 <div
-                  key={link.label}
+                  key={link.href}
                   className="relative"
-                  onMouseEnter={() => setDropdown(link.label)}
+                  onMouseEnter={() => setDropdown(link.href)}
                   onMouseLeave={() => setDropdown(null)}
                 >
                   <button className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -254,11 +257,11 @@ export default function Navbar() {
                       ? "text-white/70 hover:text-white hover:bg-white/5" 
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}>
-                    {link.label}
+                    {label}
                     <ChevronDown className="w-3.5 h-3.5" />
                   </button>
                   <AnimatePresence>
-                    {dropdown === link.label && (
+                    {dropdown === link.href && (
                       <motion.div
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -280,7 +283,7 @@ export default function Navbar() {
                                   : "text-gray-600 hover:text-[#f47822] hover:bg-[#f47822]/10"
                               }`}
                             >
-                              {child.label}
+                              {typeof child.labelKey === "string" && child.labelKey.startsWith("nav.") || child.labelKey.startsWith("home.") || child.labelKey.startsWith("common.") ? t(child.labelKey) : child.labelKey}
                             </button>
                           ))}
                         </div>
@@ -290,7 +293,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <button
-                  key={link.label}
+                  key={link.href}
                   type="button"
                   onClick={() => handleNavigate(link.href)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -303,14 +306,30 @@ export default function Navbar() {
                         : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}
                 >
-                  {link.label}
+                  {label}
                 </button>
               );
             })}
           </div>
 
-          {/* CTA & Theme Toggle */}
+          {/* CTA & Language/Theme Toggle */}
           <div className="hidden lg:flex items-center gap-3">
+            <div className="flex items-center rounded-xl border px-1 py-1" style={{ borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", background: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.8)" }}>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all ${language === "en" ? (isDark ? "bg-white/10 text-white" : "bg-orange-50 text-orange-600") : (isDark ? "text-white/60 hover:text-white" : "text-gray-600 hover:text-gray-900")}`}
+              >
+                🇬🇧 ENG
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("am")}
+                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all ${language === "am" ? (isDark ? "bg-white/10 text-white" : "bg-orange-50 text-orange-600") : (isDark ? "text-white/60 hover:text-white" : "text-gray-600 hover:text-gray-900")}`}
+              >
+                🇪🇹 አማ
+              </button>
+            </div>
             {user ? (
               <div className="flex items-center gap-3">
                 <div className="relative" ref={profileMenuRef}>
@@ -352,7 +371,7 @@ export default function Navbar() {
                             className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${isDark ? "text-white hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"}`}
                           >
                             <Camera className="w-4 h-4" />
-                            {uploadingAvatar ? "Uploading..." : "Upload photo"}
+                            {uploadingAvatar ? t("common.loading") : t("nav.uploadPhoto")}
                           </button>
                           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
 
@@ -362,7 +381,7 @@ export default function Navbar() {
                             className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${isDark ? "text-white hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"}`}
                           >
                             <LayoutDashboard className="w-4 h-4" />
-                            Dashboard
+                            {t("nav.dashboard")}
                           </button>
                           <button
                             type="button"
@@ -370,7 +389,7 @@ export default function Navbar() {
                             className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${isDark ? "text-white hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"}`}
                           >
                             <Settings className="w-4 h-4" />
-                            Account settings
+                            {t("nav.accountSettings")}
                           </button>
                           <button
                             onClick={() => {
@@ -381,7 +400,7 @@ export default function Navbar() {
                             className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all disabled:opacity-50 ${isDark ? "text-red-400 hover:bg-red-400/10" : "text-red-500 hover:bg-red-50"}`}
                           >
                             <LogOut className="w-4 h-4" />
-                            {isLoggingOut ? "Logging out..." : "Logout"}
+                            {isLoggingOut ? t("common.loading") : t("nav.logout")}
                           </button>
                         </div>
                         {avatarError && (
@@ -412,7 +431,7 @@ export default function Navbar() {
                 background: isDark ? "rgba(244,120,34,0.15)" : "rgba(244,120,34,0.1)", 
                 border: "1px solid #f47822" 
               }}
-              aria-label="Toggle theme"
+              aria-label={t("nav.themeToggle")}
             >
               {isDark ? (
                 <Sun className="w-5 h-5" style={{ color: "#f47822" }} />
@@ -453,21 +472,22 @@ export default function Navbar() {
             <div className="px-4 py-6 space-y-1">
               {navLinks.map((link) => {
                 const children = link.getChildren ? link.getChildren(courses) : link.children;
+                const label = t(link.labelKey);
                 return (
-                  <div key={link.label}>
+                  <div key={link.href}>
                     {children ? (
                       <button
-                        onClick={() => setMobileExpanded(mobileExpanded === link.label ? null : link.label)}
+                        onClick={() => setMobileExpanded(mobileExpanded === link.href ? null : link.href)}
                         className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all ${
                           isDark
                             ? "text-white/70 hover:text-white hover:bg-white/5"
                             : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                         }`}
                       >
-                        {link.label}
+                        {label}
                         <ChevronDown
                           className={`w-4 h-4 transition-transform duration-200 ${
-                            mobileExpanded === link.label ? "rotate-180" : ""
+                            mobileExpanded === link.href ? "rotate-180" : ""
                           }`}
                         />
                       </button>
@@ -484,10 +504,10 @@ export default function Navbar() {
                               : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                         }`}
                       >
-                        {link.label}
+                        {label}
                       </Link>
                     )}
-                    {children && mobileExpanded === link.label && (
+                    {children && mobileExpanded === link.href && (
                       <div className="ml-4 mt-1 space-y-1">
                         {children.map((child) => (
                           <Link
@@ -500,7 +520,7 @@ export default function Navbar() {
                                 : "text-gray-500 hover:text-[#f47822] hover:bg-[#f47822]/10"
                             }`}
                           >
-                            {child.label}
+                            {typeof child.labelKey === "string" && child.labelKey.startsWith("nav.") || child.labelKey.startsWith("home.") || child.labelKey.startsWith("common.") ? t(child.labelKey) : child.labelKey}
                           </Link>
                         ))}
                       </div>
@@ -573,12 +593,12 @@ export default function Navbar() {
                       {isLoggingOut ? (
                         <>
                           <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          Logging out...
+                          {t("common.loading")}
                         </>
                       ) : (
                         <>
                           <LogOut className="w-4 h-4" />
-                          Logout
+                          {t("nav.logout")}
                         </>
                       )}
                     </button>
@@ -594,7 +614,7 @@ export default function Navbar() {
                     }`}
                   >
                     <User className="w-4 h-4" />
-                    Login
+                    {t("nav.login")}
                   </Link>
                 )}
                 <button
@@ -607,9 +627,9 @@ export default function Navbar() {
                   }}
                 >
                   {isDark ? (
-                    <><Sun className="w-4 h-4" /> Light Mode</>
+                    <><Sun className="w-4 h-4" /> {t("nav.lightMode")}</>
                   ) : (
-                    <><Moon className="w-4 h-4" /> Dark Mode</>
+                    <><Moon className="w-4 h-4" /> {t("nav.darkMode")}</>
                   )}
                 </button>
               </div>

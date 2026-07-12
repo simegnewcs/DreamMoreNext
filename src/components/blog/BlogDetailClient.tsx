@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, User, Play, Sparkles, Share2, Bookmark } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { formatDate } from "@/lib/utils";
 import { useState } from "react";
 
@@ -76,12 +77,26 @@ function getYouTubeVideoId(url: string): string | null {
 
 export default function BlogDetailClient({ post }: BlogDetailClientProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [showVideo, setShowVideo] = useState(false);
   
   const embedUrl = post.video ? getYouTubeEmbedUrl(post.video) : null;
   const thumbnailUrl = post.video ? getYouTubeThumbnail(post.video) : null;
   const videoId = post.video ? getYouTubeVideoId(post.video) : null;
+
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case "AI": return t("blog.categories.ai");
+      case "Technology": return t("blog.categories.technology");
+      case "Startups": return t("blog.categories.startups");
+      case "Cybersecurity": return t("blog.categories.cybersecurity");
+      case "Education": return t("blog.categories.education");
+      case "Innovation": return t("blog.categories.innovation");
+      case "Promotions": return t("blog.categories.promotions");
+      default: return category;
+    }
+  };
 
   return (
     <div className={`min-h-screen pt-20 ${isDark ? "bg-[#0a0a0f]" : "bg-gray-50"}`}>
@@ -112,17 +127,17 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
           >
             {/* Category & Badges */}
             <div className="flex items-center gap-3 mb-4 flex-wrap">
-              <span className="section-badge text-xs">{post.category}</span>
+              <span className="section-badge text-xs">{getCategoryLabel(post.category)}</span>
               {post.promotion && (
                 <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500 text-white text-xs font-bold">
                   <Sparkles className="w-3 h-3" />
-                  PROMOTION
+                  {t("blog.promoBadge").toUpperCase()}
                 </span>
               )}
               {post.video && (
                 <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-500 text-white text-xs font-bold">
                   <Play className="w-3 h-3 fill-white" />
-                  VIDEO
+                  {t("blog.videoBadge").toUpperCase()}
                 </span>
               )}
             </div>
@@ -140,7 +155,7 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
                 </div>
                 <div>
                   <div className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>{post.author}</div>
-                  <div className="text-xs">Author</div>
+                  <div className="text-xs">{t("blog.author")}</div>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -207,7 +222,7 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
                   {/* Video Badge */}
                   <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600 text-white text-sm font-bold">
                     <Play className="w-4 h-4 fill-white" />
-                    Watch Video
+                    {t("blog.watchVideo")}
                   </div>
                 </div>
               )}
@@ -239,13 +254,13 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
               isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-700"
             }`}>
               <Share2 className="w-4 h-4" />
-              Share
+              {t("blog.share")}
             </button>
             <button className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-700"
             }`}>
               <Bookmark className="w-4 h-4" />
-              Save
+              {t("blog.save")}
             </button>
           </div>
 
@@ -268,23 +283,23 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
           {/* Tags */}
           <div className={`mt-12 pt-8 border-t ${isDark ? "border-white/10" : "border-gray-200"}`}>
             <h3 className={`text-sm font-bold uppercase tracking-wider mb-4 ${isDark ? "text-white/60" : "text-gray-500"}`}>
-              Tags
+              {t("blog.tags")}
             </h3>
             <div className="flex flex-wrap gap-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 isDark ? "bg-white/5 text-white/70" : "bg-gray-100 text-gray-700"
               }`}>
-                {post.category}
+                {getCategoryLabel(post.category)}
               </span>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 isDark ? "bg-white/5 text-white/70" : "bg-gray-100 text-gray-700"
               }`}>
-                Africa Tech
+                {t("blog.tagsAfrica")}
               </span>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 isDark ? "bg-white/5 text-white/70" : "bg-gray-100 text-gray-700"
               }`}>
-                Innovation
+                {t("blog.tagsInnovation")}
               </span>
             </div>
           </div>

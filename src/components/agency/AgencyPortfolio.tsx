@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ExternalLink, BookOpen, Loader2, FolderOpen, ChevronDown } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function AgencyPortfolio() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [active, setActive] = useState("all");
   const [projects, setProjects] = useState<any[]>([]);
@@ -44,12 +46,12 @@ export default function AgencyPortfolio() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="section-badge mb-4">Our Work</span>
+          <span className="section-badge mb-4">{t("agency.portfolioEyebrow")}</span>
           <h2 className={`text-3xl sm:text-4xl md:text-5xl font-black mb-4 ${isDark ? "text-white" : "text-gray-900"}`}>
-            Portfolio <span className="gradient-text">Showcase</span>
+            {t("agency.portfolioTitlePart1")} <span className="gradient-text">{t("agency.portfolioTitlePart2")}</span>
           </h2>
           <p className={`max-w-xl mx-auto ${isDark ? "text-white/50" : "text-gray-600"}`}>
-            Real projects. Real results. Here&apos;s what we&apos;ve built for our clients.
+            {t("agency.portfolioDescription")}
           </p>
         </motion.div>
 
@@ -82,8 +84,8 @@ export default function AgencyPortfolio() {
             <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-5 ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
               <FolderOpen className={`w-10 h-10 ${isDark ? "text-white/15" : "text-gray-300"}`} />
             </div>
-            <p className={`font-semibold text-lg ${isDark ? "text-white/40" : "text-gray-400"}`}>No projects yet</p>
-            <p className={`text-sm mt-1 ${isDark ? "text-white/25" : "text-gray-400"}`}>Portfolio projects will appear here once added.</p>
+            <p className={`font-semibold text-lg ${isDark ? "text-white/40" : "text-gray-400"}`}>{t("agency.portfolioEmptyTitle")}</p>
+            <p className={`text-sm mt-1 ${isDark ? "text-white/25" : "text-gray-400"}`}>{t("agency.portfolioEmptyDescription")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -124,14 +126,14 @@ export default function AgencyPortfolio() {
                         <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-400/20 text-cyan-400 text-xs font-medium border border-cyan-400/30 hover:bg-cyan-400/30 transition-colors">
                           <ExternalLink className="w-3 h-3" />
-                          Live Preview
+                          {t("agency.portfolioLivePreview")}
                         </a>
                       )}
                       {project.caseStudyUrl && (
                         <a href={project.caseStudyUrl} target="_blank" rel="noopener noreferrer"
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${isDark ? "bg-white/10 text-white border border-white/15 hover:bg-white/15" : "bg-white text-gray-900 border border-gray-200"}`}>
                           <BookOpen className="w-3 h-3" />
-                          Case Study
+                          {t("agency.portfolioCaseStudy")}
                         </a>
                       )}
                     </div>
@@ -156,7 +158,7 @@ export default function AgencyPortfolio() {
                         isDark ? "text-orange-400 hover:text-orange-300" : "text-orange-500 hover:text-orange-600"
                       }`}
                     >
-                      {expandedDesc[project.id] ? "Less" : "More"}
+                      {expandedDesc[project.id] ? t("agency.portfolioLess") : t("agency.portfolioMore")}
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${expandedDesc[project.id] ? "rotate-180" : ""}`} />
                     </button>
                   )}

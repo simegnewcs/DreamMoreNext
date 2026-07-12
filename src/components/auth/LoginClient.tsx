@@ -6,11 +6,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { authAPI } from "@/lib/api";
 import { signIn } from "next-auth/react";
 
 export default function LoginClient() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -97,13 +99,13 @@ export default function LoginClient() {
               <span className="gradient-text">More</span>
             </span>
           </Link>
-          <h1 className={`text-3xl font-black mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>Welcome Back</h1>
-          <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-500"}`}>Sign in to your DreamMore account</p>
+          <h1 className={`text-3xl font-black mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>{t("auth.loginTitle")}</h1>
+          <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-500"}`}>{t("auth.loginSubtitle")}</p>
           
           {/* Redirect Notice */}
           {redirect !== "/academy" && (
             <div className={`mt-4 px-4 py-2 rounded-xl text-xs ${isDark ? "bg-[#f47822]/10 text-[#f47822] border border-[#f47822]/20" : "bg-orange-50 text-orange-600 border border-orange-200"}`}>
-              You&apos;ll be redirected after login to continue your application
+              {t("auth.redirectNotice")}
             </div>
           )}
         </div>
@@ -130,12 +132,12 @@ export default function LoginClient() {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
             )}
-            Continue with Google
+            {t("auth.googleContinue")}
           </button>
 
           <div className="flex items-center gap-3 my-5">
             <div className={`flex-1 h-px ${isDark ? "bg-white/10" : "bg-gray-200"}`} />
-            <span className={`text-xs ${isDark ? "text-white/30" : "text-gray-400"}`}>or sign in with email</span>
+            <span className={`text-xs ${isDark ? "text-white/30" : "text-gray-400"}`}>{t("auth.orEmail")}</span>
             <div className={`flex-1 h-px ${isDark ? "bg-white/10" : "bg-gray-200"}`} />
           </div>
         </div>
@@ -150,14 +152,14 @@ export default function LoginClient() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/70" : "text-gray-700"}`}>
-                Email Address
+                {t("auth.emailLabel")}
               </label>
               <input
                 type="email"
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="your@email.com"
+                placeholder={t("auth.emailPlaceholder")}
                 className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:border-[#f47822]/50 transition-colors ${
                   isDark 
                     ? "bg-white/5 border-white/10 text-white placeholder-white/30" 
@@ -168,7 +170,7 @@ export default function LoginClient() {
 
             <div>
               <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/70" : "text-gray-700"}`}>
-                Password
+                {t("auth.passwordLabel")}
               </label>
               <div className="relative">
                 <input
@@ -193,7 +195,7 @@ export default function LoginClient() {
               </div>
               <div className="text-right mt-1.5">
                 <Link href="/forgot-password" className="text-xs text-[#f47822] hover:text-[#e06b18] transition-colors">
-                  Forgot password?
+                  {t("auth.forgotPassword")}
                 </Link>
               </div>
             </div>
@@ -206,11 +208,11 @@ export default function LoginClient() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Signing in...
+                  {t("auth.signingIn")}
                 </>
               ) : (
                 <>
-                  Sign In
+                  {t("auth.signIn")}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -219,9 +221,9 @@ export default function LoginClient() {
         </div>
 
         <p className={`text-center text-sm mt-6 ${isDark ? "text-white/40" : "text-gray-500"}`}>
-          Don&apos;t have an account?{" "}
+          {t("auth.noAccount")}{" "}
           <Link href="/register" className="text-[#f47822] hover:text-[#e06b18] font-medium transition-colors">
-            Create one
+            {t("auth.createAccount")}
           </Link>
         </p>
       </motion.div>

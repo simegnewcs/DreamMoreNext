@@ -7,9 +7,11 @@ import { Eye, EyeOff, ArrowRight, Loader2, User, Mail, Phone } from "lucide-reac
 import { authAPI } from "@/lib/api";
 import { signIn } from "next-auth/react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function RegisterClient() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -96,8 +98,8 @@ export default function RegisterClient() {
           <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isDark ? "bg-green-400/10 border border-green-400/20" : "bg-green-100 border border-green-200"}`}>
             <span className="text-3xl">🎉</span>
           </div>
-          <h2 className={`text-2xl font-black mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>Account Created!</h2>
-          <p className={`text-sm mb-4 ${isDark ? "text-white/55" : "text-gray-600"}`}>Check your email to verify your account.</p>
+          <h2 className={`text-2xl font-black mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>{t("auth.accountCreated")}</h2>
+          <p className={`text-sm mb-4 ${isDark ? "text-white/55" : "text-gray-600"}`}>{t("auth.verifyEmail")}</p>
 
           <button
             type="button"
@@ -108,11 +110,11 @@ export default function RegisterClient() {
             {resendLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Sending...
+                {t("auth.sending")}
               </>
             ) : (
               <>
-                Send verification link again
+                {t("auth.resendVerification")}
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -124,7 +126,7 @@ export default function RegisterClient() {
             </p>
           )}
 
-          <Link href="/login" className="btn-primary justify-center mt-4">Go to Login <ArrowRight className="w-4 h-4" /></Link>
+          <Link href="/login" className="btn-primary justify-center mt-4">{t("auth.goToLogin")} <ArrowRight className="w-4 h-4" /></Link>
         </div>
       </div>
     );
@@ -158,8 +160,8 @@ export default function RegisterClient() {
               <span className="gradient-text">More</span>
             </span>
           </Link>
-          <h1 className={`text-3xl font-black mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>Create Account</h1>
-          <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-600"}`}>Join DreamMore and start your journey</p>
+          <h1 className={`text-3xl font-black mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>{t("auth.registerTitle")}</h1>
+          <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-600"}`}>{t("auth.registerSubtitle")}</p>
         </div>
 
         {/* Google Sign Up */}
@@ -184,12 +186,12 @@ export default function RegisterClient() {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
             )}
-            Sign up with Google
+            {t("auth.googleSignUp")}
           </button>
 
           <div className="flex items-center gap-3 my-5">
             <div className={`flex-1 h-px ${isDark ? "bg-white/10" : "bg-gray-300"}`} />
-            <span className={`text-xs ${isDark ? "text-white/30" : "text-gray-500"}`}>or register with email</span>
+            <span className={`text-xs ${isDark ? "text-white/30" : "text-gray-500"}`}>{t("auth.orRegister")}</span>
             <div className={`flex-1 h-px ${isDark ? "bg-white/10" : "bg-gray-300"}`} />
           </div>
         </div>
@@ -203,7 +205,7 @@ export default function RegisterClient() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/70" : "text-gray-700"}`}>Full Name</label>
+              <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/70" : "text-gray-700"}`}>{t("auth.fullNameLabel")}</label>
               <div className="relative">
                 <User className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? "text-white/30" : "text-gray-400"}`} />
                 <input
@@ -211,7 +213,7 @@ export default function RegisterClient() {
                   required
                   value={form.fullName}
                   onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                  placeholder="Your full name"
+                  placeholder={t("auth.fullNamePlaceholder")}
                   className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm focus:outline-none transition-colors ${
                     isDark 
                       ? "bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-cyan-400/50" 
@@ -222,7 +224,7 @@ export default function RegisterClient() {
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/70" : "text-gray-700"}`}>Email Address</label>
+              <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/70" : "text-gray-700"}`}>{t("auth.emailLabel")}</label>
               <div className="relative">
                 <Mail className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? "text-white/30" : "text-gray-400"}`} />
                 <input
@@ -230,7 +232,7 @@ export default function RegisterClient() {
                   required
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="your@email.com"
+                  placeholder={t("auth.emailPlaceholder")}
                   className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm focus:outline-none transition-colors ${
                     isDark 
                       ? "bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-cyan-400/50" 
@@ -241,7 +243,7 @@ export default function RegisterClient() {
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/70" : "text-gray-700"}`}>Phone Number</label>
+              <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/70" : "text-gray-700"}`}>{t("auth.phoneLabel")}</label>
               <div className="relative">
                 <Phone className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? "text-white/30" : "text-gray-400"}`} />
                 <input
@@ -249,7 +251,7 @@ export default function RegisterClient() {
                   required
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="+251 911 000 000"
+                  placeholder={t("auth.phonePlaceholder")}
                   className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm focus:outline-none transition-colors ${
                     isDark 
                       ? "bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-cyan-400/50" 
@@ -260,7 +262,7 @@ export default function RegisterClient() {
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/70" : "text-gray-700"}`}>Password</label>
+              <label className={`block text-sm font-medium mb-1.5 ${isDark ? "text-white/70" : "text-gray-700"}`}>{t("auth.passwordLabel")}</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -268,7 +270,7 @@ export default function RegisterClient() {
                   minLength={8}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  placeholder="Minimum 8 characters"
+                  placeholder={t("auth.passwordPlaceholder")}
                   className={`w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-colors pr-12 ${
                     isDark 
                       ? "bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-cyan-400/50" 
@@ -293,11 +295,11 @@ export default function RegisterClient() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Creating Account...
+                  {t("auth.creatingAccount")}
                 </>
               ) : (
                 <>
-                  Create Account
+                  {t("auth.createAccount")}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -306,9 +308,9 @@ export default function RegisterClient() {
         </div>
 
         <p className={`text-center text-sm mt-6 ${isDark ? "text-white/40" : "text-gray-500"}`}>
-          Already have an account?{" "}
+          {t("auth.haveAccount")}{" "}
           <Link href="/login" className="text-cyan-500 hover:text-cyan-600 font-medium transition-colors">
-            Sign in
+            {t("auth.signIn")}
           </Link>
         </p>
       </motion.div>

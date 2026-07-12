@@ -3,18 +3,19 @@
 import { motion } from "framer-motion";
 import { GraduationCap, Award, Users, BookOpen } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
-
-const stats = [
-  { icon: BookOpen,     value: "16+",    label: "Courses" },
-  { icon: Users,        value: "150+",   label: "Students" },
-  { icon: Award,        value: "98%",    label: "Job Placement" },
-  { icon: GraduationCap, value: "100%", label: "Certified" },
-];
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function AcademyHero() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
 
+  const stats = [
+    { icon: BookOpen, value: "16+", label: t("academy.stats.courses") },
+    { icon: Users, value: "150+", label: t("academy.stats.students") },
+    { icon: Award, value: "98%", label: t("academy.stats.jobPlacement") },
+    { icon: GraduationCap, value: "100%", label: t("academy.stats.certified") },
+  ];
   return (
     <section
       className="relative pt-32 pb-20 overflow-hidden"
@@ -44,7 +45,7 @@ export default function AcademyHero() {
         >
           <div className="w-8 h-px" style={{ background: "#f47822" }} />
           <span className="text-xs font-bold tracking-[0.22em] uppercase" style={{ color: "#f47822" }}>
-            DreamMore Academy
+            {t("academy.heroBadge")}
           </span>
           <div className="w-8 h-px" style={{ background: "#f47822" }} />
         </motion.div>
@@ -55,8 +56,8 @@ export default function AcademyHero() {
           transition={{ duration: 0.7, delay: 0.1 }}
           className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.0] tracking-tight mb-6 ${isDark ? "text-white" : "text-gray-900"}`}
         >
-          Master High-Demand<br />
-          <span style={{ color: "#f47822" }}>Digital Skills.</span>
+          {t("academy.heroTitlePart1")}<br />
+          <span style={{ color: "#f47822" }}>{t("academy.heroTitlePart2")}</span>
         </motion.h1>
 
         <motion.p
@@ -65,8 +66,7 @@ export default function AcademyHero() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className={`text-lg max-w-2xl mx-auto mb-12 ${isDark ? "text-white/50" : "text-gray-600"}`}
         >
-          Learn from industry professionals through real-world projects.
-          Get certified and launch your career in tech.
+          {t("academy.heroDescription")}
         </motion.p>
 
         {/* Stats row */}

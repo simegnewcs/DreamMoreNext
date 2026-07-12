@@ -5,9 +5,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, ExternalLink, Loader2 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function TeamPreview() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,15 +49,14 @@ export default function TeamPreview() {
           <div>
             <span className="section-badge mb-4">Our Team</span>
             <h2 className={`text-4xl sm:text-5xl font-black leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
-              The Innovators<br />
-              Behind <span className="gradient-text">DreamMore</span>
+              {t("home.teamTitle")}
             </h2>
           </div>
           <Link
             href="/team"
             className="btn-secondary text-sm py-3 px-5 self-start sm:self-auto"
           >
-            Meet the Full Team
+            {t("home.teamCta")}
             <ArrowRight className="w-4 h-4" />
           </Link>
         </motion.div>
@@ -129,9 +130,9 @@ export default function TeamPreview() {
           className="mt-10 text-center"
         >
           <p className={`text-sm ${isDark ? "text-white/35" : "text-gray-500"}`}>
-            {members.length > 4 ? `And ${members.length - preview.length}+ more talented individuals driving DreamMore's mission. ` : "Meet the talented individuals driving DreamMore's mission. "}
+            {members.length > 4 ? `And ${members.length - preview.length}+ more talented individuals driving DreamMore's mission. ` : `${t("home.teamFooter")} `}
             <Link href="/team" className="hover:underline font-medium" style={{ color: "#f47822" }}>
-              View all →
+              {t("common.viewAll")} →
             </Link>
           </p>
         </motion.div>

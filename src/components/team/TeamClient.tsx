@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ExternalLink, Share2, Users, Loader2 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function TeamClient() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,12 +32,12 @@ export default function TeamClient() {
           <div className={`absolute inset-0 grid-pattern ${isDark ? "opacity-20" : "opacity-5"}`} />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="section-badge section-badge-purple mb-4">Our Team</span>
+          <span className="section-badge section-badge-purple mb-4">{t("team.heroBadge")}</span>
           <h1 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-5 leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
-            The Innovators Behind <span className="gradient-text">DreamMore</span>
+            {t("team.heroTitlePart1")} <span className="gradient-text">{t("team.heroTitlePart2")}</span>
           </h1>
           <p className={`text-lg max-w-2xl mx-auto ${isDark ? "text-white/55" : "text-gray-600"}`}>
-            A passionate team of developers, designers, educators, and strategists driving Africa&apos;s digital transformation.
+            {t("team.heroDescription")}
           </p>
         </div>
       </section>
@@ -52,8 +54,8 @@ export default function TeamClient() {
               <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-5 ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
                 <Users className={`w-10 h-10 ${isDark ? "text-white/15" : "text-gray-300"}`} />
               </div>
-              <p className={`text-xl font-bold ${isDark ? "text-white/40" : "text-gray-400"}`}>No team members yet</p>
-              <p className={`text-sm mt-1 ${isDark ? "text-white/25" : "text-gray-400"}`}>Team members will appear here once added from the admin panel.</p>
+              <p className={`text-xl font-bold ${isDark ? "text-white/40" : "text-gray-400"}`}>{t("team.emptyTitle")}</p>
+              <p className={`text-sm mt-1 ${isDark ? "text-white/25" : "text-gray-400"}`}>{t("team.emptyDescription")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

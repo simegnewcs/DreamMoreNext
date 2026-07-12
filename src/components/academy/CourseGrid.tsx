@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Clock, Award, ArrowUpRight, User, X, CheckCircle, AlertCircle, LogIn, Loader2, BookOpen } from "lucide-react";
 import { fetchCourses, applicationsAPI } from "@/lib/api";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 
 const courseBanner: Record<string, string> = {
@@ -39,6 +40,7 @@ const fallbackBanner = "https://images.unsplash.com/photo-1517694712202-14dd9538
 
 export default function CourseGrid() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const router = useRouter();
   const { isLoggedIn } = useAuth();
@@ -58,7 +60,7 @@ export default function CourseGrid() {
         const data = await fetchCourses();
         setCourses(data);
       } catch (err) {
-        setError("Failed to load courses");
+        setError(t("academy.loadError"));
         console.error("Error loading courses:", err);
       } finally {
         setLoading(false);
@@ -224,7 +226,7 @@ export default function CourseGrid() {
                     <div className="absolute bottom-3 left-3 flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full"
                       style={{ background: "rgba(244,120,34,0.2)", color: "#f47822", border: "1px solid rgba(244,120,34,0.3)" }}>
                       <Award className="w-3 h-3" />
-                      Certified
+                      {t("academy.certified")}
                     </div>
                   )}
                 </div>
@@ -245,7 +247,7 @@ export default function CourseGrid() {
                   {/* Feature/Software (Technologies) */}
                   <div className="mb-4">
                     <p className={`text-[10px] font-semibold mb-2 uppercase tracking-wide ${isDark ? "text-white/40" : "text-gray-400"}`}>
-                      Software & Tools
+                      {t("academy.softwareTools")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {(Array.isArray(course.technologies)
@@ -273,7 +275,7 @@ export default function CourseGrid() {
                       className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 hover:scale-[1.02]"
                       style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: isDark ? "#fff" : "#333", border: isDark ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(0,0,0,0.1)" }}
                     >
-                      View
+                      {t("academy.view")}
                       <ArrowUpRight className="w-3.5 h-3.5" />
                     </Link>
                     
@@ -281,29 +283,29 @@ export default function CourseGrid() {
                     {checkingStatuses ? (
                       <button
                         disabled
-                        title={`Checking... Course ID: ${course.id}`}
+                        title={`${t("academy.checking")} Course ID: ${course.id}`}
                         className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold bg-gray-300 text-gray-500 cursor-not-allowed"
                       >
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        Checking...
+                        {t("academy.checking")}
                       </button>
                     ) : applicationStatuses[String(course.id)] === 'pending' ? (
                       <button
                         disabled
-                        title={`Status: pending | Course ID: ${course.id}`}
+                        title={`${t("academy.pending")} | Course ID: ${course.id}`}
                         className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold bg-yellow-500 text-white cursor-not-allowed"
                       >
                         <Clock className="w-3.5 h-3.5" />
-                        Pending
+                        {t("academy.pending")}
                       </button>
                     ) : applicationStatuses[String(course.id)] === 'approved' ? (
                       <Link
                         href={`/lms/course/${course.slug || String(course.id)}`}
-                        title={`Status: approved | Course ID: ${course.id}`}
+                        title={`${t("academy.approved")} | Course ID: ${course.id}`}
                         className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold bg-green-600 text-white hover:bg-green-700 transition-all duration-200"
                       >
                         <BookOpen className="w-4 h-4" />
-                        Access LMS
+                        {t("academy.accessLms")}
                       </Link>
                     ) : (
                       <button
@@ -312,7 +314,7 @@ export default function CourseGrid() {
                         className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 hover:scale-[1.02]"
                         style={{ background: "#f47822", color: "#ffffff" }}
                       >
-                        {isLoggedIn ? "Apply Now" : "Apply"}
+                        {isLoggedIn ? t("academy.applyNow") : t("academy.apply")}
                         <ArrowUpRight className="w-3.5 h-3.5" />
                       </button>
                     )}
@@ -358,18 +360,18 @@ export default function CourseGrid() {
 
               {/* Content */}
               <h3 className={`text-xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
-                Login Required
+                {t("academy.loginRequired")}
               </h3>
               <p className={`text-sm mb-5 ${isDark ? "text-white/60" : "text-gray-600"}`}>
-                Please log in to apply for this course. Once logged in, you can proceed with your application.
+                {t("academy.loginRequiredP")}
               </p>
 
               {/* Features */}
               <div className={`space-y-2 mb-6 p-3 rounded-xl ${isDark ? "bg-white/5" : "bg-gray-50"}`}>
                 {[
-                  "Track application status",
-                  "Access course materials",
-                  "Connect with instructors"
+                  t("academy.features.track"),
+                  t("academy.features.accessMaterials"),
+                  t("academy.features.connectInstructors")
                 ].map((feature, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <CheckCircle className="w-4 h-4 text-[#f47822]" />
@@ -386,7 +388,7 @@ export default function CourseGrid() {
                   className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold bg-[#f47822] text-white hover:bg-[#e06b18] transition-all"
                 >
                   <User className="w-4 h-4" />
-                  Login to Continue
+                  {t("academy.loginToContinue")}
                 </Link>
                 <button
                   onClick={() => setShowLoginModal(false)}
@@ -396,7 +398,7 @@ export default function CourseGrid() {
                       : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
                   }`}
                 >
-                  Cancel
+                  {t("academy.cancel")}
                 </button>
               </div>
             </motion.div>

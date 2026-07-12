@@ -6,8 +6,18 @@ import Link from "next/link";
 import { Clock, ArrowRight, Tag, Play, Sparkles, Calendar, User, Loader2, Newspaper } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
-const categories = ["all", "AI", "Technology", "Startups", "Cybersecurity", "Education", "Innovation", "Promotions"];
+const categories = [
+  { value: "all", labelKey: "blog.categories.all" },
+  { value: "AI", labelKey: "blog.categories.ai" },
+  { value: "Technology", labelKey: "blog.categories.technology" },
+  { value: "Startups", labelKey: "blog.categories.startups" },
+  { value: "Cybersecurity", labelKey: "blog.categories.cybersecurity" },
+  { value: "Education", labelKey: "blog.categories.education" },
+  { value: "Innovation", labelKey: "blog.categories.innovation" },
+  { value: "Promotions", labelKey: "blog.categories.promotions" },
+];
 
 interface BlogPost {
   id: number;
@@ -32,6 +42,7 @@ interface BlogClientProps {
 
 export default function BlogClient({ initialBlogs = [] }: BlogClientProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [activeCategory, setActiveCategory] = useState("all");
   const [blogs, setBlogs] = useState<BlogPost[]>(initialBlogs);
@@ -76,12 +87,12 @@ export default function BlogClient({ initialBlogs = [] }: BlogClientProps) {
           <div className={`absolute inset-0 grid-pattern ${isDark ? "opacity-20" : "opacity-5"}`} />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="section-badge mb-4">Blog & Insights</span>
+          <span className="section-badge mb-4">{t("blog.heroBadge")}</span>
           <h1 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-5 ${isDark ? "text-white" : "text-gray-900"}`}>
-            Tech Insights from <span className="gradient-text">DreamMore</span>
+            {t("blog.heroTitlePart1")} <span className="gradient-text">{t("blog.heroTitlePart2")}</span>
           </h1>
           <p className={`text-lg max-w-2xl mx-auto ${isDark ? "text-white/55" : "text-gray-600"}`}>
-            AI, startups, web development, cybersecurity, and the future of African tech.
+            {t("blog.heroDescription")}
           </p>
         </div>
       </section>
@@ -112,7 +123,7 @@ export default function BlogClient({ initialBlogs = [] }: BlogClientProps) {
                     {featured.promotion && (
                       <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500 text-white text-xs font-bold">
                         <Sparkles className="w-3 h-3" />
-                        PROMO
+                        {t("blog.promoBadge")}
                       </div>
                     )}
                   </>
@@ -124,7 +135,7 @@ export default function BlogClient({ initialBlogs = [] }: BlogClientProps) {
                   {featured.promotion && (
                     <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 text-xs font-bold border border-orange-500/20">
                       <Sparkles className="w-3 h-3" />
-                      Featured
+                      {t("blog.featuredBadge")}
                     </span>
                   )}
                   <span className={`text-xs flex items-center gap-1 ${isDark ? "text-white/40" : "text-gray-500"}`}>
@@ -147,7 +158,7 @@ export default function BlogClient({ initialBlogs = [] }: BlogClientProps) {
                     </div>
                   </div>
                   <Link href={`/blog/${featured.slug}`} className="btn-primary text-sm py-2 px-4">
-                    {featured.video ? "Watch Video" : "Read Article"}
+                    {featured.video ? t("blog.watchVideo") : t("blog.readArticle")}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -160,17 +171,17 @@ export default function BlogClient({ initialBlogs = [] }: BlogClientProps) {
         <div className="flex flex-wrap gap-2 mb-8">
           {categories.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={cat.value}
+              onClick={() => setActiveCategory(cat.value)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                activeCategory === cat
+                activeCategory === cat.value
                   ? "bg-cyan-400/20 text-cyan-400 border border-cyan-400/30"
                   : isDark 
                     ? "text-white/50 hover:text-white border border-white/10 hover:border-white/20"
                     : "text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-300"
               }`}
             >
-              {cat}
+              {t(cat.labelKey)}
             </button>
           ))}
         </div>
@@ -179,7 +190,7 @@ export default function BlogClient({ initialBlogs = [] }: BlogClientProps) {
         {loading && (
           <div className={`flex flex-col items-center justify-center py-12 ${isDark ? "text-white/50" : "text-gray-500"}`}>
             <Loader2 className="w-8 h-8 animate-spin mb-3" />
-            <p>Loading blog posts...</p>
+            <p>{t("blog.loading")}</p>
           </div>
         )}
 
@@ -187,7 +198,7 @@ export default function BlogClient({ initialBlogs = [] }: BlogClientProps) {
         {!loading && blogs.length === 0 && (
           <div className={`flex flex-col items-center justify-center py-12 ${isDark ? "text-white/50" : "text-gray-500"}`}>
             <Newspaper className="w-12 h-12 mb-3 opacity-30" />
-            <p>No blog posts found.</p>
+            <p>{t("blog.emptyState")}</p>
           </div>
         )}
 
@@ -234,7 +245,7 @@ export default function BlogClient({ initialBlogs = [] }: BlogClientProps) {
                 {post.video && (
                   <div className="absolute bottom-3 right-3 px-2 py-1 rounded-full bg-black/70 text-white text-xs font-medium flex items-center gap-1">
                     <Play className="w-3 h-3 fill-white" />
-                    Video
+                    {t("blog.videoBadge")}
                   </div>
                 )}
               </div>

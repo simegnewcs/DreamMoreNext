@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Mail } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function AgencyCta() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
 
   return (
@@ -22,20 +24,20 @@ export default function AgencyCta() {
           transition={{ duration: 0.7 }}
         >
           <h2 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-6 leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
-            Ready to Transform Your{" "}
-            <span className="gradient-text">Ideas Into Reality?</span>
+            {t("agency.ctaTitlePart1")} {" "}
+            <span className="gradient-text">{t("agency.ctaTitlePart2")}</span>
           </h2>
           <p className={`text-xl mb-10 max-w-2xl mx-auto leading-relaxed ${isDark ? "text-white/55" : "text-gray-600"}`}>
-            Let&apos;s build something extraordinary together. Our team of experts is ready to bring your vision to life.
+            {t("agency.ctaDescription")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/contact" className="btn-primary text-base py-4 px-8">
-              Start a Project
+              {t("agency.ctaPrimary")}
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link href="/contact" className="btn-secondary text-base py-4 px-8">
               <Mail className="w-4 h-4" />
-              Contact Us
+              {t("agency.ctaSecondary")}
             </Link>
           </div>
         </motion.div>

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { COURSES } from "@/lib/data";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { applicationsAPI } from "@/lib/api";
 
 const courseBanner: Record<string, string> = {
@@ -44,6 +45,7 @@ type Course = (typeof COURSES)[0];
 
 export default function CourseDetailClient({ course }: { course: Course }) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [openModule, setOpenModule] = useState<number | null>(0);
   const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
@@ -110,7 +112,7 @@ export default function CourseDetailClient({ course }: { course: Course }) {
       <div className="bg-[#f47822] py-3 px-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-white text-center text-lg sm:text-xl font-bold">
-            Apply for Dream More {course.title} Course
+            {t("academy.applyForCoursePrefix")} {course.title} {t("academy.applyForCourseSuffix")}
           </h1>
         </div>
       </div>
@@ -134,7 +136,7 @@ export default function CourseDetailClient({ course }: { course: Course }) {
             {course.certificate && (
               <span className="flex items-center gap-1 text-sm text-white/80">
                 <Award className="w-4 h-4" />
-                Certificate Included
+                {t("academy.certificateIncluded")}
               </span>
             )}
           </div>
@@ -177,22 +179,22 @@ export default function CourseDetailClient({ course }: { course: Course }) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
               <div className={`text-center p-3 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-50"}`}>
                 <Clock className="w-5 h-5 text-[#f47822] mx-auto mb-1" />
-                <p className="text-xs text-[#f47822] font-medium">Duration</p>
+                <p className="text-xs text-[#f47822] font-medium">{t("academy.duration")}</p>
                 <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{course.duration}</p>
               </div>
               <div className={`text-center p-3 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-50"}`}>
                 <BarChart2 className="w-5 h-5 text-[#f47822] mx-auto mb-1" />
-                <p className="text-xs text-[#f47822] font-medium">Level</p>
-                <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>All Level</p>
+                <p className="text-xs text-[#f47822] font-medium">{t("academy.level")}</p>
+                <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{t("academy.allLevel")}</p>
               </div>
               <div className={`text-center p-3 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-50"}`}>
                 <Globe className="w-5 h-5 text-[#f47822] mx-auto mb-1" />
-                <p className="text-xs text-[#f47822] font-medium">Language</p>
+                <p className="text-xs text-[#f47822] font-medium">{t("academy.language")}</p>
                 <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{course.language}</p>
               </div>
               <div className={`text-center p-3 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-50"}`}>
                 <Users className="w-5 h-5 text-[#f47822] mx-auto mb-1" />
-                <p className="text-xs text-[#f47822] font-medium">Students</p>
+                <p className="text-xs text-[#f47822] font-medium">{t("academy.students")}</p>
                 <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{course.students.toLocaleString()}</p>
               </div>
             </div>
@@ -214,8 +216,8 @@ export default function CourseDetailClient({ course }: { course: Course }) {
             {course.outcomes && course.outcomes.length > 0 && (
               <div className="mb-6">
                 <h3 className={`text-lg font-bold text-center mb-4 ${isDark ? "text-[#f47822]" : "text-[#f47822]"}`}>
-                  What You&apos;ll Learn
-                </h3>
+                    {t("academy.whatYoullLearn")}
+                  </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {course.outcomes.map((outcome, index) => (
                     <div 
@@ -234,8 +236,8 @@ export default function CourseDetailClient({ course }: { course: Course }) {
             {course.requirements && course.requirements.length > 0 && (
               <div className="mb-6">
                 <h3 className={`text-lg font-bold text-center mb-4 ${isDark ? "text-[#f47822]" : "text-[#f47822]"}`}>
-                  Who is this course for?
-                </h3>
+                    {t("academy.whoIsThisFor")}
+                  </h3>
                 <div className="space-y-2">
                   {course.requirements.map((req, index) => (
                     <div 
@@ -253,7 +255,7 @@ export default function CourseDetailClient({ course }: { course: Course }) {
             {/* Technologies */}
             <div className="mb-6">
               <h3 className={`text-lg font-bold text-center mb-4 ${isDark ? "text-[#f47822]" : "text-[#f47822]"}`}>
-                Technologies & Tools
+                {t("academy.technologiesTools")}
               </h3>
               <div className="flex flex-wrap justify-center gap-2">
                 {course.technologies.map((tech) => (
@@ -292,7 +294,7 @@ export default function CourseDetailClient({ course }: { course: Course }) {
                   className="flex-1 text-center py-3 px-6 text-sm font-bold rounded-xl bg-gray-300 text-gray-500 cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Checking...
+                  {t("academy.checking")}
                 </button>
               ) : applicationStatus === 'pending' ? (
                 <button
@@ -301,7 +303,7 @@ export default function CourseDetailClient({ course }: { course: Course }) {
                   className="flex-1 text-center py-3 px-6 text-sm font-bold rounded-xl bg-yellow-500 text-white cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <Clock className="w-4 h-4" />
-                  Pending Approval
+                  {t("academy.pendingApproval")}
                 </button>
               ) : applicationStatus === 'approved' ? (
                 <Link
@@ -310,7 +312,7 @@ export default function CourseDetailClient({ course }: { course: Course }) {
                   className="flex-1 text-center py-3 px-6 text-sm font-bold rounded-xl bg-green-600 text-white hover:bg-green-700 transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <BookOpen className="w-4 h-4" />
-                  Access Course
+                  {t("academy.accessCourse")}
                 </Link>
               ) : (
                 <Link
@@ -318,7 +320,7 @@ export default function CourseDetailClient({ course }: { course: Course }) {
                   title={`No application | Course ID: ${course.id} | Detected: '${applicationStatus}'`}
                   className="flex-1 text-center py-3 px-6 text-sm font-bold rounded-xl bg-[#f47822] text-white hover:bg-[#e06b18] transition-all duration-200 flex items-center justify-center gap-2"
                 >
-                  Apply Now
+                  {t("academy.applyNow")}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               )}
@@ -330,7 +332,7 @@ export default function CourseDetailClient({ course }: { course: Course }) {
                     : "border-[#f47822] text-[#f47822] hover:bg-[#f47822]/10"
                 }`}
               >
-                Back to Courses
+                {t("academy.backToCourses")}
               </Link>
             </div>
           </div>

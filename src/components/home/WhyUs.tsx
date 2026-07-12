@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Layers, Zap, Users, Trophy } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 const advantages = [
   {
@@ -33,6 +34,7 @@ const advantages = [
 
 export default function WhyUs() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
 
   return (
@@ -56,13 +58,10 @@ export default function WhyUs() {
         >
           <span className="section-badge mb-5">Our Ecosystem Advantage</span>
           <h2 className={`text-4xl sm:text-5xl font-black mb-5 leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
-            Why Doing Both Makes Us{" "}
-            <span className="gradient-text">Better Than Everyone Else</span>
+            {t("home.whyUsTitle")}
           </h2>
           <p className={`text-lg max-w-3xl mx-auto leading-relaxed ${isDark ? "text-white/50" : "text-gray-600"}`}>
-            We don&apos;t just teach theory — we teach what we do every day for our global clients.
-            Our students learn from active practitioners, and our clients benefit from a talent pool
-            that is always at the cutting edge of digital innovation.
+            {t("home.whyUsDesc")}
           </p>
         </motion.div>
 

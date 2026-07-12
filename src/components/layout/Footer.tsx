@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, ExternalLink } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 const footerLinks = {
   company: [
@@ -32,6 +33,7 @@ const footerLinks = {
 
 export default function Footer() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
 
   return (
@@ -61,7 +63,7 @@ export default function Footer() {
               />
             </Link>
             <p className={`text-sm leading-relaxed mb-6 max-w-xs ${isDark ? "text-white/50" : "text-gray-600"}`}>
-              Empowering Africa through digital innovation. We build world-class solutions for businesses and train the next generation of African creators.
+              {t("footer.brandDescription")}
             </p>
             {/* Contact info */}
             <div className="space-y-3">
@@ -142,7 +144,7 @@ export default function Footer() {
 
           {/* Links columns */}
           <div className="hidden md:block">
-            <h4 className={`text-sm font-semibold mb-4 uppercase tracking-wider ${isDark ? "text-white" : "text-gray-900"}`}>Company</h4>
+            <h4 className={`text-sm font-semibold mb-4 uppercase tracking-wider ${isDark ? "text-white" : "text-gray-900"}`}>{t("footer.company")}</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
@@ -155,7 +157,7 @@ export default function Footer() {
           </div>
 
           <div className="hidden md:block">
-            <h4 className={`text-sm font-semibold mb-4 uppercase tracking-wider ${isDark ? "text-white" : "text-gray-900"}`}>Agency</h4>
+            <h4 className={`text-sm font-semibold mb-4 uppercase tracking-wider ${isDark ? "text-white" : "text-gray-900"}`}>{t("footer.agency")}</h4>
             <ul className="space-y-3">
               {footerLinks.agency.map((link) => (
                 <li key={link.href}>
@@ -168,7 +170,7 @@ export default function Footer() {
           </div>
 
           <div className="hidden md:block">
-            <h4 className={`text-sm font-semibold mb-4 uppercase tracking-wider ${isDark ? "text-white" : "text-gray-900"}`}>Academy</h4>
+            <h4 className={`text-sm font-semibold mb-4 uppercase tracking-wider ${isDark ? "text-white" : "text-gray-900"}`}>{t("footer.academy")}</h4>
             <ul className="space-y-3">
               {footerLinks.academy.map((link) => (
                 <li key={link.href}>
@@ -185,13 +187,13 @@ export default function Footer() {
         <div className={`py-8 border-t border-b ${isDark ? "border-white/5" : "border-gray-200"}`}>
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <h4 className={`font-semibold mb-1 ${isDark ? "text-white" : "text-gray-900"}`}>Stay in the loop</h4>
-              <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-600"}`}>Get the latest tech insights and course updates.</p>
+              <h4 className={`font-semibold mb-1 ${isDark ? "text-white" : "text-gray-900"}`}>{t("footer.newsletterTitle")}</h4>
+              <p className={`text-sm ${isDark ? "text-white/50" : "text-gray-600"}`}>{t("footer.newsletterDescription")}</p>
             </div>
             <form className="flex w-full md:w-auto gap-2">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t("footer.emailPlaceholder")}
                 className={`flex-1 md:w-72 px-4 py-2.5 rounded-lg text-sm focus:outline-none transition-colors ${
                   isDark 
                     ? "bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-orange-400/50" 
@@ -199,7 +201,7 @@ export default function Footer() {
                 }`}
               />
               <button type="submit" className="btn-primary text-sm py-2.5 px-5 whitespace-nowrap">
-                Subscribe
+                {t("footer.subscribe")}
               </button>
             </form>
           </div>
@@ -209,7 +211,7 @@ export default function Footer() {
         <div className="py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
             <p className={`text-xs ${isDark ? "text-white/30" : "text-gray-500"}`}>
-              © {new Date().getFullYear()} DreamMore Digital Ecosystem. All rights reserved.
+              {t("footer.copyright").replace("{year}", new Date().getFullYear().toString())}
             </p>
             <a
               href="https://www.devvoltz.com"
@@ -217,18 +219,18 @@ export default function Footer() {
               rel="noopener noreferrer"
               className={`text-xs transition-colors ${isDark ? "text-white/30 hover:text-white/60" : "text-gray-500 hover:text-gray-700"}`}
             >
-              Developed by DEVVOLTZ TECHNOLOGY PLC 
+              {t("footer.developerCredit")}
             </a>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/privacy" className={`text-xs transition-colors ${isDark ? "text-white/30 hover:text-white/60" : "text-gray-500 hover:text-gray-700"}`}>
-              Privacy Policy
+              {t("footer.privacy")}
             </Link>
             <Link href="/terms" className={`text-xs transition-colors ${isDark ? "text-white/30 hover:text-white/60" : "text-gray-500 hover:text-gray-700"}`}>
-              Terms of Service
+              {t("footer.terms")}
             </Link>
             <Link href="/cookies" className={`text-xs transition-colors ${isDark ? "text-white/30 hover:text-white/60" : "text-gray-500 hover:text-gray-700"}`}>
-              Cookies
+              {t("footer.cookies")}
             </Link>
           </div>
         </div>

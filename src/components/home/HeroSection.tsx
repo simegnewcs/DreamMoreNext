@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowUpRight, Play, TrendingUp, Users, Award, ChevronRight } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function HeroSection() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   
   return (
@@ -57,14 +59,14 @@ export default function HeroSection() {
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="w-6 h-px" style={{ background: isDark ? "#ffffff" : "#f47822" }} />
             <span className="text-[10px] font-bold tracking-[0.25em] uppercase px-3 py-1 rounded-full" style={{ background: "rgba(244,120,34,0.15)", color: "#f47822", border: "1px solid rgba(244,120,34,0.3)" }}>
-              DreamMore Digital Ecosystem
+              {t("home.heroTag")}
             </span>
             <div className="w-6 h-px" style={{ background: isDark ? "#ffffff" : "#f47822" }} />
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight uppercase">
             <span className={isDark ? "text-white" : "text-gray-900"}>Empowering</span>{" "}
             <span style={{ color: "#f47822" }}>Africa&apos;s</span>{" "}
-            <span className={isDark ? "text-white" : "text-gray-900"}>Digital Future.</span>
+            <span className={isDark ? "text-white" : "text-gray-900"}>{t("home.heroTitle")}</span>
           </h1>
         </motion.div>
 
@@ -97,12 +99,12 @@ export default function HeroSection() {
                 {/* Header */}
                 <div className="mb-6">
                   <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-2" style={{ color: "#f47822" }}>
-                    The Agency — The Build
+                    {t("home.agencyEyebrow")}
                   </p>
                   <h2 className="text-4xl sm:text-5xl font-black leading-[0.95] tracking-tight">
                     <span className={isDark ? "text-white" : "text-gray-900"}>DREAM</span>
                     <span style={{ color: "#f47822" }}>MORE</span><br />
-                    <span style={{ color: isDark ? "#ffffff" : "#15142a" }}>DIGITALS</span>
+                    <span style={{ color: isDark ? "#ffffff" : "#15142a" }}>{t("home.agencyTitle")}</span>
                   </h2>
                 </div>
 
@@ -181,8 +183,7 @@ export default function HeroSection() {
 
                 {/* Description */}
                 <p className={`text-sm leading-relaxed mb-6 max-w-sm ${isDark ? "text-white/70" : "text-gray-600"}`}>
-                  We build <span style={{ color: isDark ? "#ffffff" : "#15142a" }} className="font-semibold">world-class digital products</span> for global brands — 
-                  from <span style={{ color: "#f47822" }}>enterprise software</span> to AI-powered platforms.
+                  {t("home.agencyDescription")}
                 </p>
 
                 {/* CTA */}
@@ -191,7 +192,7 @@ export default function HeroSection() {
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 text-sm font-black uppercase tracking-widest rounded-xl transition-all hover:gap-3 group/cta border-2"
                   style={{ background: "#ffffff", color: "#15142a", borderColor: "#f47822", maxWidth: "240px" }}
                 >
-                  Hire Our Agency
+                  {t("home.agencyCta")}
                   <ArrowUpRight className="w-4 h-4 transition-transform group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" style={{ color: "#f47822" }} />
                 </Link>
 
@@ -223,11 +224,11 @@ export default function HeroSection() {
                 {/* Header */}
                 <div className="mb-6 text-right">
                   <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-2" style={{ color: "#f47822" }}>
-                    The Academy — The Teach
+                    {t("home.academyEyebrow")}
                   </p>
                   <h2 className="text-4xl sm:text-5xl font-black leading-[0.95] tracking-tight">
                     <span style={{ color: isDark ? "#ffffff" : "#15142a" }}>THE SKILLS</span><br />
-                    <span style={{ color: "#f47822" }}>ACADEMY</span>
+                    <span style={{ color: "#f47822" }}>{t("home.academyTitle")}</span>
                   </h2>
                 </div>
 
@@ -312,8 +313,7 @@ export default function HeroSection() {
 
                 {/* Description */}
                 <p className={`text-sm leading-relaxed mb-6 max-w-sm ml-auto text-right ${isDark ? "text-white/70" : "text-gray-600"}`}>
-                  Master <span style={{ color: isDark ? "#ffffff" : "#15142a" }} className="font-semibold">16+ in-demand skills</span> through 
-                  <span style={{ color: "#f47822" }}> real-world projects</span> from industry experts.
+                  {t("home.academyDescription")}
                 </p>
 
                 {/* CTA */}

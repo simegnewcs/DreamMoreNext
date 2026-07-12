@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { SERVICES } from "@/lib/data";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 const iconMap: Record<string, React.ElementType> = {
   Code, Smartphone, Globe, Brain, Palette, Zap, TrendingUp, Shield,
@@ -14,8 +15,92 @@ const iconMap: Record<string, React.ElementType> = {
 
 export default function AgencyServices() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [openId, setOpenId] = useState<number | null>(null);
+
+  const serviceContent: Record<number, { title: string; description: string; details: string[] }> = {
+    1: {
+      title: t("agency.services.software.title"),
+      description: t("agency.services.software.description"),
+      details: [
+        t("agency.services.software.detail1"),
+        t("agency.services.software.detail2"),
+        t("agency.services.software.detail3"),
+        t("agency.services.software.detail4"),
+      ],
+    },
+    2: {
+      title: t("agency.services.mobile.title"),
+      description: t("agency.services.mobile.description"),
+      details: [
+        t("agency.services.mobile.detail1"),
+        t("agency.services.mobile.detail2"),
+        t("agency.services.mobile.detail3"),
+        t("agency.services.mobile.detail4"),
+      ],
+    },
+    3: {
+      title: t("agency.services.website.title"),
+      description: t("agency.services.website.description"),
+      details: [
+        t("agency.services.website.detail1"),
+        t("agency.services.website.detail2"),
+        t("agency.services.website.detail3"),
+        t("agency.services.website.detail4"),
+      ],
+    },
+    4: {
+      title: t("agency.services.ai.title"),
+      description: t("agency.services.ai.description"),
+      details: [
+        t("agency.services.ai.detail1"),
+        t("agency.services.ai.detail2"),
+        t("agency.services.ai.detail3"),
+        t("agency.services.ai.detail4"),
+      ],
+    },
+    5: {
+      title: t("agency.services.design.title"),
+      description: t("agency.services.design.description"),
+      details: [
+        t("agency.services.design.detail1"),
+        t("agency.services.design.detail2"),
+        t("agency.services.design.detail3"),
+        t("agency.services.design.detail4"),
+      ],
+    },
+    6: {
+      title: t("agency.services.branding.title"),
+      description: t("agency.services.branding.description"),
+      details: [
+        t("agency.services.branding.detail1"),
+        t("agency.services.branding.detail2"),
+        t("agency.services.branding.detail3"),
+        t("agency.services.branding.detail4"),
+      ],
+    },
+    7: {
+      title: t("agency.services.marketing.title"),
+      description: t("agency.services.marketing.description"),
+      details: [
+        t("agency.services.marketing.detail1"),
+        t("agency.services.marketing.detail2"),
+        t("agency.services.marketing.detail3"),
+        t("agency.services.marketing.detail4"),
+      ],
+    },
+    8: {
+      title: t("agency.services.cctv.title"),
+      description: t("agency.services.cctv.description"),
+      details: [
+        t("agency.services.cctv.detail1"),
+        t("agency.services.cctv.detail2"),
+        t("agency.services.cctv.detail3"),
+        t("agency.services.cctv.detail4"),
+      ],
+    },
+  };
 
   return (
     <section id="services" className={`relative py-24 overflow-hidden ${isDark ? "bg-[#050508]" : "bg-gray-50"}`}>
@@ -28,12 +113,12 @@ export default function AgencyServices() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="section-badge mb-4">What We Do</span>
+          <span className="section-badge mb-4">{t("agency.servicesEyebrow")}</span>
           <h2 className={`text-3xl sm:text-4xl md:text-5xl font-black mb-4 ${isDark ? "text-white" : "text-gray-900"}`}>
-            Our <span className="gradient-text">Core Services</span>
+            {t("agency.servicesTitlePart1")} <span className="gradient-text">{t("agency.servicesTitlePart2")}</span>
           </h2>
           <p className={`max-w-2xl mx-auto ${isDark ? "text-white/50" : "text-gray-600"}`}>
-            Full-spectrum digital services built for businesses that demand excellence.
+            {t("agency.servicesDescription")}
           </p>
         </motion.div>
 
@@ -41,6 +126,7 @@ export default function AgencyServices() {
           {SERVICES.map((service, i) => {
             const Icon = iconMap[service.icon] || Code;
             const isOpen = openId === service.id;
+            const copy = serviceContent[service.id] ?? { title: service.title, description: service.description, details: service.details };
             return (
               <motion.div
                 key={service.id}
@@ -66,10 +152,10 @@ export default function AgencyServices() {
                   {/* Title + desc */}
                   <div className="flex-1 min-w-0">
                     <h3 className={`font-bold text-base ${isDark ? "text-white" : "text-gray-900"}`}>
-                      {service.title}
+                      {copy.title}
                     </h3>
                     <p className={`hidden sm:block text-sm mt-0.5 leading-relaxed ${isDark ? "text-white/45" : "text-gray-500"}`}>
-                      {service.description}
+                      {copy.description}
                     </p>
                   </div>
 
@@ -85,7 +171,7 @@ export default function AgencyServices() {
                     }`}
                     style={isOpen ? { background: service.color } : {}}
                   >
-                    View Full Details
+                    {t("agency.servicesButton")}
                     <ChevronDown
                       className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
                     />
@@ -104,10 +190,10 @@ export default function AgencyServices() {
                     >
                       <div className="pb-6 px-2 pl-16">
                         <p className={`sm:hidden text-sm mb-4 leading-relaxed ${isDark ? "text-white/55" : "text-gray-500"}`}>
-                          {service.description}
+                          {copy.description}
                         </p>
                         <ul className="space-y-2.5">
-                          {service.details.map((point, j) => (
+                          {copy.details.map((point, j) => (
                             <motion.li
                               key={j}
                               initial={{ opacity: 0, x: -10 }}

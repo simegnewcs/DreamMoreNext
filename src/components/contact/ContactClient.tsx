@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, MessageCircle, Send, User, FileText, MessageSquareText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 
 const contactInfo = [
@@ -46,6 +47,7 @@ const contactInfo = [
 
 export default function ContactClient() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const { user, loading: authLoading } = useAuth();
   const isDark = theme === "dark";
   const [fullName, setFullName] = useState("");
@@ -105,12 +107,12 @@ export default function ContactClient() {
           <div className={`absolute inset-0 grid-pattern ${isDark ? "opacity-20" : "opacity-5"}`} />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="section-badge mb-4">Get In Touch</span>
+          <span className="section-badge mb-4">{t("contact.heroBadge")}</span>
           <h1 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-5 ${isDark ? "text-white" : "text-gray-900"}`}>
-            Let&apos;s <span className="gradient-text">Start a Conversation</span>
+            {t("contact.heroTitle")}
           </h1>
           <p className={`text-lg max-w-2xl mx-auto ${isDark ? "text-white/55" : "text-gray-600"}`}>
-            Have a project in mind? Want to join the academy? Or just want to say hi? We&apos;d love to hear from you.
+            {t("contact.heroDescription")}
           </p>
         </div>
       </section>
@@ -119,7 +121,7 @@ export default function ContactClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Contact info */}
           <div className="space-y-4">
-            <h3 className={`text-lg font-bold mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>Contact Information</h3>
+            <h3 className={`text-lg font-bold mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>{t("contact.infoTitle")}</h3>
             {contactInfo.map((info) => {
               const Icon = info.icon;
               return (
@@ -161,9 +163,9 @@ export default function ContactClient() {
           <div className={`rounded-2xl p-8 ${isDark ? "glass" : "bg-white border border-gray-200 shadow-sm"}`}>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Send us a message</h3>
+                <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{t("contact.formTitle")}</h3>
                 <p className={`text-sm mt-1 ${isDark ? "text-white/60" : "text-gray-600"}`}>
-                  {user ? `Logged in as ${user.name || user.email}` : "Sign in to prefill your details and send a message faster."}
+                  {user ? `${t("contact.loggedInAs")} ${user.name || user.email}` : t("contact.loginHint")}
                 </p>
               </div>
             </div>
@@ -173,7 +175,7 @@ export default function ContactClient() {
                 <User className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? "text-white/40" : "text-gray-400"}`} />
                 <input
                   type="text"
-                  placeholder="Full name"
+                  placeholder={t("contact.fullNamePlaceholder")}
                   value={fullName}
                   onChange={(event) => setFullName(event.target.value)}
                   required
@@ -185,7 +187,7 @@ export default function ContactClient() {
                 <FileText className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? "text-white/40" : "text-gray-400"}`} />
                 <input
                   type="text"
-                  placeholder="Subject"
+                  placeholder={t("contact.subjectPlaceholder")}
                   value={subject}
                   onChange={(event) => setSubject(event.target.value)}
                   required
@@ -196,7 +198,7 @@ export default function ContactClient() {
               <div className="relative">
                 <MessageSquareText className={`absolute left-3 top-4 w-4 h-4 ${isDark ? "text-white/40" : "text-gray-400"}`} />
                 <textarea
-                  placeholder="Your message"
+                  placeholder={t("contact.messagePlaceholder")}
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
                   required
@@ -210,7 +212,7 @@ export default function ContactClient() {
                 disabled={isSubmitting || authLoading}
                 className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? "Sending..." : "Send Message"}
+                {isSubmitting ? t("contact.sending") : t("contact.send")}
               </button>
 
               {status.message ? (
@@ -221,19 +223,19 @@ export default function ContactClient() {
             </form>
 
             <div className={`mt-6 rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"}`}>
-              <p className={`text-sm font-semibold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>Business Hours</p>
+              <p className={`text-sm font-semibold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>{t("contact.businessHours")}</p>
               <div className="space-y-2">
                 <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${isDark ? "bg-emerald-500/10" : "bg-emerald-50"}`}>
-                  <span className={`text-xs font-medium ${isDark ? "text-emerald-200" : "text-emerald-700"}`}>Monday - Friday</span>
+                  <span className={`text-xs font-medium ${isDark ? "text-emerald-200" : "text-emerald-700"}`}>{t("contact.mondayFriday")}</span>
                   <span className={`text-xs font-semibold ${isDark ? "text-emerald-100" : "text-emerald-800"}`}>2:00 AM - 11:00 AM</span>
                 </div>
                 <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${isDark ? "bg-emerald-500/10" : "bg-emerald-50"}`}>
-                  <span className={`text-xs font-medium ${isDark ? "text-emerald-200" : "text-emerald-700"}`}>Saturday</span>
+                  <span className={`text-xs font-medium ${isDark ? "text-emerald-200" : "text-emerald-700"}`}>{t("contact.saturday")}</span>
                   <span className={`text-xs font-semibold ${isDark ? "text-emerald-100" : "text-emerald-800"}`}>4:00 AM - 10:00 AM</span>
                 </div>
                 <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${isDark ? "bg-rose-500/10" : "bg-rose-50"}`}>
-                  <span className={`text-xs font-medium ${isDark ? "text-rose-200" : "text-rose-700"}`}>Sunday</span>
-                  <span className={`text-xs font-semibold ${isDark ? "text-rose-100" : "text-rose-800"}`}>Closed</span>
+                  <span className={`text-xs font-medium ${isDark ? "text-rose-200" : "text-rose-700"}`}>{t("contact.sunday")}</span>
+                  <span className={`text-xs font-semibold ${isDark ? "text-rose-100" : "text-rose-800"}`}>{t("contact.closed")}</span>
                 </div>
               </div>
             </div>

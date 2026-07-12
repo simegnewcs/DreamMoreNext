@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Code2, Palette, TrendingUp, Layers, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 const services = [
   { icon: Code2,       title: "Software Development", desc: "Scalable Web & Mobile Apps." },
@@ -23,6 +24,7 @@ const clients = ["Hella Coffee", "ጋሪ ፋብሪካ", "Sosina Tibeb", "ሰር�
 
 export default function AgencyPillar() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [brands, setBrands] = useState<{ id: number; name: string; logo: string }[]>([]);
 
@@ -79,14 +81,11 @@ export default function AgencyPillar() {
 
             {/* headline */}
             <h2 className={`text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.0] tracking-tight mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>
-              We Build<br />
-              <span style={{ color: "#f47822" }}>World-Class</span><br />
-              Digital Products.
+              {t("home.agencyPillarTitle")}
             </h2>
 
             <p className={`text-base leading-relaxed mb-10 max-w-md ${isDark ? "text-white/50" : "text-gray-600"}`}>
-              From enterprise software to AI-powered platforms — DreamMore delivers
-              production-ready solutions that perform at global scale.
+              {t("home.agencyPillarDesc")}
             </p>
 
             {/* service list */}
@@ -123,7 +122,7 @@ export default function AgencyPillar() {
               className="inline-flex items-center gap-2 px-8 py-4 text-sm font-black uppercase tracking-widest text-white rounded-sm transition-all hover:brightness-110 active:scale-95"
               style={{ background: "#f47822" }}
             >
-              View Our Work
+              {t("home.agencyCtaButton")}
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </motion.div>

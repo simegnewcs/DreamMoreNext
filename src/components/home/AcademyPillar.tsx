@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useState } from "react";
 
 /* Per-course accent color + app-icon background + photo */
@@ -70,6 +71,7 @@ const fallbackCard = { accent: "#f47822", iconBg: "#431407", iconText: "D", phot
 
 export default function AcademyPillar() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [featured, setFeatured] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,7 +133,7 @@ export default function AcademyPillar() {
             <div className="w-8 h-px" style={{ background: "#f47822" }} />
           </div>
           <h2 className={`text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.0] tracking-tight uppercase ${isDark ? "text-white" : "text-gray-900"}`}>
-            Master 16+ In-Demand<br />Digital Skills.
+            {t("home.academyPillarTitle")}
           </h2>
         </motion.div>
 
@@ -244,12 +246,12 @@ export default function AcademyPillar() {
                   backdropFilter: "blur(12px)",
                 }}
               >
-                <p className={`text-xs font-bold uppercase tracking-wider mb-3 ${isDark ? "text-white/60" : "text-gray-500"}`}>Student Success</p>
+                <p className={`text-xs font-bold uppercase tracking-wider mb-3 ${isDark ? "text-white/60" : "text-gray-500"}`}>{t("home.academyPillarSubtitle")}</p>
                 <div className="text-5xl font-black mb-1" style={{ color: "#f47822" }}>
                   150+
                 </div>
                 <p className={`text-xs font-black uppercase tracking-widest leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
-                  Professionals<br />Trained
+                  {t("home.academyPillarStats")}
                 </p>
               </div>
             </motion.div>

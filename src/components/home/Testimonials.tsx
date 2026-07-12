@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Star, Quote, Loader2 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Testimonials() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,11 +52,10 @@ export default function Testimonials() {
             <div className="w-8 h-px" style={{ background: "#f47822" }} />
           </div>
           <h2 className={`text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.0] tracking-tight mb-5 ${isDark ? "text-white" : "text-gray-900"}`}>
-            What Our Clients<br />
-            <span style={{ color: "#f47822" }}>Say About Us.</span>
+            {t("home.testimonialsTitle")}
           </h2>
           <p className={`text-base leading-relaxed max-w-xl mx-auto ${isDark ? "text-white/50" : "text-gray-600"}`}>
-            Real stories from businesses and individuals who have partnered with DreamMore to achieve their digital goals.
+            {t("home.testimonialsDesc")}
           </p>
         </motion.div>
 

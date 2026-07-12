@@ -3,8 +3,10 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Star, Quote, Loader2 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function AgencyTestimonials() {
+  const { t } = useLanguage();
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,9 +39,9 @@ export default function AgencyTestimonials() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <span className="section-badge mb-4">Client Reviews</span>
+          <span className="section-badge mb-4">{t("agency.testimonialsEyebrow")}</span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4">
-            What Our Clients <span className="gradient-text">Say About Us</span>
+            {t("agency.testimonialsTitlePart1")} <span className="gradient-text">{t("agency.testimonialsTitlePart2")}</span>
           </h2>
         </motion.div>
 
