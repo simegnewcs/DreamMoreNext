@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, MessageCircle, Send } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle, Send, User, FileText, MessageSquareText } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const contactInfo = [
   { 
@@ -44,7 +46,55 @@ const contactInfo = [
 
 export default function ContactClient() {
   const { theme } = useTheme();
+  const { user, loading: authLoading } = useAuth();
   const isDark = theme === "dark";
+  const [fullName, setFullName] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<{ type: "idle" | "success" | "error"; message: string }>({ type: "idle", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (user?.name) {
+      setFullName(user.name);
+    }
+  }, [user]);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setStatus({ type: "idle", message: "" });
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName,
+          subject,
+          message,
+          userEmail: user?.email || "",
+          isLoggedIn: !!user,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Unable to send your message right now.");
+      }
+
+      setStatus({ type: "success", message: result.message || "Your message has been sent successfully." });
+      setFullName(user?.name || "");
+      setSubject("");
+      setMessage("");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to send your message right now.";
+      setStatus({ type: "error", message });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className={`min-h-screen pt-20 ${isDark ? "bg-[#0a0a0f]" : "bg-gray-50"}`}>
@@ -107,12 +157,69 @@ export default function ContactClient() {
 
           </div>
 
-          {/* Additional info */}
+          {/* Contact form */}
           <div className={`rounded-2xl p-8 ${isDark ? "glass" : "bg-white border border-gray-200 shadow-sm"}`}>
-            <h3 className={`text-lg font-bold mb-4 ${isDark ? "text-white" : "text-gray-900"}`}>Get in Touch</h3>
-            <p className={`text-sm leading-relaxed ${isDark ? "text-white/60" : "text-gray-600"}`}>
-              We&apos;re here to help! Reach out to us through any of the contact methods listed on the left. Whether you have questions about our courses, need technical support, or want to discuss a project, our team is ready to assist you.
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Send us a message</h3>
+                <p className={`text-sm mt-1 ${isDark ? "text-white/60" : "text-gray-600"}`}>
+                  {user ? `Logged in as ${user.name || user.email}` : "Sign in to prefill your details and send a message faster."}
+                </p>
+              </div>
+            </div>
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="relative">
+                <User className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? "text-white/40" : "text-gray-400"}`} />
+                <input
+                  type="text"
+                  placeholder="Full name"
+                  value={fullName}
+                  onChange={(event) => setFullName(event.target.value)}
+                  required
+                  className={`w-full rounded-xl border px-10 py-3 text-sm outline-none transition ${isDark ? "border-white/10 bg-white/5 text-white placeholder:text-white/40" : "border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"}`}
+                />
+              </div>
+
+              <div className="relative">
+                <FileText className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? "text-white/40" : "text-gray-400"}`} />
+                <input
+                  type="text"
+                  placeholder="Subject"
+                  value={subject}
+                  onChange={(event) => setSubject(event.target.value)}
+                  required
+                  className={`w-full rounded-xl border px-10 py-3 text-sm outline-none transition ${isDark ? "border-white/10 bg-white/5 text-white placeholder:text-white/40" : "border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"}`}
+                />
+              </div>
+
+              <div className="relative">
+                <MessageSquareText className={`absolute left-3 top-4 w-4 h-4 ${isDark ? "text-white/40" : "text-gray-400"}`} />
+                <textarea
+                  placeholder="Your message"
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  required
+                  rows={6}
+                  className={`w-full rounded-xl border px-10 py-3 text-sm outline-none transition resize-none ${isDark ? "border-white/10 bg-white/5 text-white placeholder:text-white/40" : "border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"}`}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || authLoading}
+                className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? "Sending..." : "Send Message"}
+              </button>
+
+              {status.message ? (
+                <div className={`rounded-xl border px-4 py-3 text-sm ${status.type === "success" ? (isDark ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-200" : "border-emerald-200 bg-emerald-50 text-emerald-700") : (isDark ? "border-rose-400/30 bg-rose-500/10 text-rose-200" : "border-rose-200 bg-rose-50 text-rose-700")}`}>
+                  {status.message}
+                </div>
+              ) : null}
+            </form>
+
             <div className={`mt-6 rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"}`}>
               <p className={`text-sm font-semibold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>Business Hours</p>
               <div className="space-y-2">

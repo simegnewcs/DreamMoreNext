@@ -1,5 +1,13 @@
 import nodemailer from "nodemailer";
 
+interface ContactMessagePayload {
+  fullName: string;
+  subject: string;
+  message: string;
+  userEmail?: string;
+  isLoggedIn?: boolean;
+}
+
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT || 587),
@@ -56,6 +64,41 @@ export async function sendVerificationEmail(
       return true;
     }
 
+    return false;
+  }
+}
+
+export async function sendContactMessage(payload: ContactMessagePayload): Promise<boolean> {
+  const toAddress = process.env.CONTACT_TO_EMAIL || "dreammoreschool@gmail.com";
+  const fromAddress = senderAddress;
+
+  try {
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      replyTo: payload.userEmail || fromAddress,
+      to: toAddress,
+      subject: `DreamMore Contact Form: ${payload.subject}`,
+      text: `New contact form message from ${payload.fullName}\n\nEmail: ${payload.userEmail || "Not provided"}\nLogged in: ${payload.isLoggedIn ? "Yes" : "No"}\n\nSubject: ${payload.subject}\n\nMessage:\n${payload.message}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
+          <h2 style="color: #0f172a;">New Contact Form Message</h2>
+          <p><strong>Name:</strong> ${payload.fullName}</p>
+          <p><strong>Email:</strong> ${payload.userEmail || "Not provided"}</p>
+          <p><strong>Logged in:</strong> ${payload.isLoggedIn ? "Yes" : "No"}</p>
+          <p><strong>Subject:</strong> ${payload.subject}</p>
+          <hr />
+          <p><strong>Message:</strong></p>
+          <div style="background: #f8fafc; padding: 16px; border-radius: 8px; white-space: pre-wrap;">${payload.message}</div>
+        </div>
+      `,
+      headers: {
+        "Auto-Submitted": "auto-generated",
+      },
+    });
+
+    return Boolean(info.messageId);
+  } catch (error) {
+    console.error("Failed to send contact message email:", error);
     return false;
   }
 }
