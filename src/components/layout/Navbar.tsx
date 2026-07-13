@@ -4,11 +4,23 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Sun, Moon, User, LogOut, LayoutDashboard, Camera, Settings, Sparkles, Globe2 } from "lucide-react";
+import { Menu, X, ChevronDown, Sun, Moon, User, LogOut, LayoutDashboard, Camera, Settings } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { coursesAPI } from "@/lib/api";
 import { signOut } from "next-auth/react";
+
+interface UserProfile {
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+}
+
+interface CourseOption {
+  title: string;
+  slug: string;
+}
 
 const navLinks = [
   { labelKey: "nav.home", href: "/" },
@@ -30,9 +42,9 @@ const navLinks = [
   {
     labelKey: "nav.academy",
     href: "/academy",
-    getChildren: (dynamicCourses: any[]) => [
+    getChildren: (dynamicCourses: CourseOption[]) => [
       { labelKey: "common.viewDetails", href: "/academy" },
-      ...(dynamicCourses?.map(course => ({
+      ...(dynamicCourses?.map((course) => ({
         labelKey: course.title,
         href: `/academy/course/${course.slug}`
       })) || []),
@@ -50,41 +62,49 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdown, setDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
-  const [user, setUser] = useState<{name: string; email: string; role: string; avatar?: string} | null>(null);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [courses, setCourses] = useState<CourseOption[]>([]);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const { theme, toggleTheme } = useTheme();
-  const { language, setLanguage, t, isAmharic } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const isDark = theme === "dark";
   const pathname = usePathname();
   const router = useRouter();
 
-  // Check login status
-  useEffect(() => {
-    const checkUser = () => {
-      const userData = localStorage.getItem("user");
-      if (userData) {
-        setUser(JSON.parse(userData));
-      } else {
+  const syncUser = () => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      try {
+        const parsed = JSON.parse(userData) as UserProfile;
+        setUser(parsed);
+      } catch {
         setUser(null);
       }
-    };
-    
-    checkUser();
-    
+    } else {
+      setUser(null);
+    }
+  };
+
+  // Check login status
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(syncUser);
+
     // Listen for storage changes (login/logout from other tabs)
-    window.addEventListener("storage", checkUser);
-    
+    const handleStorageChange = () => syncUser();
+    window.addEventListener("storage", handleStorageChange);
+
     // Custom event for same-tab updates
-    const handleUserUpdate = () => checkUser();
+    const handleUserUpdate = () => syncUser();
     window.addEventListener("userUpdated", handleUserUpdate);
-    
+
     return () => {
-      window.removeEventListener("storage", checkUser);
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("userUpdated", handleUserUpdate);
     };
   }, []);
@@ -104,15 +124,6 @@ export default function Navbar() {
     fetchCourses();
   }, []);
   
-  // Re-check user when pathname changes (after navigation)
-  useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      setUser(JSON.parse(userData));
-    } else {
-      setUser(null);
-    }
-  }, [pathname]);
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -145,8 +156,14 @@ export default function Navbar() {
     window.location.href = "/";
   };
 
-  const updateStoredUser = (updatedUser: any) => {
-    const nextUser = { ...(user || {}), ...updatedUser };
+  const updateStoredUser = (updatedUser: Partial<UserProfile>) => {
+    const nextUser: UserProfile = {
+      name: user?.name ?? "",
+      email: user?.email ?? "",
+      role: user?.role ?? "student",
+      avatar: user?.avatar,
+      ...updatedUser,
+    };
     setUser(nextUser);
     localStorage.setItem("user", JSON.stringify(nextUser));
     window.dispatchEvent(new Event("userUpdated"));
@@ -179,8 +196,9 @@ export default function Navbar() {
       setProfileMenuOpen(false);
       const dashboardPath = user.role === "admin" ? "/admin" : user.role === "instructor" ? "/instructor" : "/lms";
       router.push(dashboardPath);
-    } catch (error: any) {
-      setAvatarError(error.message || "Unable to upload avatar");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unable to upload avatar";
+      setAvatarError(message);
     } finally {
       setUploadingAvatar(false);
       event.target.value = "";
@@ -194,15 +212,18 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    setMobileOpen(false);
-    setMobileExpanded(null);
-  }, [pathname]);
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   const handleNavigate = (href: string) => {
     setDropdown(null);
     setMobileOpen(false);
     setProfileMenuOpen(false);
     setMobileExpanded(null);
+    setMobileProfileOpen(false);
 
     if (href === pathname) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -229,14 +250,14 @@ export default function Navbar() {
             : "bg-white/50 backdrop-blur-md py-5"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-2">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
             <img 
               src="/dreammorelogo.jpg" 
               alt="DreamMore" 
-              className="h-14 w-14 object-cover rounded-full"
+              className="h-11 w-11 object-cover rounded-full sm:h-12 sm:w-12"
             />
           </Link>
 
@@ -441,17 +462,75 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className={`lg:hidden p-2 rounded-lg transition-all ${
-              isDark 
-                ? "text-white/70 hover:text-white hover:bg-white/5" 
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-            }`}
-          >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile controls */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex items-center rounded-full border px-1 py-1" style={{ borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", background: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.8)" }}>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-all ${language === "en" ? (isDark ? "bg-white/10 text-white" : "bg-orange-50 text-orange-600") : (isDark ? "text-white/60 hover:text-white" : "text-gray-600 hover:text-gray-900")}`}
+                aria-label="English"
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("am")}
+                className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-all ${language === "am" ? (isDark ? "bg-white/10 text-white" : "bg-orange-50 text-orange-600") : (isDark ? "text-white/60 hover:text-white" : "text-gray-600 hover:text-gray-900")}`}
+                aria-label="Amharic"
+              >
+                አማ
+              </button>
+            </div>
+            {user ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(true);
+                  setMobileProfileOpen((prev) => !prev);
+                }}
+                className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all ${isDark ? "border-white/10 bg-white/5 text-white" : "border-gray-200 bg-white text-gray-700"}`}
+                aria-label={t("nav.dashboard")}
+              >
+                <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#f47822] to-[#15142a] text-xs font-bold text-white">
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={user.name || user.email} className="h-full w-full object-cover" />
+                  ) : (
+                    (user.name || user.email || "?").charAt(0).toUpperCase()
+                  )}
+                </div>
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all ${isDark ? "border-white/10 bg-white/5 text-white" : "border-gray-200 bg-white text-gray-700"}`}
+                aria-label={t("nav.login")}
+              >
+                <User className="h-4 w-4" />
+              </Link>
+            )}
+            <button
+              onClick={toggleTheme}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#f47822]/40 transition-all duration-200 hover:scale-105"
+              style={{ background: isDark ? "rgba(244,120,34,0.15)" : "rgba(244,120,34,0.1)" }}
+              aria-label={t("nav.themeToggle")}
+            >
+              {isDark ? <Sun className="h-4 w-4" style={{ color: "#f47822" }} /> : <Moon className="h-4 w-4" style={{ color: "#f47822" }} />}
+            </button>
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${
+                isDark 
+                  ? "text-white/70 hover:text-white hover:bg-white/5" 
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              }`}
+              aria-label="Toggle navigation"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu-panel"
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -459,179 +538,243 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className={`lg:hidden backdrop-blur-xl border-t overflow-hidden ${
+            id="mobile-menu-panel"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className={`lg:hidden fixed inset-x-0 top-[4.7rem] z-[60] border-t shadow-2xl backdrop-blur-xl ${
               isDark 
                 ? "bg-black/95 border-white/5" 
-                : "bg-white/95 border-gray-200 shadow-lg"
+                : "bg-white/95 border-gray-200"
             }`}
           >
-            <div className="px-4 py-6 space-y-1">
-              {navLinks.map((link) => {
-                const children = link.getChildren ? link.getChildren(courses) : link.children;
-                const label = t(link.labelKey);
-                return (
-                  <div key={link.href}>
-                    {children ? (
-                      <button
-                        onClick={() => setMobileExpanded(mobileExpanded === link.href ? null : link.href)}
-                        className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                          isDark
-                            ? "text-white/70 hover:text-white hover:bg-white/5"
-                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                        }`}
-                      >
-                        {label}
-                        <ChevronDown
-                          className={`w-4 h-4 transition-transform duration-200 ${
-                            mobileExpanded === link.href ? "rotate-180" : ""
-                          }`}
-                        />
-                      </button>
-                    ) : (
-                      <Link
-                        href={link.href}
-                        className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                          pathname === link.href
-                            ? isDark
-                              ? "text-cyan-400 bg-cyan-400/10"
-                              : "text-orange-500 bg-orange-50"
-                            : isDark
-                              ? "text-white/70 hover:text-white hover:bg-white/5"
-                              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                        }`}
-                      >
-                        {label}
-                      </Link>
-                    )}
-                    {children && mobileExpanded === link.href && (
-                      <div className="ml-4 mt-1 space-y-1">
-                        {children.map((child) => (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={`block px-4 py-2 rounded-lg text-xs transition-all ${
-                              isDark
-                                ? "text-white/50 hover:text-white hover:bg-[#f47822]/20"
-                                : "text-gray-500 hover:text-[#f47822] hover:bg-[#f47822]/10"
-                            }`}
-                          >
-                            {typeof child.labelKey === "string" && child.labelKey.startsWith("nav.") || child.labelKey.startsWith("home.") || child.labelKey.startsWith("common.") ? t(child.labelKey) : child.labelKey}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              <div className="pt-4 flex flex-col gap-2">
-                {user ? (
-                  <>
-                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-[#f47822] to-[#15142a] flex items-center justify-center text-white font-bold">
-                        {user.avatar ? (
-                          <img src={user.avatar} alt={user.name || user.email} className="w-full h-full object-cover" />
-                        ) : (
-                          (user.name || user.email || "?").charAt(0).toUpperCase()
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{user.name || user.email}</p>
-                        <p className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{user.email}</p>
-                      </div>
-                      {(user.role === "admin" || user.role === "instructor") && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f47822] text-white font-semibold capitalize">{user.role}</span>
-                      )}
-                    </div>
-                    {/* Panel link for mobile */}
-                    {user.role === "admin" && (
-                      <Link
-                        href="/admin"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold bg-[#f47822] text-white hover:bg-[#e06b18] transition-all"
-                      >
-                        <LayoutDashboard className="w-4 h-4" />
-                        Admin Panel
-                      </Link>
-                    )}
-                    {user.role === "instructor" && (
-                      <Link
-                        href="/instructor"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold bg-[#f47822] text-white hover:bg-[#e06b18] transition-all"
-                      >
-                        <LayoutDashboard className="w-4 h-4" />
-                        Instructor Panel
-                      </Link>
-                    )}
-                    {user.role === "student" && (
-                      <Link
-                        href="/lms"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold bg-[#f47822] text-white hover:bg-[#e06b18] transition-all"
-                      >
-                        <LayoutDashboard className="w-4 h-4" />
-                        My Learning
-                      </Link>
-                    )}
+            <div className="mx-auto flex max-h-[calc(100dvh-4.7rem)] max-w-7xl flex-col overflow-hidden px-3 py-4 sm:px-6">
+              <div className="flex items-center justify-between gap-2 rounded-2xl border px-3 py-2.5" style={{ borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", background: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.8)" }}>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 rounded-full border px-1 py-1" style={{ borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)" }}>
                     <button
-                      onClick={() => {
-                        handleLogout();
-                        setMobileOpen(false);
-                      }}
-                      disabled={isLoggingOut}
-                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                        isDark 
-                          ? "bg-red-500/10 text-red-400 hover:bg-red-500/20" 
-                          : "bg-red-50 text-red-500 hover:bg-red-100"
-                      }`}
+                      type="button"
+                      onClick={() => setLanguage("en")}
+                      className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-all ${language === "en" ? (isDark ? "bg-white/10 text-white" : "bg-orange-50 text-orange-600") : (isDark ? "text-white/60 hover:text-white" : "text-gray-600 hover:text-gray-900")}`}
+                      aria-label="English"
                     >
-                      {isLoggingOut ? (
-                        <>
-                          <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          {t("common.loading")}
-                        </>
-                      ) : (
-                        <>
-                          <LogOut className="w-4 h-4" />
-                          {t("nav.logout")}
-                        </>
-                      )}
+                      EN
                     </button>
-                  </>
-                ) : (
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileOpen(false)}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border text-sm font-semibold ${
-                      isDark 
-                        ? "border-white/10 text-white/80 hover:bg-white/5" 
-                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    <User className="w-4 h-4" />
-                    {t("nav.login")}
-                  </Link>
-                )}
+                    <button
+                      type="button"
+                      onClick={() => setLanguage("am")}
+                      className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-all ${language === "am" ? (isDark ? "bg-white/10 text-white" : "bg-orange-50 text-orange-600") : (isDark ? "text-white/60 hover:text-white" : "text-gray-600 hover:text-gray-900")}`}
+                      aria-label="Amharic"
+                    >
+                      አማ
+                    </button>
+                  </div>
+                  <span className={`text-xs font-medium ${isDark ? "text-white/60" : "text-gray-500"}`}>{t("nav.language") || "Language"}</span>
+                </div>
                 <button
                   onClick={toggleTheme}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all"
-                  style={{ 
-                    background: isDark ? "rgba(244,120,34,0.15)" : "rgba(244,120,34,0.1)", 
-                    border: "1px solid #f47822", 
-                    color: "#f47822" 
-                  }}
+                  className="flex items-center gap-1 rounded-full border border-[#f47822]/40 px-2.5 py-1.5 text-xs font-semibold transition-all"
+                  style={{ background: isDark ? "rgba(244,120,34,0.15)" : "rgba(244,120,34,0.1)", color: "#f47822" }}
+                  aria-label={t("nav.themeToggle")}
                 >
-                  {isDark ? (
-                    <><Sun className="w-4 h-4" /> {t("nav.lightMode")}</>
-                  ) : (
-                    <><Moon className="w-4 h-4" /> {t("nav.darkMode")}</>
-                  )}
+                  {isDark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+                  <span className="hidden xs:inline">{isDark ? t("nav.lightMode") : t("nav.darkMode")}</span>
                 </button>
+              </div>
+
+              <div className="mt-3 flex-1 overflow-y-auto overscroll-contain pb-4">
+                <div className="space-y-1">
+                  {navLinks.map((link) => {
+                    const children = link.getChildren ? link.getChildren(courses) : link.children;
+                    const label = t(link.labelKey);
+                    return (
+                      <div key={link.href}>
+                        {children ? (
+                          <button
+                            onClick={() => setMobileExpanded(mobileExpanded === link.href ? null : link.href)}
+                            className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                              isDark
+                                ? "text-white/70 hover:text-white hover:bg-white/5"
+                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                            }`}
+                            aria-expanded={mobileExpanded === link.href}
+                          >
+                            {label}
+                            <ChevronDown
+                              className={`h-4 w-4 transition-transform duration-200 ${
+                                mobileExpanded === link.href ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+                        ) : (
+                          <Link
+                            href={link.href}
+                            onClick={() => {
+                              setMobileOpen(false);
+                              setMobileExpanded(null);
+                              setMobileProfileOpen(false);
+                            }}
+                            className={`block rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                              pathname === link.href
+                                ? isDark
+                                  ? "bg-cyan-400/10 text-cyan-400"
+                                  : "bg-orange-50 text-orange-500"
+                                : isDark
+                                  ? "text-white/70 hover:text-white hover:bg-white/5"
+                                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                            }`}
+                          >
+                            {label}
+                          </Link>
+                        )}
+                        {children && mobileExpanded === link.href && (
+                          <div className="ml-3 mt-1 space-y-1">
+                            {children.map((child) => (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                onClick={() => {
+                                  setMobileOpen(false);
+                                  setMobileExpanded(null);
+                                  setMobileProfileOpen(false);
+                                }}
+                                className={`block rounded-lg px-4 py-2 text-xs transition-all ${
+                                  isDark
+                                    ? "text-white/50 hover:text-white hover:bg-[#f47822]/20"
+                                    : "text-gray-500 hover:text-[#f47822] hover:bg-[#f47822]/10"
+                                }`}
+                              >
+                                {typeof child.labelKey === "string" && child.labelKey.startsWith("nav.") || child.labelKey.startsWith("home.") || child.labelKey.startsWith("common.") ? t(child.labelKey) : child.labelKey}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-4 space-y-2">
+                  {user ? (
+                    <div className={`rounded-2xl border p-3 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"}`}>
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between gap-3 rounded-xl px-2 py-2"
+                        onClick={() => setMobileProfileOpen((prev) => !prev)}
+                        aria-expanded={mobileProfileOpen}
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#f47822] to-[#15142a] text-sm font-bold text-white">
+                            {user.avatar ? (
+                              <img src={user.avatar} alt={user.name || user.email} className="h-full w-full object-cover" />
+                            ) : (
+                              (user.name || user.email || "?").charAt(0).toUpperCase()
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className={`truncate text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>{user.name || user.email}</p>
+                            <p className={`truncate text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{user.email}</p>
+                          </div>
+                        </div>
+                        <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${mobileProfileOpen ? "rotate-180" : ""}`} />
+                      </button>
+                      <AnimatePresence>
+                        {mobileProfileOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="mt-2 space-y-1 overflow-hidden"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMobileOpen(false);
+                                setMobileProfileOpen(false);
+                                fileInputRef.current?.click();
+                              }}
+                              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all ${isDark ? "text-white hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"}`}
+                            >
+                              <Camera className="h-4 w-4" />
+                              {uploadingAvatar ? t("common.loading") : t("nav.uploadPhoto")}
+                            </button>
+                            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMobileOpen(false);
+                                setMobileProfileOpen(false);
+                                handleNavigate(user.role === "admin" ? "/admin" : user.role === "instructor" ? "/instructor" : "/lms");
+                              }}
+                              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all ${isDark ? "text-white hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"}`}
+                            >
+                              <LayoutDashboard className="h-4 w-4" />
+                              {t("nav.dashboard")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMobileOpen(false);
+                                setMobileProfileOpen(false);
+                                handleNavigate(user.role === "admin" ? "/admin" : user.role === "instructor" ? "/instructor" : "/lms/settings");
+                              }}
+                              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all ${isDark ? "text-white hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"}`}
+                            >
+                              <Settings className="h-4 w-4" />
+                              {t("nav.accountSettings")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMobileProfileOpen(false);
+                                handleLogout();
+                                setMobileOpen(false);
+                              }}
+                              disabled={isLoggingOut}
+                              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all disabled:opacity-50 ${isDark ? "text-red-400 hover:bg-red-400/10" : "text-red-500 hover:bg-red-50"}`}
+                            >
+                              <LogOut className="h-4 w-4" />
+                              {isLoggingOut ? t("common.loading") : t("nav.logout")}
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/login"
+                      onClick={() => {
+                        setMobileOpen(false);
+                        setMobileExpanded(null);
+                        setMobileProfileOpen(false);
+                      }}
+                      className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold ${
+                        isDark 
+                          ? "border-white/10 text-white/80 hover:bg-white/5" 
+                          : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <User className="h-4 w-4" />
+                      {t("nav.login")}
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      toggleTheme();
+                      setMobileProfileOpen(false);
+                    }}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-all"
+                    style={{ background: isDark ? "rgba(244,120,34,0.15)" : "rgba(244,120,34,0.1)", border: "1px solid #f47822", color: "#f47822" }}
+                  >
+                    {isDark ? (
+                      <><Sun className="h-4 w-4" /> {t("nav.lightMode")}</>
+                    ) : (
+                      <><Moon className="h-4 w-4" /> {t("nav.darkMode")}</>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
