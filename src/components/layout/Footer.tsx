@@ -81,7 +81,7 @@ export default function Footer() {
               </a>
               <div className={`flex items-center gap-3 text-sm ${isDark ? "text-white/50" : "text-gray-600"}`}>
                 <MapPin className="w-4 h-4 shrink-0" style={{ color: "#f47822" }} />
-                Bahirdar, Ethiopia
+                signal mall 8th floor ,Bahirdar, Ethiopia
               </div>
             </div>
             {/* Social links */}
@@ -213,14 +213,6 @@ export default function Footer() {
             <p className={`text-xs ${isDark ? "text-white/30" : "text-gray-500"}`}>
               {t("footer.copyright").replace("{year}", new Date().getFullYear().toString())}
             </p>
-            <a
-              href="https://www.devvoltz.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`text-xs transition-colors ${isDark ? "text-white/30 hover:text-white/60" : "text-gray-500 hover:text-gray-700"}`}
-            >
-              {t("footer.developerCredit")}
-            </a>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/privacy" className={`text-xs transition-colors ${isDark ? "text-white/30 hover:text-white/60" : "text-gray-500 hover:text-gray-700"}`}>

@@ -39,7 +39,7 @@ const contactInfo = [
   { 
     icon: MapPin, 
     label: "Location", 
-    value: "Bahirdar, Ethiopia", 
+    value: "signal mall 8th floor ,Bahirdar, Ethiopia", 
     href: "https://maps.google.com/?q=Bahirdar,Ethiopia", 
     color: "#f59e0b" 
   },
